@@ -1,6 +1,7 @@
 import './App.css';
 import Draggable from 'react-draggable'
 import React, { useState } from 'react';
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Play from './Play';
 
 // function component
@@ -8,23 +9,10 @@ function App() {
 
 	const [files, setFiles] = useState();
 	const [deckShow, setDeckShow] = useState();
+	const navigate = useNavigate()
 
 	function handleChange(e){
-		// append if exists
-		if (files) {
-			setFiles([...files, ...e.target.files], () => {
-				files.array.forEach(element => {
-					element.number = 1
-				});
-			})
-		}
-		else {
-			setFiles([...e.target.files], () => {
-				files.array.forEach(element => {
-					element.number = 1
-				});
-			})
-		}
+		setFiles([...e.target.files])
 	}
 
 	function handleSubmit(e){
@@ -39,12 +27,13 @@ function App() {
 	}
 
 	function handleNumberChange(e){
-		console.log(e.target.id)
-		setFiles(files[e.target.id].number = parseInt(e.target.value))
+		const changedFiles = [...files]
+		changedFiles[e.target.id].number = parseInt(e.target.value)
+		setFiles(changedFiles)
 	}
 	
 	function handleRedirect(e){
-		return
+		navigate("/play");
 	}
 
 	return (
@@ -58,7 +47,7 @@ function App() {
 					{files?.map((file, index) => (
 						<div>
 							<img src={URL.createObjectURL(file)} width="157.5" height="220" alt="error" />
-							<select id={index} placeholder={file.number} onChange={handleNumberChange}>
+							<select id={index} placeholder="1" onChange={handleNumberChange}>
 								<option value="1">1</option>
 								<option value="2">2</option>
 								<option value="3">3</option>
@@ -80,6 +69,7 @@ function App() {
 			{deckShow && <div>
 				{files?.map((file, index) => (
 					[...Array(file.number)].map(() => (
+						// TODO: implement card overlap
 						<div>
 							<img src={URL.createObjectURL(file)} width="157.5" height="220" alt="error" />
 						</div>
@@ -90,6 +80,11 @@ function App() {
 					<button type='submit'>デッキ確定</button>
 				</form>
 			</div>}
+			
+			<Routes>
+				<Route exact path="/" element={<App/>}/>
+				<Route exact path="/play" element={<Play/>}/>
+			</Routes>
 		</div>
 	)
 }
