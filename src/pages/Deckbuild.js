@@ -1,34 +1,40 @@
-import Draggable from 'react-draggable'
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 // function component
-function Deckbuild() {
+function Deckbuild({deck, setDeck}) {
 
-	const [files, setFiles] = useState();
-	const [deckShow, setDeckShow] = useState();
+	const [preview, setPreview] = useState();
     const navigate = useNavigate();
 
 	function handleChange(e){
-		setFiles([...e.target.files])
+		const files = [...e.target.files]
+		let deck = []
+		files.forEach((file) => {
+			let card = {
+				file: file,
+				number: 1
+			}
+			deck.push(card)
+		})
+		setDeck(deck)
+		console.log(deck)
 	}
 
 	function handleSubmit(e){
-		// reloads page for some reason default
 		e.preventDefault();
-		setDeckShow(true)
+		setPreview(true)
 	}
 
 	function handleReset(e){
-		setDeckShow(false)
-		setFiles([])
+		setPreview(false)
+		setDeck([])
 	}
 
 	function handleNumberChange(e){
-		const changedFiles = [...files]
-		changedFiles[e.target.id].number = parseInt(e.target.value)
-		setFiles(changedFiles)
+		const changedDeck = [...deck]
+		changedDeck[e.target.id].number = parseInt(e.target.value)
+		setDeck(changedDeck)
 	}
 
 	return (
@@ -36,22 +42,20 @@ function Deckbuild() {
 			<h3>カードを追加</h3>
 			<input type="file" multiple onChange={handleChange} />
 
-			<Draggable>
-				<div className="Deckbuild">
-					{/* デュエマは 63mm x 88mm */}
-					{files?.map((file, index) => (
-						<div>
-							<img src={URL.createObjectURL(file)} width="157.5" height="220" alt="error" />
-							<select id={index} placeholder="1" onChange={handleNumberChange}>
-								<option value="1">1</option>
-								<option value="2">2</option>
-								<option value="3">3</option>
-								<option value="4">4</option>
-							</select>
-						</div>
-					))}
-				</div>
-			</Draggable>
+			<div className="Deckbuild">
+				{/* デュエマは 63mm x 88mm */}
+				{deck?.map((card, index) => (
+					<div>
+						<img src={URL.createObjectURL(card["file"])} width="157.5" height="220" alt="error" />
+						<select id={index} placeholder={card["number"]} onChange={handleNumberChange}>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+						</select>
+					</div>
+				))}
+			</div>
 
 			<form onSubmit={handleSubmit}>
 				<button type='submit'>カード枚数確定</button>
@@ -61,12 +65,12 @@ function Deckbuild() {
 				<button type='submit'>リセット</button>
 			</form>
 
-			{deckShow && <div>
-				{files?.map((file, index) => (
-					[...Array(file.number)].map(() => (
+			{preview && <div>
+				{deck?.map((card, index) => (
+					[...Array(card.number)].map(() => (
 						// TODO: implement card overlap
 						<div>
-							<img src={URL.createObjectURL(file)} width="157.5" height="220" alt="error" />
+							<img src={URL.createObjectURL(card["file"])} width="157.5" height="220" alt="error" />
 						</div>
 					))
 				))}
