@@ -9,7 +9,6 @@ function Play ({deck, setDeck}) {
     useEffect(() => {
         console.log(deck)
 		const changedDeck = [...deck]
-        let cardsToDuplicate = []
         changedDeck.forEach((card) => {
             for (let i = 1; i < card["number"]; i++){
                 changedDeck.push(card)
@@ -18,7 +17,21 @@ function Play ({deck, setDeck}) {
         setDeck(changedDeck)
     }, []);
     
-	function handleDraw(e){
+    function shuffle(){
+		const changedDeck = [...deck]
+
+        for (let i = changedDeck.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            let tmp = changedDeck[i];
+            changedDeck[i] = changedDeck[j];
+            changedDeck[j] = tmp;
+        }
+
+        setDeck(changedDeck)
+        console.log(deck)
+    }
+    
+	function draw(e){
 		const changedDeck = [...deck]
         let drawCard = changedDeck[0]
         changedDeck.splice(0, 1)
@@ -34,7 +47,7 @@ function Play ({deck, setDeck}) {
     return (
         <div>
             <h3>一人回し</h3>
-            <img src={deckImage} alt="error" onClick={handleDraw}/>
+            <img src={deckImage} alt="error" onClick={draw}/>
             
             {cardsInPlay?.map((card, index) => (
 			    <Draggable>
@@ -43,6 +56,10 @@ function Play ({deck, setDeck}) {
                     </div>
                 </Draggable>
             ))}
+            
+			<form onSubmit={shuffle}>
+				<button type='submit'>シャッフル</button>
+			</form>
         </div>
     )
 }
