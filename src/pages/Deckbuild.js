@@ -8,6 +8,7 @@ function Deckbuild({deck, setDeck}) {
     const navigate = useNavigate();
 
 	function handleChange(e){
+		e.preventDefault();
 		const files = [...e.target.files]
 		let deck = []
 		files.forEach((file) => {
@@ -27,11 +28,13 @@ function Deckbuild({deck, setDeck}) {
 	}
 
 	function handleReset(e){
+		e.preventDefault();
 		setPreview(false)
 		setDeck([])
 	}
 
 	function handleNumberChange(e){
+		e.preventDefault();
 		const changedDeck = [...deck]
 		changedDeck[e.target.id].number = parseInt(e.target.value)
 		setDeck(changedDeck)

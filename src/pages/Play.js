@@ -17,24 +17,27 @@ function Play ({deck, setDeck}) {
         setDeck(changedDeck)
     }, []);
     
-    function shuffle(){
+    function shuffle(e) {
+		e.preventDefault();
 		const changedDeck = [...deck]
-
-        for (let i = changedDeck.length - 1; i > 0; i--) {
-            let j = Math.floor(Math.random() * (i + 1));
-            let tmp = changedDeck[i];
-            changedDeck[i] = changedDeck[j];
-            changedDeck[j] = tmp;
+        let currentIndex = changedDeck.length
+      
+        while (currentIndex !== 0) {
+          let randomIndex = Math.floor(Math.random() * currentIndex)
+          currentIndex--
+          [changedDeck[currentIndex], changedDeck[randomIndex]] = [changedDeck[randomIndex], changedDeck[currentIndex]]
         }
-
         setDeck(changedDeck)
         console.log(deck)
     }
     
 	function draw(e){
+		e.preventDefault();
 		const changedDeck = [...deck]
-        let drawCard = changedDeck[0]
-        changedDeck.splice(0, 1)
+        let drawCard = changedDeck.pop()
+        if (changedDeck.length == 0) {
+            console.log("empty")
+        }
         setDeck(changedDeck)
         console.log(deck)
 
