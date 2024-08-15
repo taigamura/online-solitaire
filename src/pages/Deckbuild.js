@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 // function component
 function Deckbuild({deck, setDeck}) {
@@ -19,10 +20,9 @@ function Deckbuild({deck, setDeck}) {
 			deck.push(card)
 		})
 		setDeck(deck)
-		console.log(deck)
 	}
 
-	function handleSubmit(e){
+	function handleSubmitNumber(e){
 		e.preventDefault();
 		setPreview(true)
 	}
@@ -33,11 +33,29 @@ function Deckbuild({deck, setDeck}) {
 		setDeck([])
 	}
 
+	function handleConfirmDeck(e) {
+		e.preventDefault();
+		const currDeck = [...deck]
+		
+		currDeck.forEach((card) => {
+			for (let i = 1; i < card["number"]; i++){
+				currDeck.push(card)
+			}
+		})
+		currDeck.forEach((card) => {
+			card["id"] = uuidv4()
+		})
+
+        setDeck(currDeck)
+
+		navigate('play')
+	}
+
 	function handleNumberChange(e){
 		e.preventDefault();
-		const changedDeck = [...deck]
-		changedDeck[e.target.id].number = parseInt(e.target.value)
-		setDeck(changedDeck)
+		const currDeck = [...deck]
+		currDeck[e.target.id].number = parseInt(e.target.value)
+		setDeck(currDeck)
 	}
 
 	return (
@@ -60,7 +78,7 @@ function Deckbuild({deck, setDeck}) {
 				))}
 			</div>
 
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmitNumber}>
 				<button type='submit'>カード枚数確定</button>
 			</form>
 
@@ -78,7 +96,7 @@ function Deckbuild({deck, setDeck}) {
 					))
 				))}
 
-                <button type='submit' onClick={() => navigate('play')}>デッキ確定</button>
+                <button type='submit' onClick={handleConfirmDeck}>デッキ確定</button>
 			</div>}
 		</div>
 	)

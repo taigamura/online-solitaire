@@ -8,7 +8,7 @@ import Deckbuild from './pages/Deckbuild';
 // function component
 function App() {
 
-	const [deck, setDeck] = useState();
+	const [deck, setDeck] = useState([]);
 
 	return (
 		<div>
