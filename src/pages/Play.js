@@ -28,6 +28,7 @@ function Play ({deck, setDeck}) {
         Sortable.create(battleWrap);
         
         document.addEventListener("keyup", handleKeyUp);
+        // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => document.removeEventListener("keyup", handleKeyUp);
     }, [handleKeyUp]);
     
