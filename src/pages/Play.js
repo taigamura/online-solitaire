@@ -1,7 +1,6 @@
 import Sortable from 'sortablejs';
 import { ReactSortable } from "react-sortablejs";
 import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import './Play.css';
 
 function Play ({deck, setDeck}) {
@@ -12,25 +11,6 @@ function Play ({deck, setDeck}) {
     const [cardInPlay, setCardInPlay] = useState();
 
     useEffect(() => {
-        console.log(deck)
-		const changedDeck = [...deck]
-		const changedTrash = [...trash]
-
-        // remove if statement in PROD
-        if (changedDeck.length < 100) {
-            changedDeck.forEach((card) => {
-                for (let i = 1; i < card["number"]; i++){
-                    changedDeck.push(card)
-                }
-            })
-            changedDeck.forEach((card) => {
-                card["id"] = uuidv4()
-            })
-        }
-        setDeck(changedDeck)
-        setTrash(changedTrash)
-        setCardInPlay()
-
         const handWrap = document.getElementById('handWrap');
         const trashWrap = document.getElementById('trashWrap');
         
