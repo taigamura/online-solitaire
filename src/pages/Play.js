@@ -8,6 +8,7 @@ function Play ({deck, setDeck}) {
 
 	const [hand, setHand] = useState([]);
 	const [trash, setTrash] = useState([]);
+	const [mana, setMana] = useState([]);
     const [cardInPlay, setCardInPlay] = useState();
 
     useEffect(() => {
@@ -37,30 +38,43 @@ function Play ({deck, setDeck}) {
         Sortable.create(trashWrap);
     }, []);
     
+    function handleMovementOfCard (source, target) {
+        const currSource = [...source]
+        const currTarget = [...target]
+        const currCardInPlay = cardInPlay
+        
+        let indexToRemove = 0
+        currSource.forEach((element, index) => {
+            if (element["id"] == currCardInPlay) {
+                indexToRemove = index
+            }
+        })
+        let card = currSource.splice(indexToRemove, 1)[0]
+        currTarget.push(card)
+
+        return [currSource, currTarget]
+    }
     
     function drop(e) {
 
-        // TODO: handle dropped on top of card
+        let targetId = (e.target.tagName != "IMG") ? (e.target.id) : document.getElementById(e.target.id).parentElement.parentElement.id
+        let changedState = []
 
-        // dropped in trash
-        if (e.target.id == "trashWrap") {
-            console.log("dropped in trash")
-            const changedHand = [...hand]
-            const changedTrash = [...trash]
-            const changedCardInPlay = cardInPlay
-            
-            let indexToRemove = 0
-            changedHand.forEach((element, index) => {
-                if (element["id"] == changedCardInPlay) {
-                    indexToRemove = index
-                }
-            })
-            let card = changedHand.splice(indexToRemove, 1)[0]
-            changedTrash.push(card)
-
-            setHand(changedHand)
-            setTrash(changedTrash)
-            setCardInPlay()
+        switch (targetId) {
+            case "trashWrap":
+                console.log("dropped in trash")
+                changedState = handleMovementOfCard(hand, trash)
+                setHand(changedState[0])
+                setTrash(changedState[1])
+                break
+            case "handWrap":
+                console.log("dropped in hand")
+                changedState = handleMovementOfCard(trash, hand)
+                setTrash(changedState[0])
+                setHand(changedState[1])
+                break
+            default:
+                setCardInPlay()
         }
     }
       
@@ -124,6 +138,8 @@ function Play ({deck, setDeck}) {
             
             {/* プレイヤーゾーン */}
             <div id="bottomArea" class="columnLayoutBottom">
+
+                {/* 手札 */}
                 <div id="hand" class="boxLayout">
                     <div class="boxTitle">
                         手札(<span id="hand.length">{hand.length}</span>)
@@ -142,6 +158,8 @@ function Play ({deck, setDeck}) {
                         ))}
                     </ul>
                 </div>
+
+                {/* 墓地 */}
                 <div id="trash" class="boxLayout">
                     <div class="boxTitle">
                         墓地(<span id="hand.length">{trash.length}</span>)
@@ -151,7 +169,7 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_04" class="button">placeholder_04</a>
                     </div>
                     <div class="boxLayout"></div>
-                    <ul id="trashWrap" class="cardWrap" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                    <ul id="trashWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                         {trash?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={URL.createObjectURL(card["file"])} width="78.75" height="110" alt="error" />
@@ -159,6 +177,8 @@ function Play ({deck, setDeck}) {
                         ))}
                     </ul>
                 </div>
+
+                {/* デッキ */}
                 <div id="deck" class="boxLayout">
                     <div class="boxTitle">
                         デッキ(<span id="deck.length">{deck.length}</span>)
