@@ -65,6 +65,10 @@
     width: 75px;
 }
 
+.cardWrap>.card:hover {
+    border: 1px solid #ff0000;
+}
+
 .cardWrap>.card {
     cursor: pointer;
 }

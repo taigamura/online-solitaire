@@ -44,6 +44,7 @@ function Deckbuild({deck, setDeck}) {
 		})
 		currDeck.forEach((card) => {
 			card["id"] = uuidv4()
+			card["flip"] = false
 		})
 
         setDeck(currDeck)

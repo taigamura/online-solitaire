@@ -2,13 +2,14 @@ import Sortable from 'sortablejs';
 import { ReactSortable } from "react-sortablejs";
 import React, { useState, useEffect } from 'react';
 import './Play.css';
+import cardBack from "../images/cardBack.jpg";
 
 function Play ({deck, setDeck}) {
 
 	const [hand, setHand] = useState([]);
 	const [trash, setTrash] = useState([]);
 	const [mana, setMana] = useState([]);
-    const [cardInPlay, setCardInPlay] = useState();
+    const [cardInPlay, setCardInPlay] = useState({});
 
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
@@ -25,7 +26,7 @@ function Play ({deck, setDeck}) {
         
         let indexToRemove = 0
         currSource.forEach((element, index) => {
-            if (element["id"] == currCardInPlay) {
+            if (element["id"] == currCardInPlay["id"]) {
                 indexToRemove = index
             }
         })
@@ -37,24 +38,40 @@ function Play ({deck, setDeck}) {
     
     function drop(e) {
 
+        const currCardInPlay = cardInPlay
+
+        let sourceId = currCardInPlay["source"]
         let targetId = (e.target.tagName != "IMG") ? (e.target.id) : document.getElementById(e.target.id).parentElement.parentElement.id
         let changedState = []
 
-        switch (targetId) {
-            case "trashWrap":
-                console.log("dropped in trash")
-                changedState = handleMovementOfCard(hand, trash)
-                setHand(changedState[0])
-                setTrash(changedState[1])
-                break
+        switch (sourceId) {
             case "handWrap":
-                console.log("dropped in hand")
-                changedState = handleMovementOfCard(trash, hand)
-                setTrash(changedState[0])
-                setHand(changedState[1])
+                switch (targetId) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCard(hand, trash)
+                        setHand(changedState[0])
+                        setTrash(changedState[1])
+                        break
+                    case "handWrap":
+                        break
+                }
+                break
+            case "trashWrap":
+                switch (targetId) {
+                    case "trashWrap":
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCard(trash, hand)
+                        setTrash(changedState[0])
+                        setHand(changedState[1])
+                        break
+                }
                 break
             default:
-                setCardInPlay()
+                setCardInPlay({})
+
         }
     }
       
@@ -63,7 +80,10 @@ function Play ({deck, setDeck}) {
     }
 
     function handleMouseDown(e) {
-        setCardInPlay(e.target.id)
+        setCardInPlay({
+            source: document.getElementById(e.target.id).parentElement.parentElement.id,
+            id: e.target.id
+        })
         console.log(cardInPlay)
     }
 
@@ -78,23 +98,17 @@ function Play ({deck, setDeck}) {
           [changedDeck[currentIndex], changedDeck[randomIndex]] = [changedDeck[randomIndex], changedDeck[currentIndex]]
         }
         setDeck(changedDeck)
-        console.log(deck)
     }
     
 	function draw(e){
 		e.preventDefault();
 		const changedDeck = [...deck]
         let drawnCard = changedDeck.pop()
-        if (changedDeck.length == 0) {
-            console.log("empty")
-        }
         setDeck(changedDeck)
-        console.log(deck)
 
         const changedHand = [...hand]
         changedHand.push(drawnCard)
         setHand(changedHand)
-        console.log(hand)
     }
     
     return (
@@ -165,7 +179,7 @@ function Play ({deck, setDeck}) {
                     </div>
                     
                     <form onSubmit={draw}>
-                        <button type='submit'>ドロー</button>
+                        <button type='submit'>一枚ドロー</button>
                     </form>
 
                     <form onSubmit={shuffle}>
