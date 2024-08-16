@@ -1,104 +1,121 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import cardBack from "../images/cardBack.jpg";
+import './Deckbuild.css';
 
 // function component
 function Deckbuild({deck, setDeck}) {
 
-	const [preview, setPreview] = useState();
     const navigate = useNavigate();
+	// deckGroupBy is [{key: file, value: [...card]}, ...]
+	const [deckGroupBy, setDeckGroupBy] = useState([]);
 
 	function handleChange(e){
 		e.preventDefault();
 		const files = [...e.target.files]
-		let deck = []
+		let currDeck = []
 		files.forEach((file) => {
 			let card = {
 				file: file,
-				number: 1
+				id: uuidv4(),
+				flip: false
 			}
-			deck.push(card)
+			currDeck.push(card)
 		})
-		setDeck(deck)
-	}
-
-	function handleSubmitNumber(e){
-		e.preventDefault();
-		setPreview(true)
+		setDeck(currDeck)
+		setDeckGroupBy(Array.from(Map.groupBy(currDeck, card => {return card.file}), ([key, value]) => ({ key, value })))
 	}
 
 	function handleReset(e){
 		e.preventDefault();
-		setPreview(false)
 		setDeck([])
+		setDeckGroupBy([])
 	}
 
 	function handleConfirmDeck(e) {
 		e.preventDefault();
-		const currDeck = [...deck]
-		
-		currDeck.forEach((card) => {
-			for (let i = 1; i < card["number"]; i++){
-				currDeck.push(card)
-			}
-		})
-		currDeck.forEach((card) => {
-			card["id"] = uuidv4()
-			card["flip"] = false
-		})
-
-        setDeck(currDeck)
-
 		navigate('play')
 	}
 
-	function handleNumberChange(e){
+	function handleNumberChange(e, targetCard){
 		e.preventDefault();
 		const currDeck = [...deck]
-		currDeck[e.target.id].number = parseInt(e.target.value)
-		setDeck(currDeck)
+		
+		let initialNumber = 0
+		let targetNumber = parseInt(e.target.value)
+		
+		// count how many already in deck
+		deck.forEach((card) => {
+			if (card["file"] === targetCard["file"]) {
+				initialNumber++
+			}
+		})
+
+		// if cards need to be added
+		if (initialNumber < targetNumber) {
+			for (let i = initialNumber; i < targetNumber; i++) {
+				let card = {
+					file: targetCard["file"],
+					id: uuidv4(),
+					flip: false
+				}
+				currDeck.push(card)
+			}
+		} 
+		// if cards need to be removed
+		else if (initialNumber > targetNumber) {
+			let indexesToRemove = []
+			deck.forEach((card, i) => {
+				if (card["file"] === targetCard["file"]) {
+					indexesToRemove.push(i)
+				}
+			})
+			let toRemove = initialNumber - targetNumber
+			indexesToRemove.forEach((indexToRemove) => {
+				if (toRemove !== 0) {
+					currDeck.splice(indexToRemove, 1)
+					toRemove--
+				}
+			})
+		}
+
+        setDeck(currDeck)
+		setDeckGroupBy(Array.from(Map.groupBy(currDeck, card => {return card.file}), ([key, value]) => ({ key, value })))
 	}
 
 	return (
 		<div>
 			<h3>カードを追加</h3>
 			<input type="file" multiple onChange={handleChange} />
-
-			<div className="Deckbuild">
-				{/* デュエマは 63mm x 88mm */}
-				{deck?.map((card, index) => (
-					<div>
-						<img src={URL.createObjectURL(card["file"])} width="157.5" height="220" alt="error" />
-						<select id={index} placeholder={card["number"]} onChange={handleNumberChange}>
-							<option value="1">1</option>
-							<option value="2">2</option>
-							<option value="3">3</option>
-							<option value="4">4</option>
-						</select>
-					</div>
-				))}
-			</div>
-
-			<form onSubmit={handleSubmitNumber}>
-				<button type='submit'>カード枚数確定</button>
-			</form>
-
-			<form onSubmit={handleReset}>
-				<button type='submit'>リセット</button>
-			</form>
-
-			{preview && <div>
-				{deck?.map((card, index) => (
-					[...Array(card.number)].map(() => (
-						// TODO: implement card overlap
-						<div>
-							<img src={URL.createObjectURL(card["file"])} width="157.5" height="220" alt="error" />
-						</div>
-					))
-				))}
-
-                <button type='submit' onClick={handleConfirmDeck}>デッキ確定</button>
-			</div>}
+			
+			{/* デュエマは 63mm x 88mm */}
+            <div id="deckPreview" class="boxLayout">
+                <div class="boxTitle">
+                    カード枚数指定(<span id="deck.length">{deck.length}</span>)
+                </div>
+                <div class="buttonLayout">
+                    <a id="reset" class="button" onClick={handleReset}>リセット</a>
+                    <a id="confirmDeck" class="button" onClick={handleConfirmDeck}>デッキ確定</a>
+                </div>
+                <div class="boxLayout"></div>
+					<ul id="" class="deckPreviewWrap">
+						{deckGroupBy.map((group, i) => (
+							<li class="deckPreviewWrap">
+								{[...Array(group.value.length)].map(() => (
+									<img src={URL.createObjectURL(group["key"])} width="78.75" height="110" alt="error" />
+								))}
+								
+								<select id={i} placeholder={1} onChange={event => handleNumberChange(event, group["value"][0])}>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+								</select>
+							</li>
+						))}
+					</ul>
+            </div>
 		</div>
 	)
 }
