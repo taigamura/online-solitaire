@@ -20,14 +20,12 @@ function Play ({deck, setDeck}) {
         const manaWrap = document.getElementById('manaWrap');
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
-        const deckWrap = document.getElementById('deckWrap');
         
         Sortable.create(handWrap);
         Sortable.create(trashWrap);
         Sortable.create(manaWrap);
         Sortable.create(shieldWrap);
         Sortable.create(battleWrap);
-        Sortable.create(deckWrap);
         
         document.addEventListener("keyup", handleKeyUp);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
@@ -406,6 +404,7 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, shield)) setShield(flipCardInTarget(id, shield))
         else if (isCardInTarget(id, battle)) setBattle(flipCardInTarget(id, battle))
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
+        else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
 
     function handleKeyUp (e) {
@@ -419,7 +418,10 @@ function Play ({deck, setDeck}) {
         if (viewDeck) {
             setViewDeck(false)
         } else {
-            setViewDeck(true)
+            setViewDeck(true, () => {
+                const deckWrap = document.getElementById('deckWrap');
+                Sortable.create(deckWrap);
+            })
         }
     }
     
