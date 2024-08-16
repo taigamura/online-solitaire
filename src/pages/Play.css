@@ -1,0 +1,133 @@
+.columnLayoutBottom {
+    margin-top: 30px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+}
+
+.boxTitle {
+    position: relative;
+    font-size: 16px;
+    font-weight: bold;
+    color: #777777;
+    z-index: 2;
+}
+
+.boxLayout {
+    overflow: hidden;
+    border: 2px solid #999999;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.buttonLayout {
+    position: relative;
+    z-index: 2;
+    margin-top: 5px;
+}
+
+.button {
+    display: inline-block;
+    border-radius: 5px;
+    border: 1px solid #222222;
+    padding: 2px 5px;
+    background-color: white;
+    font-size: 12px;
+    color: #222222;
+    cursor: pointer;
+  }
+  
+.button:hover {
+    border: 1px solid #222222;
+    background-color: #222222;
+    color: #ffffff;
+}
+
+.button.on {
+    border: 1px solid #222222;
+    background-color: #222222;
+    color: #ffffff;
+}
+
+.cardWrap {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 5px;
+    min-height: 105px;
+}
+
+/* child combinator */
+.cardWrap>.card {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 75px;
+}
+
+.cardWrap>.card:hover {
+    border: 1px solid #ff0000;
+}
+
+.cardWrap>.card {
+    cursor: pointer;
+}
+
+.cardWrap>.card:nth-of-type(n + 2) {
+    margin-left: -50px;
+}
+
+.cardWrap>.card.hide {
+    position: relative;
+    border: 1px solid #999999;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cardWrap>.card.hide::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    /* background: url("../img/poke_ura.jpg"); */
+    background-size: contain;
+    content: "";
+}
+
+.battleWrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-top: 30px;
+}
+  
+.battleArea {
+    position: relative;
+    width: 400px;
+    min-height: 158px;
+}
+
+.bgLayout{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.battleArea .cardWrap>.card:nth-of-type(9n + 1) {
+    margin-left: 0;
+}
+
+.fieldArea:nth-of-type(2n+1) .spMenuArea{
+    margin-right: 30px;
+}
+
+.fieldArea:nth-of-type(2n) .spMenuArea{
+    margin-left: 30px;
+}
