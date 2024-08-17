@@ -1,5 +1,4 @@
 import Sortable from 'sortablejs';
-import { ReactSortable } from "react-sortablejs";
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
@@ -11,6 +10,7 @@ function Play ({deck, setDeck}) {
 	const [mana, setMana] = useState([]);
 	const [shield, setShield] = useState([]);
 	const [battle, setBattle] = useState([]);
+	const [viewDeck, setViewDeck] = useState(true);
 
     const [cardInPlay, setCardInPlay] = useState({});
 
@@ -93,6 +93,13 @@ function Play ({deck, setDeck}) {
                         setMana(changedState[1])
                         currCardInPlay["source"] = "manaWrap"
                         break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(hand, deck)
+                        setHand(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
                 }
                 break
 
@@ -130,13 +137,20 @@ function Play ({deck, setDeck}) {
                         setMana(changedState[1])
                         currCardInPlay["source"] = "manaWrap"
                         break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(trash, deck)
+                        setTrash(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
                 }
                 break
             
             case "shieldWrap":
                 switch (targetId) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(shield, trash)
                         setShield(changedState[0])
                         setTrash(changedState[1])
@@ -167,13 +181,20 @@ function Play ({deck, setDeck}) {
                         setMana(changedState[1])
                         currCardInPlay["source"] = "manaWrap"
                         break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(shield, deck)
+                        setShield(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
                 }
                 break
             
             case "battleWrap":
                 switch (targetId) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(battle, trash)
                         setBattle(changedState[0])
                         setTrash(changedState[1])
@@ -204,13 +225,20 @@ function Play ({deck, setDeck}) {
                         setMana(changedState[1])
                         currCardInPlay["source"] = "manaWrap"
                         break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(battle, deck)
+                        setBattle(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
                 }
                 break
             
             case "manaWrap":
                 switch (targetId) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(mana, trash)
                         setMana(changedState[0])
                         setTrash(changedState[1])
@@ -240,6 +268,57 @@ function Play ({deck, setDeck}) {
                     case "manaWrap":
                         console.log("dropped in mana")
                         currCardInPlay["source"] = "manaWrap"
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(mana, deck)
+                        setMana(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
+                }
+                break
+            
+            case "deckWrap":
+                switch (targetId) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCard(deck, trash)
+                        setDeck(changedState[0])
+                        setTrash(changedState[1])
+                        currCardInPlay["source"] = "trashWrap"
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCard(deck, hand)
+                        setDeck(changedState[0])
+                        setHand(changedState[1])
+                        currCardInPlay["source"] = "handWrap"
+                        break
+                    case "shieldWrap":
+                        console.log("dropped in shield")
+                        changedState = handleMovementOfCard(deck, shield)
+                        setDeck(changedState[0])
+                        setShield(changedState[1])
+                        currCardInPlay["source"] = "shieldWrap"
+                        break
+                    case "battleWrap":
+                        console.log("dropped in battle")
+                        changedState = handleMovementOfCard(deck, battle)
+                        setDeck(changedState[0])
+                        setBattle(changedState[1])
+                        currCardInPlay["source"] = "battleWrap"
+                        break
+                    case "manaWrap":
+                        console.log("dropped in mana")
+                        changedState = handleMovementOfCard(deck, mana)
+                        setDeck(changedState[0])
+                        setMana(changedState[1])
+                        currCardInPlay["source"] = "manaWrap"
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        currCardInPlay["source"] = "deckWrap"
                         break
                 }
                 break
@@ -325,11 +404,24 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, shield)) setShield(flipCardInTarget(id, shield))
         else if (isCardInTarget(id, battle)) setBattle(flipCardInTarget(id, battle))
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
+        else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
 
     function handleKeyUp (e) {
         if (e.keyCode === 32) {
             flipCardWithId(cardInPlay["id"])
+        }
+    }
+
+    function handleViewDeck (e) {
+		e.preventDefault();
+        if (viewDeck) {
+            setViewDeck(false)
+        } else {
+            setViewDeck(true, () => {
+                const deckWrap = document.getElementById('deckWrap');
+                Sortable.create(deckWrap);
+            })
         }
     }
     
@@ -452,9 +544,32 @@ function Play ({deck, setDeck}) {
                     <form onSubmit={setOneShield}>
                         <button type='submit'>1枚シールド化</button>
                     </form>
+                    
+                    <form onSubmit={handleViewDeck}>
+                        <button type='submit'>デッキを確認</button>
+                    </form>
                 </div>
 
             </div>
+            
+            {/* デッキ確認 */}
+            {viewDeck && <div id="topArea" class="boxLayout">
+                <div class="boxTitle">
+                    デッキ確認(<span id="deck.length">{deck.length}</span>)
+                </div>
+                <div class="buttonLayout">
+                    <a id="placeholder_deck_00" class="button">placeholder_deck_00</a>
+                    <a id="placeholder_deck_01" class="button">placeholder_deck_01</a>
+                </div>
+                <div class="boxLayout"></div>
+                <ul id="deckWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                    {deck?.map((card, index) => (
+                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                        </li>
+                    ))}
+                </ul>
+            </div>}
         </div>
     )
 }
