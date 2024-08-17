@@ -49,6 +49,15 @@
     color: #ffffff;
 }
 
+.shade {
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .cardWrap {
     display: flex;
     justify-content: center;
@@ -66,7 +75,7 @@
 }
 
 .cardWrap>.card:hover {
-    border: 1px solid #ff0000;
+    transform: scale(1.25);
 }
 
 .cardWrap>.card {
@@ -91,7 +100,6 @@
     bottom: 0;
     left: 0;
     display: block;
-    /* background: url("../img/poke_ura.jpg"); */
     background-size: contain;
     content: "";
 }
