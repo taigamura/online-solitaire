@@ -30,6 +30,7 @@ function Deckbuild({deck, setDeck}) {
 		e.preventDefault();
 		setDeck([])
 		setDeckGroupBy([])
+		window.location.reload();
 	}
 
 	function handleConfirmDeck(e) {
@@ -86,7 +87,8 @@ function Deckbuild({deck, setDeck}) {
 	return (
 		<div>
 			<h3>カードを追加</h3>
-			<input type="file" multiple onChange={handleChange} />
+			<input type="file" multiple onChange={handleChange} accept='image/*'/>
+			<div class="boxLayout"></div>
 			
 			{/* デュエマは 63mm x 88mm */}
             <div id="deckPreview" class="boxLayout">
