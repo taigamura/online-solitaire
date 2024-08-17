@@ -10,7 +10,7 @@ function Play ({deck, setDeck}) {
 	const [mana, setMana] = useState([]);
 	const [shield, setShield] = useState([]);
 	const [battle, setBattle] = useState([]);
-	const [viewDeck, setViewDeck] = useState(true);
+	const [viewDeck, setViewDeck] = useState(false);
 
     const [cardInPlay, setCardInPlay] = useState({});
 
@@ -37,16 +37,18 @@ function Play ({deck, setDeck}) {
         const currTarget = [...target]
         const currCardInPlay = cardInPlay
         
-        let indexToRemove = 0
+        let indexToRemove = undefined
         currSource.forEach((element, index) => {
             if (element["id"] == currCardInPlay["id"]) {
                 indexToRemove = index
             }
         })
-        let card = currSource.splice(indexToRemove, 1)[0]
-        currTarget.push(card)
-
-        return [currSource, currTarget]
+        if (indexToRemove !== undefined) {
+            let card = currSource.splice(indexToRemove, 1)[0]
+            currTarget.push(card)
+    
+            return [currSource, currTarget]
+        }
     }
     
     function drop(e) {
@@ -331,6 +333,7 @@ function Play ({deck, setDeck}) {
     }
 
     function handleMouseDown(e) {
+        console.log(e.target)
         setCardInPlay({
             source: document.getElementById(e.target.id).parentElement.parentElement.id,
             id: e.target.id
@@ -352,25 +355,31 @@ function Play ({deck, setDeck}) {
     
 	function draw(e){
 		e.preventDefault();
-		const changedDeck = [...deck]
-        let drawnCard = changedDeck.pop()
-        setDeck(changedDeck)
-
-        const changedHand = [...hand]
-        changedHand.push(drawnCard)
-        setHand(changedHand)
+        
+        if (deck.length > 0) {
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            setDeck(changedDeck)
+    
+            const changedHand = [...hand]
+            changedHand.push(drawnCard)
+            setHand(changedHand)
+        }
     }
     
 	function setOneShield(e){
 		e.preventDefault();
-		const changedDeck = [...deck]
-        let drawnCard = changedDeck.pop()
-        setDeck(changedDeck)
-        drawnCard["flip"] = true
+        
+        if (deck.length > 0) {
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            setDeck(changedDeck)
+            drawnCard["flip"] = true
 
-        const changedShield = [...shield]
-        changedShield.push(drawnCard)
-        setShield(changedShield)
+            const changedShield = [...shield]
+            changedShield.push(drawnCard)
+            setShield(changedShield)
+        }
     }
 
     function cardImg(card) {
@@ -407,21 +416,78 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
 
-    function handleKeyUp (e) {
+    function handleKeyUp(e) {
         if (e.keyCode === 32) {
             flipCardWithId(cardInPlay["id"])
         }
     }
 
-    function handleViewDeck (e) {
+    function handleViewDeck(e) {
 		e.preventDefault();
         if (viewDeck) {
             setViewDeck(false)
         } else {
-            setViewDeck(true, () => {
-                const deckWrap = document.getElementById('deckWrap');
-                Sortable.create(deckWrap);
+            setViewDeck(true)
+        }
+    }
+
+    function pushSourceIntoTarget(source, target) {
+        const currSource = [...source]
+        const currTarget = [...target]
+
+        currSource.forEach((element) => {
+            currTarget.push(element)
+        })
+
+        return currTarget
+    }
+
+    function handleReset(e) {
+		e.preventDefault();
+        let currDeck = [...deck]
+        
+        currDeck = pushSourceIntoTarget(hand, currDeck)
+        currDeck = pushSourceIntoTarget(trash, currDeck);
+        currDeck = pushSourceIntoTarget(mana, currDeck);
+        currDeck = pushSourceIntoTarget(shield, currDeck);
+        currDeck = pushSourceIntoTarget(battle, currDeck);
+        setDeck(currDeck);
+
+        setHand([])
+        setTrash([])
+        setMana([])
+        setShield([])
+        setBattle([])
+    }
+
+    function bottom(e) {
+        const currCardInPlay = cardInPlay
+        const currHand = [...hand]
+        const currDeck = [...deck]
+
+        if (currHand.length > 0) {
+            let indexToRemove = undefined
+            currHand.forEach((element, i) => {
+                if (element["id"] == currCardInPlay["id"]) {
+                    indexToRemove = i
+                }
             })
+            
+            if (indexToRemove !== undefined) {
+                let card = currHand.splice(indexToRemove, 1)[0]
+    
+                currDeck.unshift(card)
+                currCardInPlay["source"] = "deckWrap"
+                setHand(currHand)
+                setCardInPlay(currCardInPlay)
+                setDeck(currDeck)
+            }
+        }
+    }
+
+    function handleShade(id) {
+        if (cardInPlay["id"] == id) {
+            return (<div id={id} class="shade"></div>)
         }
     }
     
@@ -441,6 +507,7 @@ function Play ({deck, setDeck}) {
                     {battle?.map((card, index) => (
                         <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                            {handleShade(card["id"])}
                         </li>
                     ))}
                 </ul>
@@ -460,6 +527,7 @@ function Play ({deck, setDeck}) {
                     {shield?.map((card, index) => (
                         <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                            {handleShade(card["id"])}
                         </li>
                     ))}
                 </ul>
@@ -475,7 +543,7 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_hand_00" class="button" style={{marginLeft: 10 + "px"}}>placeholder_hand_00</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="placeholder_hand_01" class="button">placeholder_hand_01</a>
+                        <a id="bottom" class="button" onClick={bottom}>山札の下に置く</a>
                         <a id="placeholder_hand_02" class="button">placeholder_hand_02</a>
                     </div>
                     <div class="boxLayout"></div>
@@ -483,6 +551,7 @@ function Play ({deck, setDeck}) {
                         {hand?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                                {handleShade(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -503,6 +572,7 @@ function Play ({deck, setDeck}) {
                         {mana?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                                {handleShade(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -522,6 +592,7 @@ function Play ({deck, setDeck}) {
                         {trash?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                                {handleShade(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -548,6 +619,10 @@ function Play ({deck, setDeck}) {
                     <form onSubmit={handleViewDeck}>
                         <button type='submit'>デッキを確認</button>
                     </form>
+
+                    <form onSubmit={handleReset}>
+                        <button type='submit'>リセット</button>
+                    </form>
                 </div>
 
             </div>
@@ -566,6 +641,7 @@ function Play ({deck, setDeck}) {
                     {deck?.map((card, index) => (
                         <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                            {handleShade(card["id"])}
                         </li>
                     ))}
                 </ul>
