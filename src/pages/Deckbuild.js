@@ -88,7 +88,6 @@ function Deckbuild({deck, setDeck}) {
 		<div>
 			<h3>カードを追加</h3>
 			<input type="file" multiple onChange={handleChange} accept='image/*'/>
-			<div class="boxLayout"></div>
 			
 			{/* デュエマは 63mm x 88mm */}
             <div id="deckPreview" class="boxLayout">

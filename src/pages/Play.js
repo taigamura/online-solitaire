@@ -364,6 +364,8 @@ function Play ({deck, setDeck}) {
             const changedHand = [...hand]
             changedHand.push(drawnCard)
             setHand(changedHand)
+        } else {
+            window.alert("手札はありません")
         }
     }
     
@@ -379,6 +381,8 @@ function Play ({deck, setDeck}) {
             const changedShield = [...shield]
             changedShield.push(drawnCard)
             setShield(changedShield)
+        } else {
+            window.alert("デッキはありません")
         }
     }
 
@@ -436,6 +440,7 @@ function Play ({deck, setDeck}) {
         const currTarget = [...target]
 
         currSource.forEach((element) => {
+            element["flip"] = false
             currTarget.push(element)
         })
 
@@ -482,6 +487,8 @@ function Play ({deck, setDeck}) {
                 setCardInPlay(currCardInPlay)
                 setDeck(currDeck)
             }
+        } else {
+            window.alert("手札はありません")
         }
     }
 
@@ -489,6 +496,10 @@ function Play ({deck, setDeck}) {
         if (cardInPlay["id"] == id) {
             return (<div id={id} class="shade"></div>)
         }
+    }
+
+    function handleDoubleClick(e) {
+
     }
     
     return (
