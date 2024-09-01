@@ -58,6 +58,8 @@
     left: 0;
 }
 
+/* cardWrap */
+
 .cardWrap {
     display: flex;
     justify-content: center;
@@ -82,10 +84,6 @@
     cursor: pointer;
 }
 
-.overlapCardWrap>.card:nth-of-type(n + 2) {
-    margin-left: -50px;
-}
-
 .cardWrap>.card.hide {
     position: relative;
     border: 1px solid #999999;
@@ -102,6 +100,10 @@
     display: block;
     background-size: contain;
     content: "";
+}
+
+.cardWrap>.card.overlap:nth-of-type(n + 2) {
+    margin-left: -50px;
 }
 
 .battleWrap {

@@ -18,7 +18,8 @@ function Deckbuild({deck, setDeck}) {
 			let card = {
 				file: file,
 				id: uuidv4(),
-				flip: false
+				flip: false,
+				source: "deckWrap"
 			}
 			currDeck.push(card)
 		})

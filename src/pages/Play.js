@@ -13,33 +13,34 @@ function Play ({deck, setDeck}) {
 	const [deckTop, setDeckTop] = useState([]);
 	const [viewDeck, setViewDeck] = useState(false);
 	const [viewDeckTop, setViewDeckTop] = useState(false);
-
     const [cardsInPlay, setCardsInPlay] = useState([]);
+    const [overlappedCards, setOverlappedCards] = useState([]);
 
+    const allCards = [hand, trash, mana, shield, battle, deck]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
     useEffect(() => {
-        // const handWrap = document.getElementById('handWrap');
-        // const trashWrap = document.getElementById('trashWrap');
-        // const manaWrap = document.getElementById('manaWrap');
-        // const shieldWrap = document.getElementById('shieldWrap');
-        // const battleWrap = document.getElementById('battleWrap');
+        const handWrap = document.getElementById('handWrap');
+        const trashWrap = document.getElementById('trashWrap');
+        const manaWrap = document.getElementById('manaWrap');
+        const shieldWrap = document.getElementById('shieldWrap');
+        const battleWrap = document.getElementById('battleWrap');
         
-        // Sortable.create(handWrap);
-        // Sortable.create(trashWrap);
-        // Sortable.create(manaWrap);
-        // Sortable.create(shieldWrap);
-        // Sortable.create(battleWrap);
+        Sortable.create(handWrap);
+        Sortable.create(trashWrap);
+        Sortable.create(manaWrap);
+        Sortable.create(shieldWrap);
+        Sortable.create(battleWrap);
 
-        // if (viewDeckTop) {
-        //     const deckTopWrap = document.getElementById('deckTopWrap');
-        //     Sortable.create(deckTopWrap);
-        // }
+        if (viewDeckTop) {
+            const deckTopWrap = document.getElementById('deckTopWrap');
+            Sortable.create(deckTopWrap);
+        }
         
-        // if (viewDeck) {
-        //     const deckWrap = document.getElementById('deckWrap');
-        //     Sortable.create(deckWrap);
-        // }
+        if (viewDeck) {
+            const deckWrap = document.getElementById('deckWrap');
+            Sortable.create(deckWrap);
+        }
 
         listenDeckTopChange()
         document.addEventListener("contextmenu", handleRightClick)
@@ -47,7 +48,7 @@ function Play ({deck, setDeck}) {
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => document.removeEventListener("keyup", handleKeyUp);
     }, [handleKeyUp]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
-    
+
     function handleMovementOfCard (source, target) {
         const currSource = [...source]
         const currTarget = [...target]
@@ -409,26 +410,36 @@ function Play ({deck, setDeck}) {
         e.preventDefault();
     }
 
+    function findCard(id) {
+        let to_return = undefined
+        allCards.forEach((cardArea, i) => {
+            cardArea.forEach((card, j) => {
+                if (card["id"] === id) {
+                    to_return = card
+                }
+            })
+        })
+
+        return to_return
+    }
+
     function handleMouseDown(e) {
         console.log(e.target)
         let changedCardsInPlay = [...cardsInPlay]
 
-        let selected = {
-            source: document.getElementById(e.target.id).parentElement.parentElement.id,
-            id: e.target.id
-        }
+        let selectedCard = findCard(e.target.id)
 
         // selected must be a card in playable area (not divs and other stuff)
-        if (allPlayableAreaIds.includes(selected["source"])) {
+        if (allPlayableAreaIds.includes(selectedCard["source"])) {
             // must be unique
-            if (!changedCardsInPlay.find(element => element.id === selected.id)) {
+            if (!changedCardsInPlay.find(element => element.id === selectedCard.id)) {
                 if (changedCardsInPlay.length > 0) {
                     // selected must be a part of same area else, clear card in play
-                    if (selected["source"] != changedCardsInPlay[0]["source"]) {
+                    if (selectedCard["source"] != changedCardsInPlay[0]["source"]) {
                         changedCardsInPlay = []
                     }
                 }
-                changedCardsInPlay.push(selected)
+                changedCardsInPlay.push(selectedCard)
                 setCardsInPlay(changedCardsInPlay)
             }
             console.log(changedCardsInPlay)
@@ -454,6 +465,7 @@ function Play ({deck, setDeck}) {
         if (deck.length > 0) {
             const changedDeck = [...deck]
             let drawnCard = changedDeck.pop()
+            drawnCard["source"] = "handWrap"
             setDeck(changedDeck)
     
             const changedHand = [...hand]
@@ -515,14 +527,7 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
 
-    function overlap() {
-        const changedCardsInPlay = [...cardsInPlay]
-        
-
-    }
-
     function handleRightClick(e) {
-        e.preventDefault()
         overlap()
     }
 
@@ -577,6 +582,21 @@ function Play ({deck, setDeck}) {
         setShield([])
         setBattle([])
         setCardsInPlay([])
+        setOverlappedCards([])
+    }
+    
+    function overlap() {
+        const changedOverlappedCards = [...overlappedCards]
+        const changedCardsInPlay = [...cardsInPlay]
+
+        let group = []
+        changedCardsInPlay.forEach((element, i) => {
+            group.push(element)
+        })
+
+        changedOverlappedCards.push(group)
+        setOverlappedCards(changedOverlappedCards)
+        console.log(overlappedCards)
     }
 
     function bottom(e) {
@@ -595,10 +615,12 @@ function Play ({deck, setDeck}) {
             })
             
             if (indexesToRemove.length > 0) {
-                indexesToRemove.forEach((element, i) => {
-                    let card = currHand.splice(element, 1)[0]
+                // sort so splicing doesn't mess up next iteration and do in reverse order
+                indexesToRemove.sort()
+                for (var i = indexesToRemove.length -1; i >= 0; i--) {
+                    let card = currHand.splice(indexesToRemove[i], 1)[0]
                     currDeck.unshift(card)
-                })
+                }
                 
                 changedCardsInPlay.forEach((currcardsInPlay, i) => {
                     currcardsInPlay["source"] = "deckWrap"
@@ -645,6 +667,9 @@ function Play ({deck, setDeck}) {
         }
     }
     
+    // ========================================================================================================================================================
+    // HTML
+    
     return (
         <div>
             {/* バトルゾーン */}
@@ -657,9 +682,9 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_battle_01" class="button">placeholder_battle_01</a>
                 </div>
                 <div class="boxLayout"></div>
-                <ul id="battleWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                     {battle?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                             {handleShade(card["id"])}
                         </li>
@@ -677,9 +702,9 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_shield_01" class="button">placeholder_shield_01</a>
                 </div>
                 <div class="boxLayout"></div>
-                <ul id="shieldWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                     {shield?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                             {handleShade(card["id"])}
                         </li>
@@ -701,9 +726,9 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_hand_02" class="button">placeholder_hand_02</a>
                     </div>
                     <div class="boxLayout"></div>
-                    <ul id="handWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                    <ul id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {hand?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                 {handleShade(card["id"])}
                             </li>
@@ -722,9 +747,9 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_mana_02" class="button">placeholder_mana_02</a>
                     </div>
                     <div class="boxLayout"></div>
-                    <ul id="manaWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                    <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {mana?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                 {handleShade(card["id"])}
                             </li>
@@ -742,9 +767,9 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_trash_01" class="button">placeholder_trash_01</a>
                     </div>
                     <div class="boxLayout"></div>
-                    <ul id="trashWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                    <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {trash?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                 {handleShade(card["id"])}
                             </li>
@@ -795,9 +820,9 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_deckTop_01" class="button">placeholder_deckTop_01</a>
                 </div>
                 <div class="boxLayout"></div>
-                <ul id="deckTopWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                     {deckTop?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                             {handleShade(card["id"])}
                         </li>
@@ -815,9 +840,9 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_deck_01" class="button">placeholder_deck_01</a>
                 </div>
                 <div class="boxLayout"></div>
-                <ul id="deckWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                     {deck?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                             {handleShade(card["id"])}
                         </li>
