@@ -2,6 +2,7 @@ import Sortable from 'sortablejs';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
+import DragSelect from "dragselect";
 
 function Play ({deck, setDeck}) {
 
@@ -10,7 +11,9 @@ function Play ({deck, setDeck}) {
 	const [mana, setMana] = useState([]);
 	const [shield, setShield] = useState([]);
 	const [battle, setBattle] = useState([]);
+	const [deckTop, setDeckTop] = useState([]);
 	const [viewDeck, setViewDeck] = useState(false);
+	const [viewDeckTop, setViewDeckTop] = useState(false);
 
     const [cardInPlay, setCardInPlay] = useState({});
 
@@ -26,11 +29,27 @@ function Play ({deck, setDeck}) {
         Sortable.create(manaWrap);
         Sortable.create(shieldWrap);
         Sortable.create(battleWrap);
+
+        if (viewDeckTop) {
+            const deckTopWrap = document.getElementById('deckTopWrap');
+            Sortable.create(deckTopWrap);
+        }
+        
+        if (viewDeck) {
+            const deckWrap = document.getElementById('deckWrap');
+            Sortable.create(deckWrap);
+        }
+
+        const ds = new DragSelect({
+            selectables: document.querySelectorAll('card')
+        });
+
+        listenDeckTopChange()
         
         document.addEventListener("keyup", handleKeyUp);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => document.removeEventListener("keyup", handleKeyUp);
-    }, [handleKeyUp]);
+    }, [handleKeyUp]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
     
     function handleMovementOfCard (source, target) {
         const currSource = [...source]
@@ -324,6 +343,58 @@ function Play ({deck, setDeck}) {
                         break
                 }
                 break
+                
+            case "deckTopWrap":
+                switch (targetId) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCard(deckTop, trash)
+                        setDeckTop(changedState[0])
+                        setTrash(changedState[1])
+                        currCardInPlay["source"] = "trashWrap"
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCard(deckTop, hand)
+                        setDeckTop(changedState[0])
+                        setHand(changedState[1])
+                        currCardInPlay["source"] = "handWrap"
+                        break
+                    case "shieldWrap":
+                        console.log("dropped in shield")
+                        changedState = handleMovementOfCard(deckTop, shield)
+                        setDeckTop(changedState[0])
+                        setShield(changedState[1])
+                        currCardInPlay["source"] = "shieldWrap"
+                        break
+                    case "battleWrap":
+                        console.log("dropped in battle")
+                        changedState = handleMovementOfCard(deckTop, battle)
+                        setDeckTop(changedState[0])
+                        setBattle(changedState[1])
+                        currCardInPlay["source"] = "battleWrap"
+                        break
+                    case "manaWrap":
+                        console.log("dropped in mana")
+                        changedState = handleMovementOfCard(deckTop, mana)
+                        setDeckTop(changedState[0])
+                        setMana(changedState[1])
+                        currCardInPlay["source"] = "manaWrap"
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(deckTop, deck)
+                        setDeckTop(changedState[0])
+                        setDeck(changedState[1])
+                        currCardInPlay["source"] = "deckWrap"
+                        break
+                    case "deckTopWrap":
+                        console.log("dropped in deckTop")
+                        currCardInPlay["source"] = "deckTopWrap"
+                        break
+                }
+
+                break
         }
         setCardInPlay(currCardInPlay)
     }
@@ -365,7 +436,7 @@ function Play ({deck, setDeck}) {
             changedHand.push(drawnCard)
             setHand(changedHand)
         } else {
-            window.alert("手札はありません")
+            window.alert("山札はありません")
         }
     }
     
@@ -498,14 +569,36 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function handleDoubleClick(e) {
+	function handleDeckTop(e){
+		e.preventDefault();
 
+        if (deck.length > 0) {
+            setViewDeckTop(true)
+
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            setDeck(changedDeck)
+    
+            const changedDeckTop = [...deckTop]
+            changedDeckTop.push(drawnCard)
+            setDeckTop(changedDeckTop)
+        } else {
+            window.alert("山札はありません")
+        }
+    }
+
+    function listenDeckTopChange(){
+        console.log(deckTop.length)
+
+        if (deckTop.length == 0){
+            setViewDeckTop(false)
+        }
     }
     
     return (
         <div>
             {/* バトルゾーン */}
-            <div id="topArea" class="boxLayout">
+            <div id="area0" class="boxLayout">
                 <div class="boxTitle">
                     バトルゾーン(<span id="battle.length">{battle.length}</span>)
                 </div>
@@ -525,7 +618,7 @@ function Play ({deck, setDeck}) {
             </div>
             
             {/* シールドゾーン */}
-            <div id="middleArea" class="boxLayout">
+            <div id="area1" class="boxLayout">
                 <div class="boxTitle">
                     シールドゾーン(<span id="shield.length">{shield.length}</span>)
                 </div>
@@ -545,7 +638,7 @@ function Play ({deck, setDeck}) {
             </div>
             
             {/* プレイヤーゾーン */}
-            <div id="bottomArea" class="columnLayoutBottom">
+            <div id="area2" class="columnLayoutBottom">
 
                 {/* 手札 */}
                 <div id="hand" class="boxLayout">
@@ -634,12 +727,36 @@ function Play ({deck, setDeck}) {
                     <form onSubmit={handleReset}>
                         <button type='submit'>リセット</button>
                     </form>
+
+                    <form onSubmit={handleDeckTop}>
+                        <button type='submit'>デッキ上1枚確認</button>
+                    </form>
                 </div>
 
             </div>
             
+            {/* 山札上X枚確認 */}
+            {viewDeckTop && <div id="area3" class="boxLayout">
+                <div class="boxTitle">
+                    山札上(<span id="deckTop.length">{deckTop.length}</span>)枚確認
+                </div>
+                <div class="buttonLayout">
+                    <a id="placeholder_deckTop_00" class="button">placeholder_deckTop_00</a>
+                    <a id="placeholder_deckTop_01" class="button">placeholder_deckTop_01</a>
+                </div>
+                <div class="boxLayout"></div>
+                <ul id="deckTopWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                    {deckTop?.map((card, index) => (
+                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
+                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                            {handleShade(card["id"])}
+                        </li>
+                    ))}
+                </ul>
+            </div>}
+            
             {/* デッキ確認 */}
-            {viewDeck && <div id="topArea" class="boxLayout">
+            {viewDeck && <div id="area4" class="boxLayout">
                 <div class="boxTitle">
                     デッキ確認(<span id="deck.length">{deck.length}</span>)
                 </div>
