@@ -82,7 +82,7 @@
     cursor: pointer;
 }
 
-.cardWrap>.card:nth-of-type(n + 2) {
+.overlapCardWrap>.card:nth-of-type(n + 2) {
     margin-left: -50px;
 }
 

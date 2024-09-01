@@ -19,30 +19,30 @@ function Play ({deck, setDeck}) {
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
     useEffect(() => {
-        const handWrap = document.getElementById('handWrap');
-        const trashWrap = document.getElementById('trashWrap');
-        const manaWrap = document.getElementById('manaWrap');
-        const shieldWrap = document.getElementById('shieldWrap');
-        const battleWrap = document.getElementById('battleWrap');
+        // const handWrap = document.getElementById('handWrap');
+        // const trashWrap = document.getElementById('trashWrap');
+        // const manaWrap = document.getElementById('manaWrap');
+        // const shieldWrap = document.getElementById('shieldWrap');
+        // const battleWrap = document.getElementById('battleWrap');
         
-        Sortable.create(handWrap);
-        Sortable.create(trashWrap);
-        Sortable.create(manaWrap);
-        Sortable.create(shieldWrap);
-        Sortable.create(battleWrap);
+        // Sortable.create(handWrap);
+        // Sortable.create(trashWrap);
+        // Sortable.create(manaWrap);
+        // Sortable.create(shieldWrap);
+        // Sortable.create(battleWrap);
 
-        if (viewDeckTop) {
-            const deckTopWrap = document.getElementById('deckTopWrap');
-            Sortable.create(deckTopWrap);
-        }
+        // if (viewDeckTop) {
+        //     const deckTopWrap = document.getElementById('deckTopWrap');
+        //     Sortable.create(deckTopWrap);
+        // }
         
-        if (viewDeck) {
-            const deckWrap = document.getElementById('deckWrap');
-            Sortable.create(deckWrap);
-        }
+        // if (viewDeck) {
+        //     const deckWrap = document.getElementById('deckWrap');
+        //     Sortable.create(deckWrap);
+        // }
 
         listenDeckTopChange()
-        
+        document.addEventListener("contextmenu", handleRightClick)
         document.addEventListener("keyup", handleKeyUp);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => document.removeEventListener("keyup", handleKeyUp);
@@ -513,6 +513,17 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, battle)) setBattle(flipCardInTarget(id, battle))
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
         else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
+    }
+
+    function overlap() {
+        const changedCardsInPlay = [...cardsInPlay]
+        
+
+    }
+
+    function handleRightClick(e) {
+        e.preventDefault()
+        overlap()
     }
 
     function handleKeyUp(e) {
