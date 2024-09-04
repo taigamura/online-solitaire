@@ -95,7 +95,7 @@ function Play ({deck, setDeck}) {
     }
     
     function handleMovementOfCardOverlap(source, target, targetId) {
-        const currSource = [...source]
+        let currSource = [...source]
         const currTarget = [...target]
         const changedCardsInPlay = [...cardsInPlay]
 
@@ -116,11 +116,21 @@ function Play ({deck, setDeck}) {
             })
     
             if (indexesToRemove.length > 0) {
-                for (var i = indexesToRemove.length -1; i >= 0; i--) {
-                    let card = currSource[i].splice(indexesToRemove[i][1], 1)[0]
+                for (var i = indexesToRemove.length-1; i >= 0; i--) {
+                    // splice overlappedCards[group idx].splice([card idx])
+                    let card = currSource[indexesToRemove[i][0]].splice(indexesToRemove[i][1], 1)[0]
                     currTarget.push(card)
                 }
             }
+            
+            // filter empty groups
+            let changedCurrSource = []
+            currSource.forEach((group, i) => {
+                if (group.length > 0) {
+                    changedCurrSource.push(group)
+                }
+            })
+            currSource = changedCurrSource
         } 
         // source --> overlappedCards
         else {
@@ -155,19 +165,37 @@ function Play ({deck, setDeck}) {
         const changedOverlappedCards = [...overlappedCards]
         const changedCardsInPlay = [...cardsInPlay]
 
-        let group = []
+        let illegalCards = []
         changedCardsInPlay.forEach((card, i) => {
-            group.push(card)
+            let groupIdx = findOverlapGroupIdx(card["id"])
+            if (groupIdx != undefined) {
+                illegalCards.push(card)
+            }
+            if (card["source"] != "battleWrap" || card["source"] != "battleWrapOverlap") {
+                illegalCards.push(card)
+            }
         })
-        
-        changedOverlappedCards.push(group)
 
-        let changedState = handleMovementOfCard(battle, overlappedCards)
-        setBattle(changedState[0])
-        setOverlappedCards(changedOverlappedCards)
-        
-        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
-        setCardsInPlay([])
+        // check if overlap is called on already overlapped cards in same group
+        // diff groups cannot be selected to begin with in handleMouseDown
+        if (illegalCards.length > 0) {
+            window.alert("同じグループで呼び出し禁止")
+            setCardsInPlay([])
+        } else {
+            let group = []
+            changedCardsInPlay.forEach((card, i) => {
+                group.push(card)
+            })
+            
+            changedOverlappedCards.push(group)
+    
+            let changedState = handleMovementOfCard(battle, overlappedCards)
+            setBattle(changedState[0])
+            setOverlappedCards(changedOverlappedCards)
+            
+            changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
+            setCardsInPlay([])
+        }
     }
 
     // reset only selected overlap
@@ -663,7 +691,7 @@ function Play ({deck, setDeck}) {
                 changedCardsInPlay.push(selectedCard)
                 setCardsInPlay(changedCardsInPlay)
             }
-            console.log(changedCardsInPlay)
+            console.log("changedCardsInPlay", changedCardsInPlay)
         }
     }
 
