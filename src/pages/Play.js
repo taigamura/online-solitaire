@@ -16,7 +16,7 @@ function Play ({deck, setDeck}) {
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [overlappedCards, setOverlappedCards] = useState([]);
 
-    const allCards = [hand, trash, mana, shield, battle, deck]
+    const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
     useEffect(() => {
@@ -58,21 +58,19 @@ function Play ({deck, setDeck}) {
         const currTarget = [...target]
         const changedCardsInPlay = [...cardsInPlay]
         
-        let indexesToRemove = []
+        let elementsToRemove = []
         // find indexes to remove from source
         currSource.forEach((card, i) => {
             changedCardsInPlay.forEach((currcardsInPlay, j) => {
                 if (card["id"] == currcardsInPlay["id"]) {
-                    indexesToRemove.push(i)
+                    elementsToRemove.push(card)
                 }
             })
         })
 
-        if (indexesToRemove.length > 0) {
-            // sort so splicing doesn't mess up next iteration and do in reverse order
-            indexesToRemove.sort()
-            for (var i = indexesToRemove.length -1; i >= 0; i--) {
-                let card = currSource.splice(indexesToRemove[i], 1)[0]
+        if (elementsToRemove.length > 0) {
+            for (var i = 0; i < elementsToRemove.length; i++) {
+                let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
                 currTarget.push(card)
             }
             console.log(currTarget)
@@ -134,12 +132,12 @@ function Play ({deck, setDeck}) {
         } 
         // source --> overlappedCards
         else {
-            let indexesToRemove = []
+            let elementsToRemove = []
             // find indexes to remove from source
             currSource.forEach((card, i) => {
                 changedCardsInPlay.forEach((currcardsInPlay, j) => {
                     if (card["id"] == currcardsInPlay["id"]) {
-                        indexesToRemove.push(i)
+                        elementsToRemove.push(card)
                     }
                 })
             })
@@ -147,11 +145,9 @@ function Play ({deck, setDeck}) {
             // find which group to push into
             let groupIdx = findOverlapGroupIdx(targetId)
     
-            if (indexesToRemove.length > 0) {
-                // sort so splicing doesn't mess up next iteration and do in reverse order
-                indexesToRemove.sort()
-                for (var i = indexesToRemove.length -1; i >= 0; i--) {
-                    let card = currSource.splice(indexesToRemove[i], 1)[0]
+            if (elementsToRemove.length > 0) {
+                for (var i = 0; i < elementsToRemove.length; i++) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
                     currTarget[groupIdx].push(card)
                 }
             }
@@ -824,6 +820,7 @@ function Play ({deck, setDeck}) {
         currDeck = pushSourceIntoTarget(mana, currDeck);
         currDeck = pushSourceIntoTarget(shield, currDeck);
         currDeck = pushSourceIntoTarget(battle, currDeck);
+        currDeck = pushSourceIntoTarget(deckTop, currDeck);
         setDeck(currDeck);
 
         setHand([])
@@ -831,30 +828,90 @@ function Play ({deck, setDeck}) {
         setMana([])
         setShield([])
         setBattle([])
+        setDeckTop([])
         setCardsInPlay([])
         setOverlappedCards([])
     }
+    
+    function top(e) {
+        let source = ""
+        let setSource = ""
 
-    function bottom(e) {
+        switch (e.target.id) {
+            case "handTop":
+                source = hand
+                setSource = setHand
+                break
+            case "deckTopTop":
+                source = deckTop
+                setSource = setDeckTop
+                break
+        }
+
         const changedCardsInPlay = [...cardsInPlay]
-        const currHand = [...hand]
+        const currSource = [...source]
         const currDeck = [...deck]
 
-        if (currHand.length > 0) {
-            let indexesToRemove = []
-            currHand.forEach((element, i) => {
+        if (currSource.length > 0) {
+            let elementsToRemove = []
+            currSource.forEach((element, i) => {
                 changedCardsInPlay.forEach((currcardsInPlay, j) => {
                     if (element["id"] == currcardsInPlay["id"]) {
-                        indexesToRemove.push(i)
+                        elementsToRemove.push(element)
                     }
                 })
             })
             
-            if (indexesToRemove.length > 0) {
-                // sort so splicing doesn't mess up next iteration and do in reverse order
-                indexesToRemove.sort()
-                for (var i = indexesToRemove.length -1; i >= 0; i--) {
-                    let card = currHand.splice(indexesToRemove[i], 1)[0]
+            if (elementsToRemove.length > 0) {
+                for (var i = elementsToRemove.length-1; i >= 0; i--) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
+                    currDeck.push(card)
+                }
+                
+                changedCardsInPlay.forEach((currcardsInPlay, i) => {
+                    currcardsInPlay["source"] = "deckWrap"
+                })
+                setCardsInPlay(changedCardsInPlay)
+                setSource(currSource)
+                setDeck(currDeck)
+            }
+        } else {
+            window.alert("手札はありません")
+        }
+    }
+
+    function bottom(e) {
+        let source = ""
+        let setSource = ""
+
+        switch (e.target.id) {
+            case "handBottom":
+                source = hand
+                setSource = setHand
+                break
+            case "deckTopBottom":
+                source = deckTop
+                setSource = setDeckTop
+                break
+        }
+
+        const changedCardsInPlay = [...cardsInPlay]
+        const currSource = [...source]
+        const currDeck = [...deck]
+
+        if (currSource.length > 0) {
+            let elementsToRemove = []
+            currSource.forEach((element, i) => {
+                changedCardsInPlay.forEach((currcardsInPlay, j) => {
+                    if (element["id"] == currcardsInPlay["id"]) {
+                        elementsToRemove.push(element)
+                    }
+                })
+            })
+            
+            if (elementsToRemove.length > 0) {
+                for (var i = 0; i < elementsToRemove.length; i++) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
                     currDeck.unshift(card)
                 }
                 
@@ -862,7 +919,7 @@ function Play ({deck, setDeck}) {
                     currcardsInPlay["source"] = "deckWrap"
                 })
                 setCardsInPlay(changedCardsInPlay)
-                setHand(currHand)
+                setSource(currSource)
                 setDeck(currDeck)
             }
         } else {
@@ -888,6 +945,7 @@ function Play ({deck, setDeck}) {
             setDeck(changedDeck)
     
             const changedDeckTop = [...deckTop]
+            drawnCard["source"] = "deckTopWrap"
             changedDeckTop.push(drawnCard)
             setDeckTop(changedDeckTop)
         } else {
@@ -971,8 +1029,8 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_hand_00" class="button" style={{marginLeft: 10 + "px"}}>placeholder_hand_00</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="bottom" class="button" onClick={bottom}>山札の下に置く</a>
-                        <a id="placeholder_hand_02" class="button">placeholder_hand_02</a>
+                        <a id="handBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                        <a id="handTop" class="button" onClick={top}>山札の上に置く</a>
                     </div>
                     <div class="boxLayout"></div>
                     <ul id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -1065,8 +1123,8 @@ function Play ({deck, setDeck}) {
                     山札上(<span id="deckTop.length">{deckTop.length}</span>)枚確認
                 </div>
                 <div class="buttonLayout">
-                    <a id="placeholder_deckTop_00" class="button">placeholder_deckTop_00</a>
-                    <a id="placeholder_deckTop_01" class="button">placeholder_deckTop_01</a>
+                    <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                    <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
                 </div>
                 <div class="boxLayout"></div>
                 <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -1090,7 +1148,7 @@ function Play ({deck, setDeck}) {
                 </div>
                 <div class="boxLayout"></div>
                 <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                    {deck?.map((card, index) => (
+                    {deck?.toReversed().map((card, index) => (
                         <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                             {handleShade(card["id"])}
