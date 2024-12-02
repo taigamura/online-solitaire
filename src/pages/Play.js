@@ -1,4 +1,5 @@
-import Sortable from 'sortablejs';
+// import Sortable from 'sortablejs';
+import Draggable from 'react-draggable';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
@@ -28,25 +29,25 @@ function Play ({deck, setDeck}) {
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
         
-        Sortable.create(handWrap);
-        Sortable.create(trashWrap);
-        Sortable.create(manaWrap);
-        Sortable.create(shieldWrap);
-        Sortable.create(battleWrap);
+        // Sortable.create(handWrap);
+        // Sortable.create(trashWrap);
+        // Sortable.create(manaWrap);
+        // Sortable.create(shieldWrap);
+        // Sortable.create(battleWrap);
 
         if (viewDeckTop) {
             const deckTopWrap = document.getElementById('deckTopWrap');
-            Sortable.create(deckTopWrap);
+            // Sortable.create(deckTopWrap);
         }
         
         if (viewDeck) {
             const deckWrap = document.getElementById('deckWrap');
-            Sortable.create(deckWrap);
+            // Sortable.create(deckWrap);
         }
         
         if (overlappedCards.length > 0 && canOverlap) {
             const battleWrapOverlap = document.getElementById('battleWrapOverlap');
-            Sortable.create(battleWrapOverlap);
+            // Sortable.create(battleWrapOverlap);
         }
 
         listenDeckTopChange()
@@ -194,11 +195,6 @@ function Play ({deck, setDeck}) {
             changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
             setCardsInPlay([])
         }
-    }
-
-    // reset only selected overlap
-    function reset_overlap() {
-
     }
     
     function drop(e) {
@@ -1041,11 +1037,20 @@ function Play ({deck, setDeck}) {
                     </div>
                     <div class="boxLayout"></div>
                     <ul id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {hand?.map((card, index) => (
+                        {/* {hand?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                 {handleCardOverlay(card["id"])}
                             </li>
+                        ))} */}
+                        
+                        {hand?.map((card, index) => (
+                            <Draggable>
+                                <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            </Draggable>
                         ))}
                     </ul>
                 </div>
