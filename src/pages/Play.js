@@ -856,10 +856,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            currSource.forEach((element, i) => {
-                changedCardsInPlay.forEach((currcardsInPlay, j) => {
-                    if (element["id"] == currcardsInPlay["id"]) {
-                        elementsToRemove.push(element)
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
                     }
                 })
             })
@@ -870,8 +870,8 @@ function Play ({deck, setDeck}) {
                     currDeck.push(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardsInPlay, i) => {
-                    currcardsInPlay["source"] = "deckWrap"
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
                 })
                 setCardsInPlay(changedCardsInPlay)
                 setSource(currSource)
@@ -903,10 +903,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            currSource.forEach((element, i) => {
-                changedCardsInPlay.forEach((currcardsInPlay, j) => {
-                    if (element["id"] == currcardsInPlay["id"]) {
-                        elementsToRemove.push(element)
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
                     }
                 })
             })
@@ -917,8 +917,8 @@ function Play ({deck, setDeck}) {
                     currDeck.unshift(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardsInPlay, i) => {
-                    currcardsInPlay["source"] = "deckWrap"
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
                 })
                 setCardsInPlay(changedCardsInPlay)
                 setSource(currSource)
@@ -929,10 +929,15 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function handleShade(id) {
+    function handleCardOverlay(id) {
         const changedCardsInPlay = [...cardsInPlay]
         if (changedCardsInPlay.find(element => element.id === id)) {
-            return (<div id={id} class="shade"></div>)
+            return (
+                <div>
+                    <div id={id} class="shade"></div>
+                    <div class="centered">{changedCardsInPlay.indexOf(changedCardsInPlay.find(element => element.id === id))}</div>
+                </div>
+            )
         }
     }
 
@@ -984,7 +989,7 @@ function Play ({deck, setDeck}) {
                         {battle?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
+                                {handleCardOverlay(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -993,7 +998,7 @@ function Play ({deck, setDeck}) {
                             {group.map((card, j) => (
                                 <li id={j} class="card overlap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                     <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                    {handleShade(card["id"])}
+                                    {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
                         </ul>
@@ -1015,7 +1020,7 @@ function Play ({deck, setDeck}) {
                     {shield?.map((card, index) => (
                         <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
+                            {handleCardOverlay(card["id"])}
                         </li>
                     ))}
                 </ul>
@@ -1039,7 +1044,7 @@ function Play ({deck, setDeck}) {
                         {hand?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
+                                {handleCardOverlay(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -1060,7 +1065,7 @@ function Play ({deck, setDeck}) {
                         {mana?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
+                                {handleCardOverlay(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -1080,7 +1085,7 @@ function Play ({deck, setDeck}) {
                         {trash?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
+                                {handleCardOverlay(card["id"])}
                             </li>
                         ))}
                     </ul>
@@ -1133,7 +1138,7 @@ function Play ({deck, setDeck}) {
                     {deckTop?.map((card, index) => (
                         <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
+                            {handleCardOverlay(card["id"])}
                         </li>
                     ))}
                 </ul>
@@ -1153,7 +1158,7 @@ function Play ({deck, setDeck}) {
                     {deck?.toReversed().map((card, index) => (
                         <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                             <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
+                            {handleCardOverlay(card["id"])}
                         </li>
                     ))}
                 </ul>
