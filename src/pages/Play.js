@@ -19,6 +19,8 @@ function Play ({deck, setDeck}) {
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
+    const canOverlap = false;
+
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
         const trashWrap = document.getElementById('trashWrap');
@@ -42,7 +44,7 @@ function Play ({deck, setDeck}) {
             Sortable.create(deckWrap);
         }
         
-        if (overlappedCards.length > 0) {
+        if (overlappedCards.length > 0 && canOverlap) {
             const battleWrapOverlap = document.getElementById('battleWrapOverlap');
             Sortable.create(battleWrapOverlap);
         }
@@ -784,7 +786,7 @@ function Play ({deck, setDeck}) {
             setCardsInPlay([])
         }
         // o
-        if (e.keyCode === 79) {
+        if (e.keyCode === 79 && canOverlap) {
             console.log("run overlap")
             overlap()
         }
