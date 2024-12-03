@@ -29,7 +29,7 @@ function Play ({deck, setDeck}) {
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
         
-        // Sortable.create(handWrap);
+        // Sortable.create(handWrap, {animation: 100});
         // Sortable.create(trashWrap);
         // Sortable.create(manaWrap);
         // Sortable.create(shieldWrap);
@@ -1036,7 +1036,7 @@ function Play ({deck, setDeck}) {
                         <a id="handTop" class="button" onClick={top}>山札の上に置く</a>
                     </div>
                     <div class="boxLayout"></div>
-                    <ul id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                    <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {/* {hand?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
@@ -1045,14 +1045,14 @@ function Play ({deck, setDeck}) {
                         ))} */}
                         
                         {hand?.map((card, index) => (
-                            <Draggable>
-                                <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                            <Draggable id={index} class="card" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop} bounds="parent">
+                                <div>
                                     <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                     {handleCardOverlay(card["id"])}
-                                </li>
+                                </div>
                             </Draggable>
                         ))}
-                    </ul>
+                    </div>
                 </div>
 
                 {/* マナゾーン */}

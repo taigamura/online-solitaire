@@ -59,6 +59,7 @@
 }
 
 .centered {
+    pointer-events: none;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -86,6 +87,7 @@
     flex-wrap: wrap;
     margin-top: 5px;
     min-height: 105px;
+    position: relative;
 }
 
 /* child combinator */
