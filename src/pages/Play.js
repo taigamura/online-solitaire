@@ -1,5 +1,5 @@
-// import Sortable from 'sortablejs';
-import Draggable from 'react-draggable';
+import Sortable from 'sortablejs';
+// import Draggable from 'react-draggable';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
@@ -20,7 +20,7 @@ function Play ({deck, setDeck}) {
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
-    const canOverlap = false;
+    const canOverlap = true;
 
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
@@ -29,25 +29,25 @@ function Play ({deck, setDeck}) {
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
         
-        // Sortable.create(handWrap, {animation: 100});
-        // Sortable.create(trashWrap);
-        // Sortable.create(manaWrap);
-        // Sortable.create(shieldWrap);
-        // Sortable.create(battleWrap);
+        Sortable.create(handWrap, {animation: 100});
+        Sortable.create(trashWrap, {animation: 100});
+        Sortable.create(manaWrap, {animation: 100});
+        Sortable.create(shieldWrap, {animation: 100});
+        Sortable.create(battleWrap, {animation: 100});
 
         if (viewDeckTop) {
             const deckTopWrap = document.getElementById('deckTopWrap');
-            // Sortable.create(deckTopWrap);
+            Sortable.create(deckTopWrap, {animation: 100});
         }
         
         if (viewDeck) {
             const deckWrap = document.getElementById('deckWrap');
-            // Sortable.create(deckWrap);
+            Sortable.create(deckWrap, {animation: 100});
         }
         
         if (overlappedCards.length > 0 && canOverlap) {
             const battleWrapOverlap = document.getElementById('battleWrapOverlap');
-            // Sortable.create(battleWrapOverlap);
+            Sortable.create(battleWrapOverlap, {animation: 100});
         }
 
         listenDeckTopChange()
@@ -174,10 +174,11 @@ function Play ({deck, setDeck}) {
                 illegalCards.push(card)
             }
         })
-
+        
         // check if overlap is called on already overlapped cards in same group
         // diff groups cannot be selected to begin with in handleMouseDown
         if (illegalCards.length > 0) {
+            console.log(illegalCards)
             window.alert("同じグループで呼び出し禁止")
             setCardsInPlay([])
         } else {
@@ -1037,21 +1038,21 @@ function Play ({deck, setDeck}) {
                     </div>
                     <div class="boxLayout"></div>
                     <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {/* {hand?.map((card, index) => (
+                        {hand?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
                                 <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                 {handleCardOverlay(card["id"])}
                             </li>
-                        ))} */}
+                        ))}
                         
-                        {hand?.map((card, index) => (
+                        {/* {hand?.map((card, index) => (
                             <Draggable id={index} class="card" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop} bounds="parent">
                                 <div>
                                     <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
                                     {handleCardOverlay(card["id"])}
                                 </div>
                             </Draggable>
-                        ))}
+                        ))} */}
                     </div>
                 </div>
 
