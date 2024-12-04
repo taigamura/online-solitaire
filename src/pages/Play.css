@@ -1,3 +1,8 @@
+:root {
+    --card-height: 88px;
+    --card-width: 63px;
+}
+
 .columnLayoutBottom {
     margin-top: 30px;
     display: flex;
@@ -59,7 +64,7 @@
 }
 
 .centered {
-    /* pointer-events: none; */
+    pointer-events: none;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -67,19 +72,11 @@
     color: #ffffff;
 }
 
-.dragme {
-    position: relative;
-    width: 270px;
-    height: 203px;
-    cursor: move;
-}
-
-#draggable {
-    background-color: #ccc;
-    border: 1px solid #000;
-}
-
 /* cardWrap */
+
+.tap {
+    transform: rotate(270deg);
+}
 
 .cardWrap {
     display: flex;
@@ -99,7 +96,7 @@
 }
 
 .cardWrap>.card:hover {
-    transform: scale(1.25);
+    transform: scale(1.75);
 }
 
 .cardWrap>.card {
@@ -122,6 +119,18 @@
     display: block;
     background-size: contain;
     content: "";
+}
+
+.cardWrap>.card {
+    height: var(--card-height);
+    width: var(--card-width);
+    overflow: hidden;
+}
+
+.cardWrap>.card>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .cardWrap>.card.overlap:nth-of-type(n + 2) {
