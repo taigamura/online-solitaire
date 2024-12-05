@@ -74,9 +74,7 @@
 
 /* cardWrap */
 
-.tap {
-    transform: rotate(270deg);
-}
+
 
 .cardWrap {
     display: flex;
@@ -98,6 +96,15 @@
 .cardWrap>.card:hover {
     transform: scale(1.75);
 }
+
+.cardWrap>.magnify:hover {
+    transform: scale(5);
+}
+
+.cardWrap>.tap {
+    transform: rotate(270deg);
+}
+
 
 .cardWrap>.card {
     cursor: pointer;

@@ -15,11 +15,13 @@ function Play ({deck, setDeck}) {
 	const [viewDeckTop, setViewDeckTop] = useState(false);
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [overlappedCards, setOverlappedCards] = useState([]);
+    const [forceUpdate, setForceUpdate] = useState(0);
 
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
     const canOverlap = true;
+    let magnify = false;
 
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
@@ -51,9 +53,13 @@ function Play ({deck, setDeck}) {
 
         listenDeckTopChange()
         document.addEventListener("keyup", handleKeyUp);
+        document.addEventListener("keydown", handleKeyDown);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
-        return () => document.removeEventListener("keyup", handleKeyUp);
-    }, [handleKeyUp]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+        return () => {
+            document.removeEventListener("keyup", handleKeyUp)
+            document.removeEventListener("keydown", handleKeyDown)
+        };
+    }, [handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
 
     function handleMovementOfCard (source, target) {
         const currSource = [...source]
@@ -755,12 +761,20 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function handleTap(card) {
+    function handleCardClass(card) {
+        let classString = "card";
+
         if (card["tap"]) {
-            return "tap"
+            classString = classString + " tap"
         } else {
-            return "untap"
+            classString = classString + " untap"
         }
+
+        if (magnify) {
+            classString = classString + " magnify"
+        }
+
+        return classString
     }
 
     function handleCardImg(card) {
@@ -802,14 +816,14 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
         else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
-
-    function magnify() {
-        
-        const currCardsInPlay = [...cardsInPlay]
-
-        currCardsInPlay.forEach((card, i) => {
-            window.open(URL.createObjectURL(card["file"]))
-        })
+    
+    function handleKeyDown(e) {
+        // m
+        if (e.keyCode === 77) {
+            if (!magnify) {
+                magnify = true;
+            }
+        }
     }
 
     function handleKeyUp(e) {
@@ -834,7 +848,7 @@ function Play ({deck, setDeck}) {
         }
         // m
         if (e.keyCode === 77) {
-            magnify()
+            magnify = false;
         }
     }
 
@@ -1033,8 +1047,8 @@ function Play ({deck, setDeck}) {
                     <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
                         <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {battle?.map((card, index) => (
-                                <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                    <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    <img id={card["id"]} src={handleCardImg(card)}/>
                                     {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
@@ -1043,7 +1057,7 @@ function Play ({deck, setDeck}) {
                             <ul id="battleWrapOverlap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                                 {group.map((card, j) => (
                                     <li id={j} class="card overlap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                        <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                        <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                         {handleCardOverlay(card["id"])}
                                     </li>
                                 ))}
@@ -1066,7 +1080,7 @@ function Play ({deck, setDeck}) {
                     <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {shield?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                 {handleCardOverlay(card["id"])}
                             </li>
                         ))}
@@ -1091,7 +1105,7 @@ function Play ({deck, setDeck}) {
                         <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {hand?.map((card, index) => (
                                 <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                    <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                    <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                     {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
@@ -1113,7 +1127,7 @@ function Play ({deck, setDeck}) {
                         <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {mana?.map((card, index) => (
                                 <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                    <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                    <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                     {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
@@ -1134,7 +1148,7 @@ function Play ({deck, setDeck}) {
                         <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {trash?.map((card, index) => (
                                 <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                    <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                    <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                     {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
@@ -1188,7 +1202,7 @@ function Play ({deck, setDeck}) {
                     <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {deckTop?.map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                 {handleCardOverlay(card["id"])}
                             </li>
                         ))}
@@ -1209,7 +1223,7 @@ function Play ({deck, setDeck}) {
                     <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {deck?.toReversed().map((card, index) => (
                             <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={handleCardImg(card)} class={handleTap(card)}/>
+                                <img id={card["id"]} src={handleCardImg(card)} class={handleCardClass(card)}/>
                                 {handleCardOverlay(card["id"])}
                             </li>
                         ))}
