@@ -2,7 +2,6 @@ import Sortable from 'sortablejs';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
-import NewWindow from 'react-new-window'
 
 function Play ({deck, setDeck}) {
 
@@ -16,7 +15,7 @@ function Play ({deck, setDeck}) {
 	const [viewDeckTop, setViewDeckTop] = useState(false);
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [overlappedCards, setOverlappedCards] = useState([]);
-    // const [magnify, setMagnify] = useState(false);
+    const [magnify, setMagnify] = useState(false);
 
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
@@ -770,9 +769,9 @@ function Play ({deck, setDeck}) {
             classString = "card uptap"
         }
 
-        // if (magnify) {
-        //     classString = classString + " magnify"
-        // }
+        if (magnify) {
+            classString = classString + " magnify"
+        }
 
         return classString
     }
@@ -807,14 +806,6 @@ function Play ({deck, setDeck}) {
         })
         return currTarget
     }
-    
-    function magnify(id) {
-        return (
-            <NewWindow>
-                <img src={URL.createObjectURL(findCard(id)["file"])}/>
-            </NewWindow>
-        )
-    }
 
     function flipCardWithId(id) {
         if (isCardInTarget(id, hand)) setHand(flipCardInTarget(id, hand)) 
@@ -827,11 +818,11 @@ function Play ({deck, setDeck}) {
     
     function handleKeyDown(e) {
         // m
-        // if (e.keyCode === 77) {
-        //     if (!magnify) {
-        //         setMagnify(true)
-        //     }
-        // }
+        if (e.keyCode === 77) {
+            if (!magnify) {
+                setMagnify(true)
+            }
+        }
     }
 
     function handleKeyUp(e) {
@@ -856,14 +847,9 @@ function Play ({deck, setDeck}) {
         }
         // m
         if (e.keyCode === 77) {
-            // if (magnify) {
-            //     setMagnify(false)
-            // }
-            
-            cardsInPlay.forEach((element, i) => {
-                magnify(element["id"])
-            })
-
+            if (magnify) {
+                setMagnify(false)
+            }
         }
     }
 
