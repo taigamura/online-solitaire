@@ -74,8 +74,6 @@
 
 /* cardWrap */
 
-
-
 .cardWrap {
     display: flex;
     justify-content: center;
@@ -97,18 +95,15 @@
     transform: scale(1.75);
 }
 
-.cardWrap>.magnify:hover {
-    transform: scale(5);
-}
-
 .cardWrap>.tap {
     transform: rotate(270deg);
 }
 
-
-.cardWrap>.card {
-    cursor: pointer;
-}
+/* .cardWrap>.magnify:hover {
+    transform: scale(5);
+    z-index: -1;
+    position: relative;
+} */
 
 .cardWrap>.card.hide {
     position: relative;
@@ -129,15 +124,14 @@
 }
 
 .cardWrap>.card {
+    cursor: pointer;
     height: var(--card-height);
     width: var(--card-width);
-    overflow: hidden;
 }
 
 .cardWrap>.card>img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
 }
 
 .cardWrap>.card.overlap:nth-of-type(n + 2) {
