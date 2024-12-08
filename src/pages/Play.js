@@ -2,6 +2,14 @@ import Sortable from 'sortablejs';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
+import {
+    Magnifier,
+    GlassMagnifier,
+    SideBySideMagnifier,
+    PictureInPictureMagnifier,
+    MOUSE_ACTIVATION,
+    TOUCH_ACTIVATION
+  } from "react-image-magnifiers";
 
 function Play ({deck, setDeck}) {
 
@@ -15,11 +23,12 @@ function Play ({deck, setDeck}) {
 	const [viewDeckTop, setViewDeckTop] = useState(false);
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [overlappedCards, setOverlappedCards] = useState([]);
+    const [magnify, setMagnify] = useState(false);
 
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
 
-    const canOverlap = false;
+    const canOverlap = true;
 
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
@@ -28,32 +37,36 @@ function Play ({deck, setDeck}) {
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
         
-        Sortable.create(handWrap);
-        Sortable.create(trashWrap);
-        Sortable.create(manaWrap);
-        Sortable.create(shieldWrap);
-        Sortable.create(battleWrap);
+        Sortable.create(handWrap, {animation: 100});
+        Sortable.create(trashWrap, {animation: 100});
+        Sortable.create(manaWrap, {animation: 100});
+        Sortable.create(shieldWrap, {animation: 100});
+        Sortable.create(battleWrap, {animation: 100});
 
         if (viewDeckTop) {
             const deckTopWrap = document.getElementById('deckTopWrap');
-            Sortable.create(deckTopWrap);
+            Sortable.create(deckTopWrap, {animation: 100});
         }
         
         if (viewDeck) {
             const deckWrap = document.getElementById('deckWrap');
-            Sortable.create(deckWrap);
+            Sortable.create(deckWrap, {animation: 100});
         }
         
         if (overlappedCards.length > 0 && canOverlap) {
             const battleWrapOverlap = document.getElementById('battleWrapOverlap');
-            Sortable.create(battleWrapOverlap);
+            Sortable.create(battleWrapOverlap, {animation: 100});
         }
 
         listenDeckTopChange()
         document.addEventListener("keyup", handleKeyUp);
+        document.addEventListener("keydown", handleKeyDown);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
-        return () => document.removeEventListener("keyup", handleKeyUp);
-    }, [handleKeyUp]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+        return () => {
+            document.removeEventListener("keyup", handleKeyUp)
+            document.removeEventListener("keydown", handleKeyDown)
+        };
+    }, [handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
 
     function handleMovementOfCard (source, target) {
         const currSource = [...source]
@@ -157,6 +170,20 @@ function Play ({deck, setDeck}) {
         return [currSource, currTarget]
     }
 
+    function tap() {
+        const currCardsInPlay = [...cardsInPlay]
+
+        currCardsInPlay.forEach((card, i) => {
+            if (card["tap"]) {
+                card["tap"] = false
+            } else {
+                card["tap"] = true
+            }
+        })
+
+        setCardsInPlay(currCardsInPlay)
+    }
+
     // when a single card is dragged ontop group, add to group
     // when a card is selected already in group, switch
     function overlap() {
@@ -166,17 +193,23 @@ function Play ({deck, setDeck}) {
         let illegalCards = []
         changedCardsInPlay.forEach((card, i) => {
             let groupIdx = findOverlapGroupIdx(card["id"])
+
+            // if already in group, illegal
             if (groupIdx != undefined) {
                 illegalCards.push(card)
             }
-            if (card["source"] != "battleWrap" || card["source"] != "battleWrapOverlap") {
+
+            // only overlap if cards are in battle zone
+            if (!(card["source"] == "battleWrap" || card["source"] == "battleWrapOverlap")) {
+                console.log('card["source"]', card["source"])
                 illegalCards.push(card)
             }
         })
-
+        
         // check if overlap is called on already overlapped cards in same group
         // diff groups cannot be selected to begin with in handleMouseDown
         if (illegalCards.length > 0) {
+            console.log(illegalCards)
             window.alert("同じグループで呼び出し禁止")
             setCardsInPlay([])
         } else {
@@ -194,11 +227,6 @@ function Play ({deck, setDeck}) {
             changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
             setCardsInPlay([])
         }
-    }
-
-    // reset only selected overlap
-    function reset_overlap() {
-
     }
     
     function drop(e) {
@@ -740,8 +768,32 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function cardImg(card) {
-        return (card["flip"]) ? cardBack : (URL.createObjectURL(card["file"]))
+    function handleCardClass(card) {
+        let classString = ""
+
+        if (card["tap"]) {
+            classString = "card tap"
+        } else {
+            classString = "card uptap"
+        }
+
+        if (magnify) {
+            classString = classString + " magnify"
+        } else {
+            classString = classString + " unmagnify"
+        }
+
+        return classString
+    }
+
+    function handleCardImgSrc(card) {
+        let cardImg = ""
+        if (card["flip"]) {
+            cardImg = cardBack
+        } else {
+            cardImg = URL.createObjectURL(card["file"])
+        }
+        return cardImg
     }
 
     function isCardInTarget(id, target) {
@@ -773,6 +825,15 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
         else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
+    
+    function handleKeyDown(e) {
+        // m
+        if (e.keyCode === 77) {
+            if (!magnify) {
+                setMagnify(true)
+            }
+        }
+    }
 
     function handleKeyUp(e) {
         // space
@@ -789,6 +850,16 @@ function Play ({deck, setDeck}) {
         if (e.keyCode === 79 && canOverlap) {
             console.log("run overlap")
             overlap()
+        }
+        // t
+        if (e.keyCode === 84) {
+            tap()
+        }
+        // m
+        if (e.keyCode === 77) {
+            if (magnify) {
+                setMagnify(false)
+            }
         }
     }
 
@@ -856,10 +927,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            currSource.forEach((element, i) => {
-                changedCardsInPlay.forEach((currcardsInPlay, j) => {
-                    if (element["id"] == currcardsInPlay["id"]) {
-                        elementsToRemove.push(element)
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
                     }
                 })
             })
@@ -870,8 +941,8 @@ function Play ({deck, setDeck}) {
                     currDeck.push(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardsInPlay, i) => {
-                    currcardsInPlay["source"] = "deckWrap"
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
                 })
                 setCardsInPlay(changedCardsInPlay)
                 setSource(currSource)
@@ -903,10 +974,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            currSource.forEach((element, i) => {
-                changedCardsInPlay.forEach((currcardsInPlay, j) => {
-                    if (element["id"] == currcardsInPlay["id"]) {
-                        elementsToRemove.push(element)
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
                     }
                 })
             })
@@ -917,8 +988,8 @@ function Play ({deck, setDeck}) {
                     currDeck.unshift(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardsInPlay, i) => {
-                    currcardsInPlay["source"] = "deckWrap"
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
                 })
                 setCardsInPlay(changedCardsInPlay)
                 setSource(currSource)
@@ -929,10 +1000,16 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function handleShade(id) {
+    function handleCardOverlay(id) {
         const changedCardsInPlay = [...cardsInPlay]
-        if (changedCardsInPlay.find(element => element.id === id)) {
-            return (<div id={id} class="shade"></div>)
+        let card = changedCardsInPlay.find(element => element.id === id);
+        if (card) {
+            return (
+                <div>
+                    <div id={id} class="shade"></div>
+                    <div class="centered">{changedCardsInPlay.indexOf(card)}</div>
+                </div>
+            )
         }
     }
 
@@ -952,6 +1029,14 @@ function Play ({deck, setDeck}) {
             setDeckTop(changedDeckTop)
         } else {
             window.alert("山札はありません")
+        }
+    }
+
+    function handleCardImg(card) {
+        if (magnify) {
+            return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)}/>
+        } else {
+            return <img id={card["id"]} src={handleCardImgSrc(card)} class={handleCardClass(card)}/>
         }
     }
 
@@ -977,27 +1062,27 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_battle_00" class="button">placeholder_battle_00</a>
                     <a id="placeholder_battle_01" class="button">placeholder_battle_01</a>
                 </div>
-                <div class="boxLayout"></div>
-                
-                <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
-                    <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {battle?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
-                    {overlappedCards?.map((group, i) => (
-                        <ul id="battleWrapOverlap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                            {group.map((card, j) => (
-                                <li id={j} class="card overlap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                    <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                    {handleShade(card["id"])}
+                <div class="boxLayout">
+                    <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
+                        <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {battle?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
                         </ul>
-                    ))}
+                        {overlappedCards?.map((group, i) => (
+                            <ul id="battleWrapOverlap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                                {group.map((card, j) => (
+                                    <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                        {handleCardImg(card)}
+                                        {handleCardOverlay(card["id"])}
+                                    </li>
+                                ))}
+                            </ul>
+                        ))}
+                    </div>
                 </div>
             </div>
             
@@ -1010,15 +1095,16 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_shield_00" class="button">placeholder_shield_00</a>
                     <a id="placeholder_shield_01" class="button">placeholder_shield_01</a>
                 </div>
-                <div class="boxLayout"></div>
-                <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                    {shield?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
-                        </li>
-                    ))}
-                </ul>
+                <div class="boxLayout">
+                    <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {shield?.map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
             
             {/* プレイヤーゾーン */}
@@ -1034,15 +1120,16 @@ function Play ({deck, setDeck}) {
                         <a id="handBottom" class="button" onClick={bottom}>山札の下に置く</a>
                         <a id="handTop" class="button" onClick={top}>山札の上に置く</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {hand?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {hand?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 {/* マナゾーン */}
@@ -1055,15 +1142,16 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_mana_01" class="button">placeholder_mana_01</a>
                         <a id="placeholder_mana_02" class="button">placeholder_mana_02</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {mana?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {mana?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 {/* 墓地 */}
@@ -1075,15 +1163,16 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_trash_00" class="button">placeholder_trash_00</a>
                         <a id="placeholder_trash_01" class="button">placeholder_trash_01</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {trash?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                                {handleShade(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {trash?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 {/* デッキ */}
@@ -1128,15 +1217,16 @@ function Play ({deck, setDeck}) {
                     <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
                     <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
                 </div>
-                <div class="boxLayout"></div>
-                <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                    {deckTop?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
-                        </li>
-                    ))}
-                </ul>
+                <div class="boxLayout">
+                    <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {deckTop?.map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>}
             
             {/* デッキ確認 */}
@@ -1148,15 +1238,16 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_deck_00" class="button">placeholder_deck_00</a>
                     <a id="placeholder_deck_01" class="button">placeholder_deck_01</a>
                 </div>
-                <div class="boxLayout"></div>
-                <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                    {deck?.toReversed().map((card, index) => (
-                        <li id={index} class="card" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            {handleShade(card["id"])}
-                        </li>
-                    ))}
-                </ul>
+                <div class="boxLayout">
+                    <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {deck?.toReversed().map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>}
         </div>
     )
