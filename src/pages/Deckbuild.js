@@ -60,7 +60,9 @@ function Deckbuild({deck, setDeck}) {
 				let card = {
 					file: targetCard["file"],
 					id: uuidv4(),
-					flip: false
+					flip: false,
+					tap: false,
+					source: "deckWrap"
 				}
 				currDeck.push(card)
 			}

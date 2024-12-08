@@ -1034,7 +1034,7 @@ function Play ({deck, setDeck}) {
 
     function handleCardImg(card) {
         if (magnify) {
-            return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)}/>
+            return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)} class={handleCardClass(card)}/>
         } else {
             return <img id={card["id"]} src={handleCardImgSrc(card)} class={handleCardClass(card)}/>
         }
