@@ -1,8 +1,15 @@
 import Sortable from 'sortablejs';
-import { ReactSortable } from "react-sortablejs";
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
+import {
+    Magnifier,
+    GlassMagnifier,
+    SideBySideMagnifier,
+    PictureInPictureMagnifier,
+    MOUSE_ACTIVATION,
+    TOUCH_ACTIVATION
+  } from "react-image-magnifiers";
 
 function Play ({deck, setDeck}) {
 
@@ -11,8 +18,17 @@ function Play ({deck, setDeck}) {
 	const [mana, setMana] = useState([]);
 	const [shield, setShield] = useState([]);
 	const [battle, setBattle] = useState([]);
+	const [deckTop, setDeckTop] = useState([]);
+	const [viewDeck, setViewDeck] = useState(false);
+	const [viewDeckTop, setViewDeckTop] = useState(false);
+    const [cardsInPlay, setCardsInPlay] = useState([]);
+    const [overlappedCards, setOverlappedCards] = useState([]);
+    const [magnify, setMagnify] = useState(false);
 
-    const [cardInPlay, setCardInPlay] = useState({});
+    const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
+    const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
+
+    const canOverlap = true;
 
     useEffect(() => {
         const handWrap = document.getElementById('handWrap');
@@ -21,241 +37,688 @@ function Play ({deck, setDeck}) {
         const shieldWrap = document.getElementById('shieldWrap');
         const battleWrap = document.getElementById('battleWrap');
         
-        Sortable.create(handWrap);
-        Sortable.create(trashWrap);
-        Sortable.create(manaWrap);
-        Sortable.create(shieldWrap);
-        Sortable.create(battleWrap);
+        Sortable.create(handWrap, {animation: 100});
+        Sortable.create(trashWrap, {animation: 100});
+        Sortable.create(manaWrap, {animation: 100});
+        Sortable.create(shieldWrap, {animation: 100});
+        Sortable.create(battleWrap, {animation: 100});
+
+        if (viewDeckTop) {
+            const deckTopWrap = document.getElementById('deckTopWrap');
+            Sortable.create(deckTopWrap, {animation: 100});
+        }
         
+        if (viewDeck) {
+            const deckWrap = document.getElementById('deckWrap');
+            Sortable.create(deckWrap, {animation: 100});
+        }
+        
+        if (overlappedCards.length > 0 && canOverlap) {
+            const battleWrapOverlap = document.getElementById('battleWrapOverlap');
+            Sortable.create(battleWrapOverlap, {animation: 100});
+        }
+
+        listenDeckTopChange()
         document.addEventListener("keyup", handleKeyUp);
+        document.addEventListener("keydown", handleKeyDown);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
-        return () => document.removeEventListener("keyup", handleKeyUp);
-    }, [handleKeyUp]);
-    
+        return () => {
+            document.removeEventListener("keyup", handleKeyUp)
+            document.removeEventListener("keydown", handleKeyDown)
+        };
+    }, [handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+
     function handleMovementOfCard (source, target) {
         const currSource = [...source]
         const currTarget = [...target]
-        const currCardInPlay = cardInPlay
+        const changedCardsInPlay = [...cardsInPlay]
         
-        let indexToRemove = 0
-        currSource.forEach((element, index) => {
-            if (element["id"] == currCardInPlay["id"]) {
-                indexToRemove = index
+        let elementsToRemove = []
+        // find indexes to remove from source
+        currSource.forEach((card, i) => {
+            changedCardsInPlay.forEach((currcardsInPlay, j) => {
+                if (card["id"] == currcardsInPlay["id"]) {
+                    elementsToRemove.push(card)
+                }
+            })
+        })
+
+        if (elementsToRemove.length > 0) {
+            for (var i = 0; i < elementsToRemove.length; i++) {
+                let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
+                currTarget.push(card)
+            }
+            console.log(currTarget)
+            return [currSource, currTarget]
+        }
+    }
+
+    function findOverlapGroupIdx (id) {
+        
+        let groupIdx = undefined
+
+        overlappedCards.forEach((group, i) => {
+            group.forEach((card, j) => {
+                if (id === card["id"]) {
+                    groupIdx = i
+                }
+            })
+        })
+        return groupIdx
+    }
+    
+    function handleMovementOfCardOverlap(source, target, targetId) {
+        let currSource = [...source]
+        const currTarget = [...target]
+        const changedCardsInPlay = [...cardsInPlay]
+
+        // overlappedCards --> target
+        if (source === overlappedCards) {
+            
+            // [[group idx, card idx], ...]
+            let indexesToRemove = []
+            // find indexes to remove from source
+            currSource.forEach((group, i) => {
+                group.forEach((card, j) => {
+                    changedCardsInPlay.forEach((currcardsInPlay, k) => {
+                        if (card["id"] == currcardsInPlay["id"]) {
+                            indexesToRemove.push([i, j])
+                        }
+                    })
+                })
+            })
+    
+            if (indexesToRemove.length > 0) {
+                for (var i = indexesToRemove.length-1; i >= 0; i--) {
+                    // splice overlappedCards[group idx].splice([card idx])
+                    let card = currSource[indexesToRemove[i][0]].splice(indexesToRemove[i][1], 1)[0]
+                    currTarget.push(card)
+                }
+            }
+            
+            // filter empty groups
+            let changedCurrSource = []
+            currSource.forEach((group, i) => {
+                if (group.length > 0) {
+                    changedCurrSource.push(group)
+                }
+            })
+            currSource = changedCurrSource
+        } 
+        // source --> overlappedCards
+        else {
+            let elementsToRemove = []
+            // find indexes to remove from source
+            currSource.forEach((card, i) => {
+                changedCardsInPlay.forEach((currcardsInPlay, j) => {
+                    if (card["id"] == currcardsInPlay["id"]) {
+                        elementsToRemove.push(card)
+                    }
+                })
+            })
+
+            // find which group to push into
+            let groupIdx = findOverlapGroupIdx(targetId)
+    
+            if (elementsToRemove.length > 0) {
+                for (var i = 0; i < elementsToRemove.length; i++) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
+                    currTarget[groupIdx].push(card)
+                }
+            }
+        }
+        return [currSource, currTarget]
+    }
+
+    function tap() {
+        const currCardsInPlay = [...cardsInPlay]
+
+        currCardsInPlay.forEach((card, i) => {
+            if (card["tap"]) {
+                card["tap"] = false
+            } else {
+                card["tap"] = true
             }
         })
-        let card = currSource.splice(indexToRemove, 1)[0]
-        currTarget.push(card)
 
-        return [currSource, currTarget]
+        setCardsInPlay(currCardsInPlay)
+    }
+
+    // when a single card is dragged ontop group, add to group
+    // when a card is selected already in group, switch
+    function overlap() {
+        const changedOverlappedCards = [...overlappedCards]
+        const changedCardsInPlay = [...cardsInPlay]
+
+        let illegalCards = []
+        changedCardsInPlay.forEach((card, i) => {
+            let groupIdx = findOverlapGroupIdx(card["id"])
+
+            // if already in group, illegal
+            if (groupIdx != undefined) {
+                illegalCards.push(card)
+            }
+
+            // only overlap if cards are in battle zone
+            if (!(card["source"] == "battleWrap" || card["source"] == "battleWrapOverlap")) {
+                console.log('card["source"]', card["source"])
+                illegalCards.push(card)
+            }
+        })
+        
+        // check if overlap is called on already overlapped cards in same group
+        // diff groups cannot be selected to begin with in handleMouseDown
+        if (illegalCards.length > 0) {
+            console.log(illegalCards)
+            window.alert("同じグループで呼び出し禁止")
+            setCardsInPlay([])
+        } else {
+            let group = []
+            changedCardsInPlay.forEach((card, i) => {
+                group.push(card)
+            })
+            
+            changedOverlappedCards.push(group)
+    
+            let changedState = handleMovementOfCard(battle, overlappedCards)
+            setBattle(changedState[0])
+            setOverlappedCards(changedOverlappedCards)
+            
+            changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
+            setCardsInPlay([])
+        }
     }
     
     function drop(e) {
+        console.log("e.target:", e.target)
 
-        const currCardInPlay = cardInPlay
+        const changedCardsInPlay = [...cardsInPlay]
+        let targetSource = (e.target.tagName != "IMG") ? (e.target.id) : document.getElementById(e.target.id).parentElement.parentElement.id
+        let sourceId = changedCardsInPlay[0]["source"]
 
-        let sourceId = currCardInPlay["source"]
-        let targetId = (e.target.tagName != "IMG") ? (e.target.id) : document.getElementById(e.target.id).parentElement.parentElement.id
+        console.log("sourceId:", sourceId)
+        console.log("targetSource:", targetSource)
+
         let changedState = []
 
         switch (sourceId) {
-
             case "handWrap":
-                switch (targetId) {
+                switch (targetSource) {
                     case "trashWrap":
                         console.log("dropped in trash")
                         changedState = handleMovementOfCard(hand, trash)
                         setHand(changedState[0])
                         setTrash(changedState[1])
-                        currCardInPlay["source"] = "trashWrap"
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
                         break
                     case "handWrap":
                         console.log("dropped in hand")
-                        currCardInPlay["source"] = "handWrap"
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
                         break
                     case "shieldWrap":
                         console.log("dropped in shield")
                         changedState = handleMovementOfCard(hand, shield)
                         setHand(changedState[0])
                         setShield(changedState[1])
-                        currCardInPlay["source"] = "shieldWrap"
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
                         break
                     case "battleWrap":
+                    case "battleWrapParent":
                         console.log("dropped in battle")
                         changedState = handleMovementOfCard(hand, battle)
                         setHand(changedState[0])
                         setBattle(changedState[1])
-                        currCardInPlay["source"] = "battleWrap"
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
                         break
                     case "manaWrap":
                         console.log("dropped in mana")
                         changedState = handleMovementOfCard(hand, mana)
                         setHand(changedState[0])
                         setMana(changedState[1])
-                        currCardInPlay["source"] = "manaWrap"
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(hand, deck)
+                        setHand(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(hand, overlappedCards, e.target.id)
+                        setHand(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
                         break
                 }
                 break
 
             case "trashWrap":
-                switch (targetId) {
+                switch (targetSource) {
                     case "trashWrap":
                         console.log("dropped in trash")
-                        currCardInPlay["source"] = "trashWrap"
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
                         break
                     case "handWrap":
                         console.log("dropped in hand")
                         changedState = handleMovementOfCard(trash, hand)
                         setTrash(changedState[0])
                         setHand(changedState[1])
-                        currCardInPlay["source"] = "handWrap"
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
                         break
                     case "shieldWrap":
                         console.log("dropped in shield")
                         changedState = handleMovementOfCard(trash, shield)
                         setTrash(changedState[0])
                         setShield(changedState[1])
-                        currCardInPlay["source"] = "shieldWrap"
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
                         break
                     case "battleWrap":
+                    case "battleWrapParent":
                         console.log("dropped in battle")
                         changedState = handleMovementOfCard(trash, battle)
                         setTrash(changedState[0])
                         setBattle(changedState[1])
-                        currCardInPlay["source"] = "battleWrap"
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
                         break
                     case "manaWrap":
                         console.log("dropped in mana")
                         changedState = handleMovementOfCard(trash, mana)
                         setTrash(changedState[0])
                         setMana(changedState[1])
-                        currCardInPlay["source"] = "manaWrap"
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(trash, deck)
+                        setTrash(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(trash, overlappedCards, e.target.id)
+                        setTrash(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
                         break
                 }
                 break
             
             case "shieldWrap":
-                switch (targetId) {
+                switch (targetSource) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(shield, trash)
                         setShield(changedState[0])
                         setTrash(changedState[1])
-                        currCardInPlay["source"] = "trashWrap"
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
                         break
                     case "handWrap":
                         console.log("dropped in hand")
                         changedState = handleMovementOfCard(shield, hand)
                         setShield(changedState[0])
                         setHand(changedState[1])
-                        currCardInPlay["source"] = "handWrap"
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
                         break
                     case "shieldWrap":
                         console.log("dropped in shield")
-                        currCardInPlay["source"] = "shieldWrap"
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
                         break
                     case "battleWrap":
+                    case "battleWrapParent":
                         console.log("dropped in battle")
                         changedState = handleMovementOfCard(shield, battle)
                         setShield(changedState[0])
                         setBattle(changedState[1])
-                        currCardInPlay["source"] = "battleWrap"
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
                         break
                     case "manaWrap":
                         console.log("dropped in mana")
                         changedState = handleMovementOfCard(shield, mana)
                         setShield(changedState[0])
                         setMana(changedState[1])
-                        currCardInPlay["source"] = "manaWrap"
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(shield, deck)
+                        setShield(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(shield, overlappedCards, e.target.id)
+                        setShield(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
                         break
                 }
                 break
             
             case "battleWrap":
-                switch (targetId) {
+                switch (targetSource) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(battle, trash)
                         setBattle(changedState[0])
                         setTrash(changedState[1])
-                        currCardInPlay["source"] = "trashWrap"
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
                         break
                     case "handWrap":
                         console.log("dropped in hand")
                         changedState = handleMovementOfCard(battle, hand)
                         setBattle(changedState[0])
                         setHand(changedState[1])
-                        currCardInPlay["source"] = "handWrap"
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
                         break
                     case "shieldWrap":
                         console.log("dropped in shield")
                         changedState = handleMovementOfCard(battle, shield)
                         setBattle(changedState[0])
                         setShield(changedState[1])
-                        currCardInPlay["source"] = "shieldWrap"
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
                         break
                     case "battleWrap":
+                    case "battleWrapParent":
                         console.log("dropped in battle")
-                        currCardInPlay["source"] = "battleWrap"
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
                         break
                     case "manaWrap":
                         console.log("dropped in mana")
                         changedState = handleMovementOfCard(battle, mana)
                         setBattle(changedState[0])
                         setMana(changedState[1])
-                        currCardInPlay["source"] = "manaWrap"
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(battle, deck)
+                        setBattle(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(battle, overlappedCards, e.target.id)
+                        setBattle(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
                         break
                 }
                 break
             
             case "manaWrap":
-                switch (targetId) {
+                switch (targetSource) {
                     case "trashWrap":
-                        console.log("dropped in hand")
+                        console.log("dropped in trash")
                         changedState = handleMovementOfCard(mana, trash)
                         setMana(changedState[0])
                         setTrash(changedState[1])
-                        currCardInPlay["source"] = "trashWrap"
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
                         break
                     case "handWrap":
                         console.log("dropped in hand")
                         changedState = handleMovementOfCard(mana, hand)
                         setMana(changedState[0])
                         setHand(changedState[1])
-                        currCardInPlay["source"] = "handWrap"
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
                         break
                     case "shieldWrap":
                         console.log("dropped in shield")
                         changedState = handleMovementOfCard(mana, shield)
                         setMana(changedState[0])
                         setShield(changedState[1])
-                        currCardInPlay["source"] = "shieldWrap"
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
                         break
                     case "battleWrap":
+                    case "battleWrapParent":
                         console.log("dropped in battle")
                         changedState = handleMovementOfCard(mana, battle)
                         setMana(changedState[0])
                         setBattle(changedState[1])
-                        currCardInPlay["source"] = "battleWrap"
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
                         break
                     case "manaWrap":
                         console.log("dropped in mana")
-                        currCardInPlay["source"] = "manaWrap"
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(mana, deck)
+                        setMana(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(mana, overlappedCards, e.target.id)
+                        setMana(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
+                        break
+                }
+                break
+            
+            case "deckWrap":
+                switch (targetSource) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCard(deck, trash)
+                        setDeck(changedState[0])
+                        setTrash(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCard(deck, hand)
+                        setDeck(changedState[0])
+                        setHand(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
+                        break
+                    case "shieldWrap":
+                        console.log("dropped in shield")
+                        changedState = handleMovementOfCard(deck, shield)
+                        setDeck(changedState[0])
+                        setShield(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
+                        break
+                    case "battleWrap":
+                    case "battleWrapParent":
+                        console.log("dropped in battle")
+                        changedState = handleMovementOfCard(deck, battle)
+                        setDeck(changedState[0])
+                        setBattle(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
+                        break
+                    case "manaWrap":
+                        console.log("dropped in mana")
+                        changedState = handleMovementOfCard(deck, mana)
+                        setDeck(changedState[0])
+                        setMana(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(deck, overlappedCards, e.target.id)
+                        setDeck(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
+                        break
+                }
+                break
+            
+            // deckTop is output only
+            case "deckTopWrap":
+                switch (targetSource) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCard(deckTop, trash)
+                        setDeckTop(changedState[0])
+                        setTrash(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCard(deckTop, hand)
+                        setDeckTop(changedState[0])
+                        setHand(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
+                        break
+                    case "shieldWrap":
+                        console.log("dropped in shield")
+                        changedState = handleMovementOfCard(deckTop, shield)
+                        setDeckTop(changedState[0])
+                        setShield(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
+                        break
+                    case "battleWrap":
+                    case "battleWrapParent":
+                        console.log("dropped in battle")
+                        changedState = handleMovementOfCard(deckTop, battle)
+                        setDeckTop(changedState[0])
+                        setBattle(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
+                        break
+                    case "manaWrap":
+                        console.log("dropped in mana")
+                        changedState = handleMovementOfCard(deckTop, mana)
+                        setDeckTop(changedState[0])
+                        setMana(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCard(deckTop, deck)
+                        setDeckTop(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "deckTopWrap":
+                        console.log("dropped in deckTop")
+                        changedCardsInPlay.map(element => element["source"] = "deckTopWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedState = handleMovementOfCardOverlap(deckTop, overlappedCards, e.target.id)
+                        setDeckTop(changedState[0])
+                        setOverlappedCards(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
+                        break
+                }
+                break
+                
+            case "battleWrapOverlap":
+                switch (targetSource) {
+                    case "trashWrap":
+                        console.log("dropped in trash")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, trash, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setTrash(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "trashWrap");
+                        break
+                    case "handWrap":
+                        console.log("dropped in hand")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, hand, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setHand(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "handWrap");
+                        break
+                    case "shieldWrap":
+                        console.log("dropped in shield")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, shield, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setShield(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "shieldWrap");
+                        break
+                    case "battleWrap":
+                    case "battleWrapParent":
+                        console.log("dropped in battle")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, battle, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setBattle(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "battleWrap");
+                        break
+                    case "manaWrap":
+                        console.log("dropped in mana")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, mana, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setMana(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "manaWrap");
+                        break
+                    case "deckWrap":
+                        console.log("dropped in deck")
+                        changedState = handleMovementOfCardOverlap(overlappedCards, deck, e.target.id)
+                        setOverlappedCards(changedState[0])
+                        setDeck(changedState[1])
+                        changedCardsInPlay.map(element => element["source"] = "deckWrap");
+                        break
+                    case "battleWrapOverlap":
+                        console.log("dropped in overlap")
+                        changedCardsInPlay.map(element => element["source"] = "battleWrapOverlap");
                         break
                 }
                 break
         }
-        setCardInPlay(currCardInPlay)
+        // reset card in play after drag
+        setCardsInPlay([])
     }
       
     function allowDrop(e) {
         e.preventDefault();
     }
 
-    function handleMouseDown(e) {
-        setCardInPlay({
-            source: document.getElementById(e.target.id).parentElement.parentElement.id,
-            id: e.target.id
+    function findCard(id) {
+        let to_return = undefined
+        allCards.forEach((cardArea, i) => {
+            cardArea.forEach((card, j) => {
+                if (card["id"] === id) {
+                    to_return = card
+                }
+            })
         })
+        
+        // if to_return is overlapped
+        if (to_return === undefined) {
+            overlappedCards.forEach((group, i) => {
+                group.forEach((card, j) => {
+                    if (card["id"] === id) {
+                        to_return = card
+                    }
+                })
+            })
+        }
+
+        return to_return
+    }
+
+    function handleMouseDown(e) {
+        let changedCardsInPlay = [...cardsInPlay]
+        let selectedCard = findCard(e.target.id)
+
+        console.log("selectedCard", selectedCard)
+
+        // selected must be a card in playable area (not divs and other stuff) or grouped
+        if (allPlayableAreaIds.includes(selectedCard["source"]) || findOverlapGroupIdx(selectedCard["id"]) != undefined) {
+            // must be unique
+            if (!changedCardsInPlay.find(element => element.id === selectedCard.id)) {
+                if (changedCardsInPlay.length > 0) {
+                    // selected must be a part of same area else, clear card in play, if different groups, also clear
+                    if (selectedCard["source"] != changedCardsInPlay[0]["source"] || findOverlapGroupIdx(selectedCard["id"]) != findOverlapGroupIdx(changedCardsInPlay[0]["id"])) {
+                        changedCardsInPlay = []
+                    }
+                }
+                changedCardsInPlay.push(selectedCard)
+                setCardsInPlay(changedCardsInPlay)
+            }
+            console.log("changedCardsInPlay", changedCardsInPlay)
+        }
     }
 
     function shuffle(e) {
@@ -273,29 +736,64 @@ function Play ({deck, setDeck}) {
     
 	function draw(e){
 		e.preventDefault();
-		const changedDeck = [...deck]
-        let drawnCard = changedDeck.pop()
-        setDeck(changedDeck)
-
-        const changedHand = [...hand]
-        changedHand.push(drawnCard)
-        setHand(changedHand)
+        
+        if (deck.length > 0) {
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            drawnCard["source"] = "handWrap"
+            setDeck(changedDeck)
+    
+            const changedHand = [...hand]
+            changedHand.push(drawnCard)
+            setHand(changedHand)
+        } else {
+            window.alert("山札はありません")
+        }
     }
     
 	function setOneShield(e){
 		e.preventDefault();
-		const changedDeck = [...deck]
-        let drawnCard = changedDeck.pop()
-        setDeck(changedDeck)
-        drawnCard["flip"] = true
+        
+        if (deck.length > 0) {
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            setDeck(changedDeck)
+            drawnCard["flip"] = true
 
-        const changedShield = [...shield]
-        changedShield.push(drawnCard)
-        setShield(changedShield)
+            const changedShield = [...shield]
+            changedShield.push(drawnCard)
+            setShield(changedShield)
+        } else {
+            window.alert("デッキはありません")
+        }
     }
 
-    function cardImg(card) {
-        return (card["flip"]) ? cardBack : (URL.createObjectURL(card["file"]))
+    function handleCardClass(card) {
+        let classString = ""
+
+        if (card["tap"]) {
+            classString = "card tap"
+        } else {
+            classString = "card uptap"
+        }
+
+        if (magnify) {
+            classString = classString + " magnify"
+        } else {
+            classString = classString + " unmagnify"
+        }
+
+        return classString
+    }
+
+    function handleCardImgSrc(card) {
+        let cardImg = ""
+        if (card["flip"]) {
+            cardImg = cardBack
+        } else {
+            cardImg = URL.createObjectURL(card["file"])
+        }
+        return cardImg
     }
 
     function isCardInTarget(id, target) {
@@ -325,18 +823,238 @@ function Play ({deck, setDeck}) {
         else if (isCardInTarget(id, shield)) setShield(flipCardInTarget(id, shield))
         else if (isCardInTarget(id, battle)) setBattle(flipCardInTarget(id, battle))
         else if (isCardInTarget(id, mana)) setMana(flipCardInTarget(id, mana))
+        else if (isCardInTarget(id, deck)) setDeck(flipCardInTarget(id, deck))
     }
-
-    function handleKeyUp (e) {
-        if (e.keyCode === 32) {
-            flipCardWithId(cardInPlay["id"])
+    
+    function handleKeyDown(e) {
+        // m
+        if (e.keyCode === 77) {
+            if (!magnify) {
+                setMagnify(true)
+            }
         }
     }
+
+    function handleKeyUp(e) {
+        // space
+        if (e.keyCode === 32) { 
+            cardsInPlay.forEach((element, i) => {
+                flipCardWithId(element["id"])
+            })
+        }
+        // esc
+        if (e.keyCode === 27) {
+            setCardsInPlay([])
+        }
+        // o
+        if (e.keyCode === 79 && canOverlap) {
+            console.log("run overlap")
+            overlap()
+        }
+        // t
+        if (e.keyCode === 84) {
+            tap()
+        }
+        // m
+        if (e.keyCode === 77) {
+            if (magnify) {
+                setMagnify(false)
+            }
+        }
+    }
+
+    function handleViewDeck(e) {
+		e.preventDefault();
+        if (viewDeck) {
+            setViewDeck(false)
+        } else {
+            setViewDeck(true)
+        }
+    }
+
+    function pushSourceIntoTarget(source, target) {
+        const currSource = [...source]
+        const currTarget = [...target]
+
+        currSource.forEach((element) => {
+            element["flip"] = false
+            currTarget.push(element)
+        })
+
+        return currTarget
+    }
+
+    function handleReset(e) {
+		e.preventDefault();
+        let currDeck = [...deck]
+        
+        currDeck = pushSourceIntoTarget(hand, currDeck)
+        currDeck = pushSourceIntoTarget(trash, currDeck);
+        currDeck = pushSourceIntoTarget(mana, currDeck);
+        currDeck = pushSourceIntoTarget(shield, currDeck);
+        currDeck = pushSourceIntoTarget(battle, currDeck);
+        currDeck = pushSourceIntoTarget(deckTop, currDeck);
+        setDeck(currDeck);
+
+        setHand([])
+        setTrash([])
+        setMana([])
+        setShield([])
+        setBattle([])
+        setDeckTop([])
+        setCardsInPlay([])
+        setOverlappedCards([])
+    }
+    
+    function top(e) {
+        let source = ""
+        let setSource = ""
+
+        switch (e.target.id) {
+            case "handTop":
+                source = hand
+                setSource = setHand
+                break
+            case "deckTopTop":
+                source = deckTop
+                setSource = setDeckTop
+                break
+        }
+
+        const changedCardsInPlay = [...cardsInPlay]
+        const currSource = [...source]
+        const currDeck = [...deck]
+
+        if (currSource.length > 0) {
+            let elementsToRemove = []
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
+                    }
+                })
+            })
+            
+            if (elementsToRemove.length > 0) {
+                for (var i = elementsToRemove.length-1; i >= 0; i--) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
+                    currDeck.push(card)
+                }
+                
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
+                })
+                setCardsInPlay(changedCardsInPlay)
+                setSource(currSource)
+                setDeck(currDeck)
+            }
+        } else {
+            window.alert("手札はありません")
+        }
+    }
+
+    function bottom(e) {
+        let source = ""
+        let setSource = ""
+
+        switch (e.target.id) {
+            case "handBottom":
+                source = hand
+                setSource = setHand
+                break
+            case "deckTopBottom":
+                source = deckTop
+                setSource = setDeckTop
+                break
+        }
+
+        const changedCardsInPlay = [...cardsInPlay]
+        const currSource = [...source]
+        const currDeck = [...deck]
+
+        if (currSource.length > 0) {
+            let elementsToRemove = []
+            changedCardsInPlay.forEach((currcardInPlay, i) => {
+                currSource.forEach((element, j) => {
+                    if (element["id"] == currcardInPlay["id"]) {
+                        elementsToRemove.push(currcardInPlay)
+                    }
+                })
+            })
+            
+            if (elementsToRemove.length > 0) {
+                for (var i = 0; i < elementsToRemove.length; i++) {
+                    let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
+                    currDeck.unshift(card)
+                }
+                
+                changedCardsInPlay.forEach((currcardInPlay, i) => {
+                    currcardInPlay["source"] = "deckWrap"
+                })
+                setCardsInPlay(changedCardsInPlay)
+                setSource(currSource)
+                setDeck(currDeck)
+            }
+        } else {
+            window.alert("手札はありません")
+        }
+    }
+
+    function handleCardOverlay(id) {
+        const changedCardsInPlay = [...cardsInPlay]
+        let card = changedCardsInPlay.find(element => element.id === id);
+        if (card) {
+            return (
+                <div>
+                    <div id={id} class="shade"></div>
+                    <div class="centered">{changedCardsInPlay.indexOf(card)}</div>
+                </div>
+            )
+        }
+    }
+
+	function handleDeckTop(e){
+		e.preventDefault();
+
+        if (deck.length > 0) {
+            setViewDeckTop(true)
+
+            const changedDeck = [...deck]
+            let drawnCard = changedDeck.pop()
+            setDeck(changedDeck)
+    
+            const changedDeckTop = [...deckTop]
+            drawnCard["source"] = "deckTopWrap"
+            changedDeckTop.push(drawnCard)
+            setDeckTop(changedDeckTop)
+        } else {
+            window.alert("山札はありません")
+        }
+    }
+
+    function handleCardImg(card) {
+        if (magnify) {
+            return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)}/>
+        } else {
+            return <img id={card["id"]} src={handleCardImgSrc(card)} class={handleCardClass(card)}/>
+        }
+    }
+
+    function listenDeckTopChange(){
+        console.log(deckTop.length)
+
+        if (deckTop.length == 0){
+            setViewDeckTop(false)
+        }
+    }
+    
+    // ========================================================================================================================================================
+    // HTML
     
     return (
         <div>
             {/* バトルゾーン */}
-            <div id="topArea" class="boxLayout">
+            <div id="area0" class="boxLayout">
                 <div class="boxTitle">
                     バトルゾーン(<span id="battle.length">{battle.length}</span>)
                 </div>
@@ -344,18 +1062,32 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_battle_00" class="button">placeholder_battle_00</a>
                     <a id="placeholder_battle_01" class="button">placeholder_battle_01</a>
                 </div>
-                <div class="boxLayout"></div>
-                <ul id="battleWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                    {battle?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
-                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                        </li>
-                    ))}
-                </ul>
+                <div class="boxLayout">
+                    <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
+                        <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {battle?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                        {overlappedCards?.map((group, i) => (
+                            <ul id="battleWrapOverlap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                                {group.map((card, j) => (
+                                    <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                        {handleCardImg(card)}
+                                        {handleCardOverlay(card["id"])}
+                                    </li>
+                                ))}
+                            </ul>
+                        ))}
+                    </div>
+                </div>
             </div>
             
             {/* シールドゾーン */}
-            <div id="middleArea" class="boxLayout">
+            <div id="area1" class="boxLayout">
                 <div class="boxTitle">
                     シールドゾーン(<span id="shield.length">{shield.length}</span>)
                 </div>
@@ -363,18 +1095,20 @@ function Play ({deck, setDeck}) {
                     <a id="placeholder_shield_00" class="button">placeholder_shield_00</a>
                     <a id="placeholder_shield_01" class="button">placeholder_shield_01</a>
                 </div>
-                <div class="boxLayout"></div>
-                <ul id="shieldWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                    {shield?.map((card, index) => (
-                        <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
-                            <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                        </li>
-                    ))}
-                </ul>
+                <div class="boxLayout">
+                    <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {shield?.map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
             
             {/* プレイヤーゾーン */}
-            <div id="bottomArea" class="columnLayoutBottom">
+            <div id="area2" class="columnLayoutBottom">
 
                 {/* 手札 */}
                 <div id="hand" class="boxLayout">
@@ -383,17 +1117,19 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_hand_00" class="button" style={{marginLeft: 10 + "px"}}>placeholder_hand_00</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="placeholder_hand_01" class="button">placeholder_hand_01</a>
-                        <a id="placeholder_hand_02" class="button">placeholder_hand_02</a>
+                        <a id="handBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                        <a id="handTop" class="button" onClick={top}>山札の上に置く</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="handWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                        {hand?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {hand?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
                 {/* マナゾーン */}
@@ -406,14 +1142,16 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_mana_01" class="button">placeholder_mana_01</a>
                         <a id="placeholder_mana_02" class="button">placeholder_mana_02</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="manaWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                        {mana?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {mana?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 {/* 墓地 */}
@@ -425,14 +1163,16 @@ function Play ({deck, setDeck}) {
                         <a id="placeholder_trash_00" class="button">placeholder_trash_00</a>
                         <a id="placeholder_trash_01" class="button">placeholder_trash_01</a>
                     </div>
-                    <div class="boxLayout"></div>
-                    <ul id="trashWrap" class="cardWrap" draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
-                        {trash?.map((card, index) => (
-                            <li id={index} class="card" draggable="true" onDrop={drop} onDragOver={allowDrop}>
-                                <img id={card["id"]} src={cardImg(card)} width="78.75" height="110" alt="error" />
-                            </li>
-                        ))}
-                    </ul>
+                    <div class="boxLayout">
+                        <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {trash?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 {/* デッキ */}
@@ -452,9 +1192,63 @@ function Play ({deck, setDeck}) {
                     <form onSubmit={setOneShield}>
                         <button type='submit'>1枚シールド化</button>
                     </form>
+                    
+                    <form onSubmit={handleViewDeck}>
+                        <button type='submit'>デッキを確認</button>
+                    </form>
+
+                    <form onSubmit={handleReset}>
+                        <button type='submit'>リセット</button>
+                    </form>
+
+                    <form onSubmit={handleDeckTop}>
+                        <button type='submit'>デッキ上1枚確認</button>
+                    </form>
                 </div>
 
             </div>
+            
+            {/* 山札上X枚確認 */}
+            {viewDeckTop && <div id="area3" class="boxLayout">
+                <div class="boxTitle">
+                    山札上(<span id="deckTop.length">{deckTop.length}</span>)枚確認
+                </div>
+                <div class="buttonLayout">
+                    <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                    <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
+                </div>
+                <div class="boxLayout">
+                    <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {deckTop?.map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>}
+            
+            {/* デッキ確認 */}
+            {viewDeck && <div id="area4" class="boxLayout">
+                <div class="boxTitle">
+                    デッキ確認(<span id="deck.length">{deck.length}</span>)
+                </div>
+                <div class="buttonLayout">
+                    <a id="placeholder_deck_00" class="button">placeholder_deck_00</a>
+                    <a id="placeholder_deck_01" class="button">placeholder_deck_01</a>
+                </div>
+                <div class="boxLayout">
+                    <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        {deck?.toReversed().map((card, index) => (
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                {handleCardImg(card)}
+                                {handleCardOverlay(card["id"])}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>}
         </div>
     )
 }

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import cardBack from "../images/cardBack.jpg";
 import './Deckbuild.css';
 
 // function component
@@ -19,7 +18,9 @@ function Deckbuild({deck, setDeck}) {
 			let card = {
 				file: file,
 				id: uuidv4(),
-				flip: false
+				flip: false,
+				tap: false,
+				source: "deckWrap"
 			}
 			currDeck.push(card)
 		})
@@ -31,6 +32,7 @@ function Deckbuild({deck, setDeck}) {
 		e.preventDefault();
 		setDeck([])
 		setDeckGroupBy([])
+		window.location.reload();
 	}
 
 	function handleConfirmDeck(e) {
@@ -87,7 +89,7 @@ function Deckbuild({deck, setDeck}) {
 	return (
 		<div>
 			<h3>カードを追加</h3>
-			<input type="file" multiple onChange={handleChange} />
+			<input type="file" multiple onChange={handleChange} accept='image/*'/>
 			
 			{/* デュエマは 63mm x 88mm */}
             <div id="deckPreview" class="boxLayout">
