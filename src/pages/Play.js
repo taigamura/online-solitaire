@@ -2,14 +2,7 @@ import Sortable from 'sortablejs';
 import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
-import {
-    Magnifier,
-    GlassMagnifier,
-    SideBySideMagnifier,
-    PictureInPictureMagnifier,
-    MOUSE_ACTIVATION,
-    TOUCH_ACTIVATION
-  } from "react-image-magnifiers";
+import { SideBySideMagnifier } from "react-image-magnifiers";
 
 function Play ({deck, setDeck}) {
 
@@ -704,20 +697,23 @@ function Play ({deck, setDeck}) {
 
         console.log("selectedCard", selectedCard)
 
-        // selected must be a card in playable area (not divs and other stuff) or grouped
-        if (allPlayableAreaIds.includes(selectedCard["source"]) || findOverlapGroupIdx(selectedCard["id"]) != undefined) {
-            // must be unique
-            if (!changedCardsInPlay.find(element => element.id === selectedCard.id)) {
-                if (changedCardsInPlay.length > 0) {
-                    // selected must be a part of same area else, clear card in play, if different groups, also clear
-                    if (selectedCard["source"] != changedCardsInPlay[0]["source"] || findOverlapGroupIdx(selectedCard["id"]) != findOverlapGroupIdx(changedCardsInPlay[0]["id"])) {
-                        changedCardsInPlay = []
+        // selectedCard must not be undefined (can be undefined when magnified)
+        if (selectedCard) {
+            // selected must be a card in playable area (not divs and other stuff) or grouped
+            if (allPlayableAreaIds.includes(selectedCard["source"]) || findOverlapGroupIdx(selectedCard["id"]) != undefined) {
+                // must be unique
+                if (!changedCardsInPlay.find(element => element.id === selectedCard.id)) {
+                    if (changedCardsInPlay.length > 0) {
+                        // selected must be a part of same area else, clear card in play, if different groups, also clear
+                        if (selectedCard["source"] != changedCardsInPlay[0]["source"] || findOverlapGroupIdx(selectedCard["id"]) != findOverlapGroupIdx(changedCardsInPlay[0]["id"])) {
+                            changedCardsInPlay = []
+                        }
                     }
+                    changedCardsInPlay.push(selectedCard)
+                    setCardsInPlay(changedCardsInPlay)
                 }
-                changedCardsInPlay.push(selectedCard)
-                setCardsInPlay(changedCardsInPlay)
+                console.log("changedCardsInPlay", changedCardsInPlay)
             }
-            console.log("changedCardsInPlay", changedCardsInPlay)
         }
     }
 
@@ -910,7 +906,7 @@ function Play ({deck, setDeck}) {
         let source = ""
         let setSource = ""
 
-        switch (e.target.id) {
+        switch (e) {
             case "handTop":
                 source = hand
                 setSource = setHand
