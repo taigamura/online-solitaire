@@ -88,7 +88,6 @@
     position: relative;
     z-index: 2;
     display: block;
-    width: 75px;
 }
 
 .cardWrap>.tap {
