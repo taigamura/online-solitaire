@@ -90,15 +90,19 @@ function Deckbuild({deck, setDeck}) {
 
 	return (
 		<div>
-			<h3>カードを追加</h3>
-			<input type="file" multiple onChange={handleChange} accept='image/*'/>
+			<h1>デュエルマスターズ一人回し用ツール by taigamura</h1>
+			
+            <div id="readme" class="boxLayout">
+				<a>下からカード写真を追加してください。画像は高画質のものを使ってください（デュエルマスターズ公式カード検索から保存した写真推奨）。その後、デッキ確定をクリック。</a>
+            </div>
 			
 			{/* デュエマは 63mm x 88mm */}
             <div id="deckPreview" class="boxLayout">
                 <div class="boxTitle">
-                    カード枚数指定(<span id="deck.length">{deck.length}</span>)
+                    デッキ(<span id="deck.length">{deck.length}</span>)枚
                 </div>
                 <div class="buttonLayout">
+					<input class="button" type="file" multiple onChange={handleChange} accept='image/*'/>
                     <a id="reset" class="button" onClick={handleReset}>リセット</a>
                     <a id="confirmDeck" class="button" onClick={handleConfirmDeck}>デッキ確定</a>
                 </div>

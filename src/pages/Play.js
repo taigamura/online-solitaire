@@ -17,6 +17,7 @@ function Play ({deck, setDeck}) {
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [overlappedCards, setOverlappedCards] = useState([]);
     const [magnify, setMagnify] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const allCards = [hand, trash, mana, shield, battle, deck, deckTop]
     const allPlayableAreaIds = ["handWrap", "trashWrap", "manaWrap", "shieldWrap", "battleWrap", "deckWrap", "deckTopWrap"]
@@ -50,6 +51,9 @@ function Play ({deck, setDeck}) {
             const battleWrapOverlap = document.getElementById('battleWrapOverlap');
             Sortable.create(battleWrapOverlap, {animation: 100});
         }
+
+        // hand.map(card => card["source"] = "handWrap")
+        // shield.map(card => card["source"] = "shieldWrap")
 
         listenDeckTopChange()
         document.addEventListener("keyup", handleKeyUp);
@@ -718,50 +722,55 @@ function Play ({deck, setDeck}) {
     }
 
     function shuffle(e) {
-		e.preventDefault();
-		const changedDeck = [...deck]
-        let currentIndex = changedDeck.length
-      
-        while (currentIndex !== 0) {
-          let randomIndex = Math.floor(Math.random() * currentIndex)
-          currentIndex--
-          [changedDeck[currentIndex], changedDeck[randomIndex]] = [changedDeck[randomIndex], changedDeck[currentIndex]]
-        }
-        setDeck(changedDeck)
+        return new Promise((resolve, reject) => { 
+            e.preventDefault();
+            const currDeck = [...deck]
+            let currentIndex = currDeck.length
+          
+            while (currentIndex !== 0) {
+                let randomIndex = Math.floor(Math.random() * currentIndex)
+                currentIndex--
+                [currDeck[currentIndex], currDeck[randomIndex]] = [currDeck[randomIndex], currDeck[currentIndex]]
+            }
+            setDeck(currDeck, resolve())
+        })
     }
     
 	function draw(e){
-		e.preventDefault();
-        
-        if (deck.length > 0) {
-            const changedDeck = [...deck]
-            let drawnCard = changedDeck.pop()
-            drawnCard["source"] = "handWrap"
-            setDeck(changedDeck)
-    
-            const changedHand = [...hand]
-            changedHand.push(drawnCard)
-            setHand(changedHand)
-        } else {
-            window.alert("山札はありません")
-        }
+        return new Promise((resolve, reject) => { 
+            e.preventDefault();
+            if (deck.length > 0) {
+                setHand((prevState) => {
+                    let drawnCard = deck.slice(-1)[0]
+                    drawnCard["source"] = "handWrap"
+                    return prevState.concat(drawnCard)
+                })
+                setDeck((prevState) => prevState.slice(0, prevState.length - 1))
+                resolve()
+            } else {
+                window.alert("山札はありません")
+                reject()
+            }
+        })
     }
-    
-	function setOneShield(e){
-		e.preventDefault();
-        
-        if (deck.length > 0) {
-            const changedDeck = [...deck]
-            let drawnCard = changedDeck.pop()
-            setDeck(changedDeck)
-            drawnCard["flip"] = true
 
-            const changedShield = [...shield]
-            changedShield.push(drawnCard)
-            setShield(changedShield)
-        } else {
-            window.alert("デッキはありません")
-        }
+	function setOneShield(e){
+        return new Promise((resolve, reject) => { 
+            e.preventDefault();
+            if (deck.length > 0) {
+                setShield((prevState) => {
+                    let drawnCard = deck.slice(-1)[0]
+                    drawnCard["source"] = "shieldWrap"
+                    drawnCard["flip"] = true
+                    return prevState.concat(drawnCard)
+                })
+                setDeck(prevState => prevState.slice(0, prevState.length - 1))
+                resolve()
+            } else {
+                window.alert("デッキはありません")
+                reject()
+            }
+        })
     }
 
     function handleCardClass(card) {
@@ -1043,12 +1052,30 @@ function Play ({deck, setDeck}) {
             setViewDeckTop(false)
         }
     }
+
+    function drawFiveSetFiveShield(e){
+        e.preventDefault();
+        if (deck.length > 10) {
+            draw(e).then(() => {draw(e)})
+        } else {
+            window.alert("山札が足りません")
+        }
+    }
     
     // ========================================================================================================================================================
     // HTML
     
     return (
         <div>
+
+            {/* 説明 */}
+            <div id="area0" class="boxLayout">
+                <div class="boxTitle">説明</div>
+                <div>Spacebar = カード選択した状態でカードを裏向き表示</div>
+                <div>O = カード選択した状態でカードを重ねる</div>
+                <div>M = カード拡大モード</div>
+            </div>
+
             {/* バトルゾーン */}
             <div id="area0" class="boxLayout">
                 <div class="boxTitle">
@@ -1177,8 +1204,12 @@ function Play ({deck, setDeck}) {
                         デッキ(<span id="deck.length">{deck.length}</span>)
                     </div>
                     
+                    <form onSubmit={drawFiveSetFiveShield}>
+                        <button type='submit'>5枚ドロー、5枚シールド化</button>
+                    </form>
+
                     <form onSubmit={draw}>
-                        <button type='submit'>一枚ドロー</button>
+                        <button type='submit'>1枚ドロー</button>
                     </form>
 
                     <form onSubmit={shuffle}>
