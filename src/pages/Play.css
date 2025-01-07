@@ -83,6 +83,12 @@
     position: relative;
 }
 
+.overlapWrap {
+    border: 2px solid #999999;
+    border-radius: 10px;
+    padding: 10px;
+}
+
 /* child combinator */
 .cardWrap>.card {
     position: relative;
