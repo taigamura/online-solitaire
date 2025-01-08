@@ -24,6 +24,7 @@ function Play ({deck, setDeck}) {
 	const [viewDeckTop, setViewDeckTop] = useState(false);
     const [canMagnify, setCanMagnify] = useState(false);
     const [canOverlap, setCanOverlap] = useState(true);
+    const [mouseRight, setMouseRight] = useState(false)
 
     const allCards = Object.values(boardState)
     const allPlayableAreaIds = Object.keys(boardState).map(x => x + "Wrap")
@@ -63,14 +64,25 @@ function Play ({deck, setDeck}) {
         }
 
         listenDeckTopChange()
+        document.addEventListener("mousemove", handleMouseMove)
         document.addEventListener("keyup", handleKeyUp);
         document.addEventListener("keydown", handleKeyDown);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => {
+            document.addEventListener("mousemove", handleMouseMove)
             document.removeEventListener("keyup", handleKeyUp)
             document.removeEventListener("keydown", handleKeyDown)
         };
-    }, [handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+    }, [handleMouseDown, handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+
+    // check which side mouse is on
+    function handleMouseMove(e) {
+        if (e.clientX > window.innerWidth / 2) {
+            setMouseRight(true)
+        } else {
+            setMouseRight(false)
+        }
+    }
 
     // Runs a set of commands (functions) that need to run in sequence
     // setState will cause useEffect, creating a loop
@@ -283,14 +295,20 @@ function Play ({deck, setDeck}) {
         if ((source.includes("overlap") || target.includes("overlap")) && source != target) {
             changedState = handleMovementOfCardOverlap(boardState[source], boardState[target], e.target.id)
             currBoardState[source] = changedState[0]
-            changedState[1].map(x => x["source"] = targetSource)
+            // if target is overlapped or not
+            if (Array.isArray(changedState[1][0])) {
+                changedState[1].map(group => group.map(card => card["source"] = targetSource))
+            } else {
+                changedState[1].map(card => card["source"] = targetSource)
+            }
+            console.log(changedState[1])
             currBoardState[target] = changedState[1]
             setBoardState(currBoardState)
         }
         else if (source != target) {
             changedState = handleMovementOfCard(boardState[source], boardState[target])
             currBoardState[source] = changedState[0]
-            changedState[1].map(x => x["source"] = targetSource)
+            changedState[1].map(card => card["source"] = targetSource)
             currBoardState[target] = changedState[1]
             setBoardState(currBoardState)
         }
@@ -724,7 +742,12 @@ function Play ({deck, setDeck}) {
 
     function handleCardImg(card) {
         if (canMagnify) {
-            return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)} class={handleCardClass(card)}/>
+            // change side of magnifier
+            if (mouseRight) {
+                return <SideBySideMagnifier switchSides="true" id={card["id"]} imageSrc={handleCardImgSrc(card)} class={handleCardClass(card)}/>
+            } else {
+                return <SideBySideMagnifier id={card["id"]} imageSrc={handleCardImgSrc(card)} class={handleCardClass(card)}/>
+            }
         } else {
             return <img id={card["id"]} src={handleCardImgSrc(card)} class={handleCardClass(card)}/>
         }
@@ -757,13 +780,13 @@ function Play ({deck, setDeck}) {
         })
 
         // handle overlappedCards
-        if (source == "battle") {
-            boardState.overlappedCards.forEach((group, i) => {
-                group.forEach((card, j) => {
-                    currCardsInPlay.push(card)
-                })
-            })
-        }
+        // if (source == "battle") {
+        //     boardState.overlappedCards.forEach((group, i) => {
+        //         group.forEach((card, j) => {
+        //             currCardsInPlay.push(card)
+        //         })
+        //     })
+        // }
 
         setCardsInPlay(currCardsInPlay)
     }
@@ -792,23 +815,23 @@ function Play ({deck, setDeck}) {
                     <a id="battleSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
                 </div>
                 <div class="buttonLayout">
-                    <a id="placeholder_battle_00" class="button">placeholder_battle_00</a>
+                    <a id="placeholder_battle_00" class="button" onClick={overlap}>選択カードを重ねる</a>
                     <a id="placeholder_battle_01" class="button">placeholder_battle_01</a>
                 </div>
                 <div class="boxLayout">
                     <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
-                        <ul id="battleWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                        <ul id="battleWrap" class="cardWrap">
                             {boardState.battle?.map((card, index) => (
-                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                     {handleCardImg(card)}
                                     {handleCardOverlay(card["id"])}
                                 </li>
                             ))}
                         </ul>
                         {boardState.overlappedCards?.map((group, i) => (
-                            <ul id="overlappedCardsWrap" class="cardWrap overlapWrap" onDrop={drop} onDragOver={allowDrop}>
+                            <ul id="overlappedCardsWrap" class="cardWrap overlapWrap">
                                 {group.map((card, j) => (
-                                    <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                    <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown}>
                                         {handleCardImg(card)}
                                         {handleCardOverlay(card["id"])}
                                     </li>
@@ -832,7 +855,7 @@ function Play ({deck, setDeck}) {
                 <div class="boxLayout">
                     <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {boardState.shield?.map((card, index) => (
-                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                 {handleCardImg(card)}
                                 {handleCardOverlay(card["id"])}
                             </li>
@@ -857,7 +880,7 @@ function Play ({deck, setDeck}) {
                     <div class="boxLayout">
                         <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {boardState.hand?.map((card, index) => (
-                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                     {handleCardImg(card)}
                                     {handleCardOverlay(card["id"])}
                                 </li>
@@ -879,7 +902,7 @@ function Play ({deck, setDeck}) {
                     <div class="boxLayout">
                         <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {boardState.mana?.map((card, index) => (
-                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                     {handleCardImg(card)}
                                     {handleCardOverlay(card["id"])}
                                 </li>
@@ -901,7 +924,7 @@ function Play ({deck, setDeck}) {
                     <div class="boxLayout">
                         <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                             {boardState.trash?.map((card, index) => (
-                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                     {handleCardImg(card)}
                                     {handleCardOverlay(card["id"])}
                                 </li>
@@ -961,7 +984,7 @@ function Play ({deck, setDeck}) {
                 <div class="boxLayout">
                     <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {boardState.deckTop?.map((card, index) => (
-                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                 {handleCardImg(card)}
                                 {handleCardOverlay(card["id"])}
                             </li>
@@ -983,7 +1006,7 @@ function Play ({deck, setDeck}) {
                 <div class="boxLayout">
                     <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
                         {boardState.deck?.toReversed().map((card, index) => (
-                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown} onDrop={drop} onDragOver={allowDrop}>
+                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
                                 {handleCardImg(card)}
                                 {handleCardOverlay(card["id"])}
                             </li>
