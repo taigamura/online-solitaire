@@ -1,5 +1,5 @@
 import Sortable from 'sortablejs';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import './Play.css';
 import cardBack from "../images/cardBack.jpg";
 import { SideBySideMagnifier } from "react-image-magnifiers";
@@ -7,7 +7,8 @@ import { SideBySideMagnifier } from "react-image-magnifiers";
 function Play ({deck, setDeck}) {
 
     const [cardsInPlay, setCardsInPlay] = useState([]);
-    const [commandList, setCommandList] = useState({})
+    const [commandList, setCommandList] = useState({});
+    const [deckBackup, setDeckBackup] = useState([]);
     
     const [boardState, setBoardState] = useState({
         "hand": [],
@@ -17,7 +18,7 @@ function Play ({deck, setDeck}) {
         "battle": [],
         "overlappedCards": [],
         "deckTop": [],
-        "deck": deck
+        "deck": [...deck]
     });
     
 	const [viewDeck, setViewDeck] = useState(false);
@@ -28,8 +29,11 @@ function Play ({deck, setDeck}) {
 
     const allCards = Object.values(boardState)
     const allPlayableAreaIds = Object.keys(boardState).map(x => x + "Wrap")
+    
+    const copy = [...deck];
 
     useEffect(() => {
+
         const handWrap = document.getElementById('handWrap');
         const trashWrap = document.getElementById('trashWrap');
         const manaWrap = document.getElementById('manaWrap');
@@ -69,7 +73,7 @@ function Play ({deck, setDeck}) {
         document.addEventListener("keydown", handleKeyDown);
         // https://stackoverflow.com/questions/64434545/react-keydown-event-listener-is-being-called-multiple-times
         return () => {
-            document.addEventListener("mousemove", handleMouseMove)
+            document.removeEventListener("mousemove", handleMouseMove)
             document.removeEventListener("keyup", handleKeyUp)
             document.removeEventListener("keydown", handleKeyDown)
         };
@@ -109,6 +113,20 @@ function Play ({deck, setDeck}) {
             currCommandList["shield"]--
             if (currCommandList["shield"] == 0) {
                 delete currCommandList["shield"]
+            }
+        }
+        else if (currCommandList["manaUntapAll"] > 0) {
+            manaUntapAll()
+            currCommandList["manaUntapAll"]--
+            if (currCommandList["manaUntapAll"] == 0) {
+                delete currCommandList["manaUntapAll"]
+            }
+        }
+        else if (currCommandList["battleUntapAll"] > 0) {
+            battleUntapAll()
+            currCommandList["battleUntapAll"]--
+            if (currCommandList["battleUntapAll"] == 0) {
+                delete currCommandList["battleUntapAll"]
             }
         }
 
@@ -572,31 +590,12 @@ function Play ({deck, setDeck}) {
         }
     }
 
-    function pushSourceIntoTarget(source, target) {
-        const currSource = [...source]
-        const currTarget = [...target]
-
-        currSource.forEach((element) => {
-            element["flip"] = false
-            currTarget.push(element)
-        })
-
-        return currTarget
-    }
-
     function handleReset(e) {
 		e.preventDefault();
-        let currDeck = [...boardState.deck]
-        
-        currDeck = pushSourceIntoTarget(boardState.hand, currDeck)
-        currDeck = pushSourceIntoTarget(boardState.trash, currDeck);
-        currDeck = pushSourceIntoTarget(boardState.mana, currDeck);
-        currDeck = pushSourceIntoTarget(boardState.shield, currDeck);
-        currDeck = pushSourceIntoTarget(boardState.battle, currDeck);
-        currDeck = pushSourceIntoTarget(boardState.deckTop, currDeck);
-        
-        boardState.overlappedCards.forEach((group, i) => {
-            currDeck = pushSourceIntoTarget(group, currDeck);
+
+        copy.forEach((card) => { 
+            card["tap"] = false 
+            card["flip"] = false 
         })
 
         setBoardState({
@@ -607,7 +606,7 @@ function Play ({deck, setDeck}) {
             "battle": [],
             "overlappedCards": [],
             "deckTop": [],
-            "deck": currDeck
+            "deck": copy
         })
         setCardsInPlay([])
     }
@@ -625,6 +624,10 @@ function Play ({deck, setDeck}) {
                 source = boardState.deckTop
                 setSource = "deckTop"
                 break
+            case "trashTop":
+                source = boardState.trash
+                setSource = "trash"
+                break
         }
 
         const changedCardsInPlay = [...cardsInPlay]
@@ -633,10 +636,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            changedCardsInPlay.forEach((currcardInPlay, i) => {
+            changedCardsInPlay.forEach((card, i) => {
                 currSource.forEach((element, j) => {
-                    if (element["id"] == currcardInPlay["id"]) {
-                        elementsToRemove.push(currcardInPlay)
+                    if (element["id"] == card["id"]) {
+                        elementsToRemove.push(card)
                     }
                 })
             })
@@ -647,13 +650,10 @@ function Play ({deck, setDeck}) {
                     currDeck.push(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardInPlay, i) => {
-                    currcardInPlay["source"] = "deckWrap"
-                })
-                setCardsInPlay(changedCardsInPlay)
-                setCardsInPlay([])
+                currDeck.forEach((card, i) => { card["source"] = "deckWrap" })
                 setBoardState(prevState => {return {...prevState, [setSource]: currSource}})
                 setBoardState(prevState => {return {...prevState, "deck": currDeck}})
+                setCardsInPlay([])
             }
         } else {
             window.alert("手札はありません")
@@ -673,6 +673,10 @@ function Play ({deck, setDeck}) {
                 source = boardState.deckTop
                 setSource = "deckTop"
                 break
+            case "trashBottom":
+                source = boardState.trash
+                setSource = "trash"
+                break
         }
 
         const changedCardsInPlay = [...cardsInPlay]
@@ -681,10 +685,10 @@ function Play ({deck, setDeck}) {
 
         if (currSource.length > 0) {
             let elementsToRemove = []
-            changedCardsInPlay.forEach((currcardInPlay, i) => {
+            changedCardsInPlay.forEach((card, i) => {
                 currSource.forEach((element, j) => {
-                    if (element["id"] == currcardInPlay["id"]) {
-                        elementsToRemove.push(currcardInPlay)
+                    if (element["id"] == card["id"]) {
+                        elementsToRemove.push(card)
                     }
                 })
             })
@@ -695,13 +699,10 @@ function Play ({deck, setDeck}) {
                     currDeck.unshift(card)
                 }
                 
-                changedCardsInPlay.forEach((currcardInPlay, i) => {
-                    currcardInPlay["source"] = "deckWrap"
-                })
-                setCardsInPlay(changedCardsInPlay)
-                setCardsInPlay([])
+                currDeck.forEach((card, i) => { card["source"] = "deckWrap" })
                 setBoardState(prevState => {return {...prevState, [setSource]: currSource}})
                 setBoardState(prevState => {return {...prevState, "deck": currDeck}})
+                setCardsInPlay([])
             }
         } else {
             window.alert("手札はありません")
@@ -790,6 +791,42 @@ function Play ({deck, setDeck}) {
 
         setCardsInPlay(currCardsInPlay)
     }
+
+    function battleUntapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.battle.forEach((card) => {
+            card["tap"] = false
+        })
+        
+        currBoardState.overlappedCards.forEach((card) => {
+            card["tap"] = false
+        })
+
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+
+    function manaUntapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.mana.forEach((card) => {
+            card["tap"] = false
+        })
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+
+    function untapAllDrawOnce(e) {
+        e.preventDefault();
+        setCommandList({
+            "battleUntapAll": 1,
+            "manaUntapAll": 1,
+            "draw": 1
+        })
+    }
     
     // ========================================================================================================================================================
     // HTML
@@ -816,7 +853,7 @@ function Play ({deck, setDeck}) {
                 </div>
                 <div class="buttonLayout">
                     <a id="placeholder_battle_00" class="button" onClick={overlap}>選択カードを重ねる</a>
-                    <a id="placeholder_battle_01" class="button">placeholder_battle_01</a>
+                    <a id="placeholder_battle_01" class="button" onClick={battleUntapAll}>全てアンタップ</a>
                 </div>
                 <div class="boxLayout">
                     <div id="battleWrapParent" class="columnLayoutBottom" onDrop={drop} onDragOver={allowDrop}>
@@ -896,7 +933,7 @@ function Play ({deck, setDeck}) {
                         <a id="manaSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="placeholder_mana_01" class="button">placeholder_mana_01</a>
+                        <a id="manaUntapAll" class="button" onClick={manaUntapAll}>全てアンタップ</a>
                         <a id="placeholder_mana_02" class="button">placeholder_mana_02</a>
                     </div>
                     <div class="boxLayout">
@@ -918,8 +955,9 @@ function Play ({deck, setDeck}) {
                         <a id="trashSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="placeholder_trash_00" class="button">placeholder_trash_00</a>
-                        <a id="placeholder_trash_01" class="button">placeholder_trash_01</a>
+                        <a id="trashBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                        <a id="trashTop" class="button" onClick={top}>山札の上に置く</a>
+                        <a id="trashShuffle" class="button" onClick={shuffleDeckTop}>シャッフル</a>
                     </div>
                     <div class="boxLayout">
                         <ul id="trashWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -949,6 +987,10 @@ function Play ({deck, setDeck}) {
 
                     <form onSubmit={draw}>
                         <button type='submit'>1枚ドロー</button>
+                    </form>
+                    
+                    <form onSubmit={untapAllDrawOnce}>
+                        <button type='submit'>マナアンタップ、1枚ドロー（ターンドロー）</button>
                     </form>
                     
                     <form onSubmit={setOneShield}>
