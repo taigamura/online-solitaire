@@ -8,7 +8,7 @@ function Play ({deck, setDeck}) {
 
     const [cardsInPlay, setCardsInPlay] = useState([]);
     const [commandList, setCommandList] = useState({});
-    const [deckBackup, setDeckBackup] = useState([]);
+    const [turnCounter, setTurnCounter] = useState(1);
     
     const [boardState, setBoardState] = useState({
         "hand": [],
@@ -25,6 +25,7 @@ function Play ({deck, setDeck}) {
 	const [viewDeckTop, setViewDeckTop] = useState(false);
     const [canMagnify, setCanMagnify] = useState(false);
     const [canOverlap, setCanOverlap] = useState(true);
+    const [canSortable, setCanSortable] = useState(false);
     const [mouseRight, setMouseRight] = useState(false)
 
     const allCards = Object.values(boardState)
@@ -34,29 +35,31 @@ function Play ({deck, setDeck}) {
 
     useEffect(() => {
 
-        const handWrap = document.getElementById('handWrap');
-        const trashWrap = document.getElementById('trashWrap');
-        const manaWrap = document.getElementById('manaWrap');
-        const shieldWrap = document.getElementById('shieldWrap');
-        const battleWrap = document.getElementById('battleWrap');
-        
-        Sortable.create(handWrap, {animation: 100});
-        Sortable.create(trashWrap, {animation: 100});
-        Sortable.create(manaWrap, {animation: 100});
-        Sortable.create(shieldWrap, {animation: 100});
-        Sortable.create(battleWrap, {animation: 100});
+        if (canSortable) {
+            const handWrap = document.getElementById('handWrap');
+            const trashWrap = document.getElementById('trashWrap');
+            const manaWrap = document.getElementById('manaWrap');
+            const shieldWrap = document.getElementById('shieldWrap');
+            const battleWrap = document.getElementById('battleWrap');
+            
+            Sortable.create(handWrap, {animation: 100});
+            Sortable.create(trashWrap, {animation: 100});
+            Sortable.create(manaWrap, {animation: 100});
+            Sortable.create(shieldWrap, {animation: 100});
+            Sortable.create(battleWrap, {animation: 100});
+        }
 
-        if (viewDeckTop) {
+        if (viewDeckTop && canSortable) {
             const deckTopWrap = document.getElementById('deckTopWrap');
             Sortable.create(deckTopWrap, {animation: 100});
         }
         
-        if (viewDeck) {
+        if (viewDeck && canSortable) {
             const deckWrap = document.getElementById('deckWrap');
             Sortable.create(deckWrap, {animation: 100});
         }
         
-        if (boardState.overlappedCards.length > 0 && canOverlap) {
+        if (boardState.overlappedCards.length > 0 && canOverlap && canSortable) {
             const overlappedCardsWraps = document.getElementsByClassName("cardWrap overlapWrap")
             for (var i = 0; i < overlappedCardsWraps.length; i++) {
                 Sortable.create(overlappedCardsWraps[i], {animation: 100});
@@ -282,6 +285,8 @@ function Play ({deck, setDeck}) {
             currCardsInPlay.forEach((card, i) => {
                 group.push(card)
             })
+            // make selected first card the top
+            group = group.reverse()
     
             let changedState = handleMovementOfCard(boardState.battle, boardState.overlappedCards)
             
@@ -411,6 +416,20 @@ function Play ({deck, setDeck}) {
         }
 
         setBoardState(currBoardState)
+    }
+    
+	function manaBoost(e){
+        e?.preventDefault();
+        if (boardState.deck.length > 0) {
+            const currBoardState = {...boardState}
+            let drawnCard = currBoardState.deck.slice(-1)[0]
+            drawnCard["source"] = "manaWrap"
+            currBoardState.deck = currBoardState.deck.slice(0, currBoardState.deck.length - 1)
+            currBoardState.mana = currBoardState.mana.concat(drawnCard)
+            setBoardState(currBoardState)
+        } else {
+            window.alert("山札はありません")
+        }
     }
     
 	function draw(e){
@@ -609,6 +628,7 @@ function Play ({deck, setDeck}) {
             "deck": copy
         })
         setCardsInPlay([])
+        setTurnCounter(1)
     }
     
     function top(e) {
@@ -773,6 +793,10 @@ function Play ({deck, setDeck}) {
         }
     }
 
+    function deselectAll(e) {
+        setCardsInPlay([])
+    }
+
     function selectAll(e) {
         let source = e.target.id.replace("SelectAll", "")
         const currCardsInPlay = []
@@ -807,6 +831,33 @@ function Play ({deck, setDeck}) {
         setCardsInPlay([])
         setBoardState(currBoardState)
     }
+    
+    function battleTapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.battle.forEach((card) => {
+            card["tap"] = true
+        })
+        
+        currBoardState.overlappedCards.forEach((card) => {
+            card["tap"] = true
+        })
+
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+    
+    function manaTapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.mana.forEach((card) => {
+            card["tap"] = true
+        })
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
 
     function manaUntapAll(e) {
 		e?.preventDefault();
@@ -819,15 +870,38 @@ function Play ({deck, setDeck}) {
         setBoardState(currBoardState)
     }
 
-    function untapAllDrawOnce(e) {
+    function turnDraw(e) {
         e.preventDefault();
+        setTurnCounter(prevState => {return prevState + 1})
         setCommandList({
             "battleUntapAll": 1,
             "manaUntapAll": 1,
             "draw": 1
         })
     }
+
+    function shieldFlipAllFalse(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.shield.forEach((card) => {
+            card["flip"] = false
+        })
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
     
+    function shieldFlipAllTrue(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+
+        currBoardState.shield.forEach((card) => {
+            card["flip"] = true
+        })
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+
     // ========================================================================================================================================================
     // HTML
     
@@ -837,12 +911,13 @@ function Play ({deck, setDeck}) {
             {/* 説明 */}
             <div id="area0" class="boxLayout">
                 <div class="boxTitle">説明</div>
-                <div>Spacebar = カード選択した状態でカードを裏向き表示</div>
-                <div>Esc = 選択カードリセット</div>
-                <div>M = カード拡大モード</div>
-                <div>O = カード選択した状態でカードを重ねる</div>
-                <div>R = 全カードアンタップ</div>
-                <div>T = カード選択した状態でカードをタップ</div>
+                <div><b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> = 選択カードリセット | <b>M</b> = カード拡大モード | <b>O</b> = カード選択した状態でカードを重ねる | <b>R</b> = 全カードアンタップ | <b>T</b> = カード選択した状態でカードをタップ</div>
+            </div>
+
+            {/* データ */}
+            <div id="area0" class="boxLayout">
+                <div class="boxTitle">ターン(<span id="turnCounter">{turnCounter}</span>)</div>
+                <div class="boxTitle">Sortable?(<span id="canSortable">{canSortable.toString()}</span>)</div>
             </div>
 
             {/* バトルゾーン */}
@@ -850,9 +925,11 @@ function Play ({deck, setDeck}) {
                 <div class="boxTitle">
                     バトルゾーン(<span id="battle.length">{boardState.battle.length}</span>)
                     <a id="battleSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                    <a id="battleDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                 </div>
                 <div class="buttonLayout">
                     <a id="placeholder_battle_00" class="button" onClick={overlap}>選択カードを重ねる</a>
+                    <a id="placeholder_battle_01" class="button" onClick={battleTapAll}>全てタップ</a>
                     <a id="placeholder_battle_01" class="button" onClick={battleUntapAll}>全てアンタップ</a>
                 </div>
                 <div class="boxLayout">
@@ -884,10 +961,11 @@ function Play ({deck, setDeck}) {
                 <div class="boxTitle">
                     シールドゾーン(<span id="shield.length">{boardState.shield.length}</span>)
                     <a id="shieldSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                    <a id="shieldDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                 </div>
                 <div class="buttonLayout">
-                    <a id="placeholder_shield_00" class="button">placeholder_shield_00</a>
-                    <a id="placeholder_shield_01" class="button">placeholder_shield_01</a>
+                    <a id="placeholder_shield_00" class="button" onClick={shieldFlipAllFalse}>シールド全て表</a>
+                    <a id="placeholder_shield_01" class="button" onClick={shieldFlipAllTrue}>シールド全て裏</a>
                 </div>
                 <div class="boxLayout">
                     <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -909,6 +987,7 @@ function Play ({deck, setDeck}) {
                     <div class="boxTitle">
                         手札(<span id="hand.length">{boardState.hand.length}</span>)
                         <a id="handSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                        <a id="handDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
                         <a id="handBottom" class="button" onClick={bottom}>山札の下に置く</a>
@@ -931,10 +1010,12 @@ function Play ({deck, setDeck}) {
                     <div class="boxTitle">
                         マナゾーン(<span id="mana.length">{boardState.mana.length}</span>)
                         <a id="manaSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                        <a id="manaDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
+                        <a id="manaTapAll" class="button" onClick={manaTapAll}>全てタップ</a>
                         <a id="manaUntapAll" class="button" onClick={manaUntapAll}>全てアンタップ</a>
-                        <a id="placeholder_mana_02" class="button">placeholder_mana_02</a>
+                        <a id="placeholder_mana_02" class="button" onClick={manaBoost}>1枚マナブースト</a>
                     </div>
                     <div class="boxLayout">
                         <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -953,6 +1034,7 @@ function Play ({deck, setDeck}) {
                     <div class="boxTitle">
                         墓地(<span id="hand.length">{boardState.trash.length}</span>)
                         <a id="trashSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                        <a id="trashDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
                         <a id="trashBottom" class="button" onClick={bottom}>山札の下に置く</a>
@@ -989,8 +1071,8 @@ function Play ({deck, setDeck}) {
                         <button type='submit'>1枚ドロー</button>
                     </form>
                     
-                    <form onSubmit={untapAllDrawOnce}>
-                        <button type='submit'>マナアンタップ、1枚ドロー（ターンドロー）</button>
+                    <form onSubmit={turnDraw}>
+                        <button type='submit'>ターンドロー</button>
                     </form>
                     
                     <form onSubmit={setOneShield}>
@@ -1017,6 +1099,7 @@ function Play ({deck, setDeck}) {
                 <div class="boxTitle">
                     山札上(<span id="deckTop.length">{boardState.deckTop.length}</span>)枚確認
                     <a id="deckTopSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                    <a id="deckTopDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                 </div>
                 <div class="buttonLayout">
                     <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
@@ -1040,6 +1123,7 @@ function Play ({deck, setDeck}) {
                 <div class="boxTitle">
                     デッキ確認(<span id="deck.length">{boardState.deck.length}</span>)
                     <a id="deckSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                    <a id="deckDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                 </div>
                 <div class="buttonLayout">
                     <a id="placeholder_deck_00" class="button">placeholder_deck_00</a>
