@@ -230,7 +230,7 @@ function Play ({deck, setDeck}) {
             if (elementsToRemove.length > 0) {
                 for (var i = 0; i < elementsToRemove.length; i++) {
                     let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
-                    currTarget[groupIdx].push(card)
+                    currTarget[groupIdx].unshift(card)
                 }
             }
         }
