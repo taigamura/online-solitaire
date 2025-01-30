@@ -230,7 +230,7 @@ function Play ({deck, setDeck}) {
             if (elementsToRemove.length > 0) {
                 for (var i = 0; i < elementsToRemove.length; i++) {
                     let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
-                    currTarget[groupIdx].push(card)
+                    currTarget[groupIdx].unshift(card)
                 }
             }
         }
@@ -800,20 +800,59 @@ function Play ({deck, setDeck}) {
     function selectAll(e) {
         let source = e.target.id.replace("SelectAll", "")
         const currCardsInPlay = []
-        boardState[source].forEach((card, i) => {
-            currCardsInPlay.push(card)
-        })
 
-        // handle overlappedCards
-        // if (source == "battle") {
-        //     boardState.overlappedCards.forEach((group, i) => {
-        //         group.forEach((card, j) => {
-        //             currCardsInPlay.push(card)
-        //         })
-        //     })
-        // }
+        if (!source.includes("overlap")) {
+            boardState[source].forEach((card, i) => {
+                currCardsInPlay.push(card)
+            })
+        } else {
+            let sourceId = parseInt(source.replace("overlap", ""))
+            boardState.overlappedCards.forEach((group, i) => {
+                if (sourceId == i) {
+                    group.forEach((card, j) => {
+                        currCardsInPlay.push(card)
+                    })
+                }
+            })
+        }
 
         setCardsInPlay(currCardsInPlay)
+    }
+
+    function overlapUntapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+        
+        let sourceId = parseInt(e.target.id.replace("overlap", ""))
+        
+        currBoardState.overlappedCards.forEach((group, i) => {
+            if (sourceId == i) {
+                group.forEach((card) => {
+                    card["tap"] = false
+                })
+            }
+        })
+
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+    
+    function overlapTapAll(e) {
+		e?.preventDefault();
+        const currBoardState = {...boardState}
+        
+        let sourceId = parseInt(e.target.id.replace("overlap", ""))
+        
+        currBoardState.overlappedCards.forEach((group, i) => {
+            if (sourceId == i) {
+                group.forEach((card) => {
+                    card["tap"] = true
+                })
+            }
+        })
+
+        setCardsInPlay([])
+        setBoardState(currBoardState)
     }
 
     function battleUntapAll(e) {
@@ -824,8 +863,10 @@ function Play ({deck, setDeck}) {
             card["tap"] = false
         })
         
-        currBoardState.overlappedCards.forEach((card) => {
-            card["tap"] = false
+        currBoardState.overlappedCards.forEach((group) => {
+            group.forEach((card) => {
+                card["tap"] = false
+            })
         })
 
         setCardsInPlay([])
@@ -840,8 +881,10 @@ function Play ({deck, setDeck}) {
             card["tap"] = true
         })
         
-        currBoardState.overlappedCards.forEach((card) => {
-            card["tap"] = true
+        currBoardState.overlappedCards.forEach((group) => {
+            group.forEach((card) => {
+                card["tap"] = true
+            })
         })
 
         setCardsInPlay([])
@@ -902,6 +945,28 @@ function Play ({deck, setDeck}) {
         setBoardState(currBoardState)
     }
 
+    function undoOverlap(e) {
+		e?.preventDefault();
+        let sourceId = parseInt(e.target.id.replace("overlap", ""))
+        
+        const currBoardState = {...boardState}
+        currBoardState.overlappedCards.forEach((group, i) => {
+            if (i == sourceId) {
+                while (group.length > 0) {
+                    let currCard = group.pop()
+                    currCard["source"] = "battleWrap"
+                    currBoardState.battle.push(currCard)
+                }
+            }
+        })
+
+        // filter empty array from array
+        currBoardState.overlappedCards = currBoardState.overlappedCards.filter(x => x.length)
+
+        setCardsInPlay([])
+        setBoardState(currBoardState)
+    }
+
     // ========================================================================================================================================================
     // HTML
     
@@ -943,14 +1008,21 @@ function Play ({deck, setDeck}) {
                             ))}
                         </ul>
                         {boardState.overlappedCards?.map((group, i) => (
-                            <ul id="overlappedCardsWrap" class="cardWrap overlapWrap">
-                                {group.map((card, j) => (
-                                    <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown}>
-                                        {handleCardImg(card)}
-                                        {handleCardOverlay(card["id"])}
-                                    </li>
-                                ))}
-                            </ul>
+                            <div>
+                                <a id={"overlap" + i + "SelectAll"} class="button" onClick={selectAll}>全選択</a>
+                                <a id={"overlap" + i + "DeselectAll"} class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
+                                <a id={"overlap" + i} class="button" style={{marginLeft: 10 + "px"}} onClick={undoOverlap}>重ね解除</a>
+                                <a id={"overlap" + i + "TapAll"} class="button" style={{marginLeft: 10 + "px"}} onClick={overlapTapAll}>全てタップ</a>
+                                <a id={"overlap" + i + "UntapAll"} class="button" style={{marginLeft: 10 + "px"}} onClick={overlapUntapAll}>全てアンタップ</a>
+                                <ul id="overlappedCardsWrap" class="cardWrap overlapWrap">
+                                    {group.map((card, j) => (
+                                        <li id={j} class={handleCardClass(card) + " overlap"} draggable="true" onMouseDown={handleMouseDown}>
+                                            {handleCardImg(card)}
+                                            {handleCardOverlay(card["id"])}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         ))}
                     </div>
                 </div>
