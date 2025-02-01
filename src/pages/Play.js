@@ -316,17 +316,20 @@ function Play ({deck, setDeck}) {
         let target = targetSource.replace("Wrap", "")
 
         if ((source.includes("overlap") || target.includes("overlap")) && source != target) {
-            changedState = handleMovementOfCardOverlap(boardState[source], boardState[target], e.target.id)
-            currBoardState[source] = changedState[0]
-            // if target is overlapped or not
-            if (Array.isArray(changedState[1][0])) {
-                changedState[1].map(group => group.map(card => card["source"] = targetSource))
-            } else {
-                changedState[1].map(card => card["source"] = targetSource)
+            // if not dropped in empty space of overlappedCardsWrap
+            if (!e.target.id.includes("overlappedCardsWrap")) {
+                changedState = handleMovementOfCardOverlap(boardState[source], boardState[target], e.target.id)
+                currBoardState[source] = changedState[0]
+                // if target is overlapped or not
+                if (Array.isArray(changedState[1][0])) {
+                    changedState[1].map(group => group.map(card => card["source"] = targetSource))
+                } else {
+                    changedState[1].map(card => card["source"] = targetSource)
+                }
+                console.log(changedState[1])
+                currBoardState[target] = changedState[1]
+                setBoardState(currBoardState)
             }
-            console.log(changedState[1])
-            currBoardState[target] = changedState[1]
-            setBoardState(currBoardState)
         }
         else if (source != target) {
             changedState = handleMovementOfCard(boardState[source], boardState[target])
