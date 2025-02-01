@@ -26,7 +26,8 @@ function Play ({deck, setDeck}) {
     const [canMagnify, setCanMagnify] = useState(false);
     const [canOverlap, setCanOverlap] = useState(true);
     const [canSortable, setCanSortable] = useState(false);
-    const [mouseRight, setMouseRight] = useState(false)
+    const [mouseRight, setMouseRight] = useState(false);
+    const [overlapTop, setOverlapTop] = useState(false);
 
     const allCards = Object.values(boardState)
     const allPlayableAreaIds = Object.keys(boardState).map(x => x + "Wrap")
@@ -230,7 +231,13 @@ function Play ({deck, setDeck}) {
             if (elementsToRemove.length > 0) {
                 for (var i = 0; i < elementsToRemove.length; i++) {
                     let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0]
-                    currTarget[groupIdx].unshift(card)
+
+                    // if overlapTop = true, then dropped cards are on top
+                    if (overlapTop) {
+                        currTarget[groupIdx].unshift(card)
+                    } else {
+                        currTarget[groupIdx].push(card)
+                    }
                 }
             }
         }
@@ -612,6 +619,15 @@ function Play ({deck, setDeck}) {
         }
     }
 
+    function handleOverlapTop(e) {
+		e.preventDefault();
+        if (overlapTop) {
+            setOverlapTop(false)
+        } else {
+            setOverlapTop(true)
+        }
+    }
+
     function handleReset(e) {
 		e.preventDefault();
 
@@ -970,6 +986,14 @@ function Play ({deck, setDeck}) {
         setBoardState(currBoardState)
     }
 
+    function getOverlapTopMessage() {
+        if (overlapTop) {
+            return "下に重ねるモード"
+        } else {
+            return "上に重ねるモード"
+        }
+    }
+
     // ========================================================================================================================================================
     // HTML
     
@@ -1160,6 +1184,10 @@ function Play ({deck, setDeck}) {
                     
                     <form onSubmit={handleViewDeck}>
                         <button type='submit'>デッキを確認</button>
+                    </form>
+                    
+                    <form onSubmit={handleOverlapTop}>
+                        <button type='submit'>{getOverlapTopMessage()}</button>
                     </form>
                     
                     <form onSubmit={handleReset}>
