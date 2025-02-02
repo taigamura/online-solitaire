@@ -244,7 +244,8 @@ function Play ({deck, setDeck}) {
         return [currSource, currTarget]
     }
 
-    function tap() {
+    function tap(e) {
+        e?.preventDefault();
         const currCardsInPlay = [...cardsInPlay]
 
         currCardsInPlay.forEach((card, i) => {
@@ -564,6 +565,28 @@ function Play ({deck, setDeck}) {
         setBoardState(currBoardState)
     }
     
+    function flip(e) {
+        e?.preventDefault();
+        cardsInPlay.forEach((element, i) => {
+            flipCardWithId(element["id"])
+        })
+    }
+
+    function resetSelected(e) {
+        e?.preventDefault();
+        setCardsInPlay([])
+    }
+
+    function toggleMagnify(e) {
+        e?.preventDefault();
+        if (canMagnify) {
+            setCanMagnify(false)
+        } else {
+            setCanMagnify(true)
+        }
+
+    }
+
     function handleKeyDown(e) {
         // m
         if (e.keyCode === 77) {
@@ -575,14 +598,12 @@ function Play ({deck, setDeck}) {
 
     function handleKeyUp(e) {
         // space
-        if (e.keyCode === 32) { 
-            cardsInPlay.forEach((element, i) => {
-                flipCardWithId(element["id"])
-            })
+        if (e.keyCode === 32) {
+            flip(e)
         }
         // esc
         if (e.keyCode === 27) {
-            setCardsInPlay([])
+            resetSelected(e)
         }
         // o
         if (e.keyCode === 79 && canOverlap) {
@@ -591,7 +612,7 @@ function Play ({deck, setDeck}) {
         }
         // t
         if (e.keyCode === 84) {
-            tap()
+            tap(e)
         }
         // m
         if (e.keyCode === 77) {
@@ -633,7 +654,8 @@ function Play ({deck, setDeck}) {
 
         copy.forEach((card) => { 
             card["tap"] = false 
-            card["flip"] = false 
+            card["flip"] = false
+            card["source"] = "deckWrap"
         })
 
         setBoardState({
@@ -988,9 +1010,17 @@ function Play ({deck, setDeck}) {
 
     function getOverlapTopMessage() {
         if (overlapTop) {
-            return "下に重ねるモード"
+            return "重ねるモード（現在：下）"
         } else {
-            return "上に重ねるモード"
+            return "重ねるモード（現在：上）"
+        }
+    }
+    
+    function getMagnifyMessage() {
+        if (canMagnify) {
+            return "拡大モード（現在：ON）"
+        } else {
+            return "拡大モード（現在：OFF）"
         }
     }
 
@@ -1008,8 +1038,29 @@ function Play ({deck, setDeck}) {
 
             {/* データ */}
             <div id="area0" class="boxLayout">
-                <div class="boxTitle">ターン(<span id="turnCounter">{turnCounter}</span>)</div>
-                <div class="boxTitle">Sortable?(<span id="canSortable">{canSortable.toString()}</span>)</div>
+                <div>現在ターン：<span id="turnCounter">{turnCounter}</span></div>
+                <div>Sortable：<span id="canSortable">{canSortable.toString()}</span></div>
+                
+                <form onSubmit={handleOverlapTop}>
+                    <button type='submit'>{getOverlapTopMessage()}</button>
+                </form>
+                
+                <form onSubmit={toggleMagnify}>
+                    <button type='submit'>{getMagnifyMessage()}</button>
+                </form>
+
+                <form onSubmit={tap}>
+                    <button type='submit'>選択カードタップ</button>
+                </form>
+                
+                <form onSubmit={flip}>
+                    <button type='submit'>選択カード裏返し</button>
+                </form>
+                
+                <form onSubmit={resetSelected}>
+                    <button type='submit'>選択カードリセット</button>
+                </form>
+                
             </div>
 
             {/* バトルゾーン */}
@@ -1184,10 +1235,6 @@ function Play ({deck, setDeck}) {
                     
                     <form onSubmit={handleViewDeck}>
                         <button type='submit'>デッキを確認</button>
-                    </form>
-                    
-                    <form onSubmit={handleOverlapTop}>
-                        <button type='submit'>{getOverlapTopMessage()}</button>
                     </form>
                     
                     <form onSubmit={handleReset}>
