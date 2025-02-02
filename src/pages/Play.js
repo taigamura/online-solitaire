@@ -1106,32 +1106,30 @@ function Play ({deck, setDeck}) {
                 </div>
             </div>
             
-            {/* シールドゾーン */}
-            <div id="area1" class="boxLayout">
-                <div class="boxTitle">
-                    シールドゾーン(<span id="shield.length">{boardState.shield.length}</span>)
-                    <a id="shieldSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
-                    <a id="shieldDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
+            <div id="area1" class="columnLayoutBottom">
+                {/* シールドゾーン */}
+                <div id="shield" class="boxLayout">
+                    <div class="boxTitle">
+                        シールドゾーン(<span id="shield.length">{boardState.shield.length}</span>)
+                        <a id="shieldSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                        <a id="shieldDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
+                    </div>
+                    <div class="buttonLayout">
+                        <a id="placeholder_shield_00" class="button" onClick={shieldFlipAllFalse}>シールド全て表</a>
+                        <a id="placeholder_shield_01" class="button" onClick={shieldFlipAllTrue}>シールド全て裏</a>
+                    </div>
+                    <div class="boxLayout">
+                        <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {boardState.shield?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-                <div class="buttonLayout">
-                    <a id="placeholder_shield_00" class="button" onClick={shieldFlipAllFalse}>シールド全て表</a>
-                    <a id="placeholder_shield_01" class="button" onClick={shieldFlipAllTrue}>シールド全て裏</a>
-                </div>
-                <div class="boxLayout">
-                    <ul id="shieldWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {boardState.shield?.map((card, index) => (
-                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
-                                {handleCardImg(card)}
-                                {handleCardOverlay(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-            
-            {/* プレイヤーゾーン */}
-            <div id="area2" class="columnLayoutBottom">
-
+                
                 {/* 手札 */}
                 <div id="hand" class="boxLayout">
                     <div class="boxTitle">
@@ -1154,6 +1152,49 @@ function Play ({deck, setDeck}) {
                         </div>
                     </div>
                 </div>
+                
+                {/* デッキ */}
+                <div id="deck" class="boxLayout">
+                    <div class="boxTitle">
+                        デッキ(<span id="deck.length">{boardState.deck.length}</span>)
+                    </div>
+                    
+                    <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
+                        <button type='submit'>シャッフル, 5枚ドロー, 5枚シールド化</button>
+                    </form>
+
+                    <form onSubmit={shuffle}>
+                        <button type='submit'>シャッフル</button>
+                    </form>
+
+                    <form onSubmit={draw}>
+                        <button type='submit'>1枚ドロー</button>
+                    </form>
+                    
+                    <form onSubmit={turnDraw}>
+                        <button type='submit'>ターンドロー</button>
+                    </form>
+                    
+                    <form onSubmit={setOneShield}>
+                        <button type='submit'>1枚シールド化</button>
+                    </form>
+
+                    <form onSubmit={handleDeckTop}>
+                        <button type='submit'>デッキ上1枚確認</button>
+                    </form>
+                    
+                    <form onSubmit={handleViewDeck}>
+                        <button type='submit'>デッキを確認</button>
+                    </form>
+                    
+                    <form onSubmit={handleReset}>
+                        <button type='submit'>リセット</button>
+                    </form>
+                </div>
+            </div>
+            
+            {/* プレイヤーゾーン */}
+            <div id="area2" class="columnLayoutBottom">
 
                 {/* マナゾーン */}
                 <div id="mana" class="boxLayout">
@@ -1202,46 +1243,6 @@ function Play ({deck, setDeck}) {
                         </ul>
                     </div>
                 </div>
-
-                {/* デッキ */}
-                <div id="deck" class="boxLayout">
-                    <div class="boxTitle">
-                        デッキ(<span id="deck.length">{boardState.deck.length}</span>)
-                    </div>
-                    
-                    <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
-                        <button type='submit'>シャッフル, 5枚ドロー, 5枚シールド化</button>
-                    </form>
-
-                    <form onSubmit={shuffle}>
-                        <button type='submit'>シャッフル</button>
-                    </form>
-
-                    <form onSubmit={draw}>
-                        <button type='submit'>1枚ドロー</button>
-                    </form>
-                    
-                    <form onSubmit={turnDraw}>
-                        <button type='submit'>ターンドロー</button>
-                    </form>
-                    
-                    <form onSubmit={setOneShield}>
-                        <button type='submit'>1枚シールド化</button>
-                    </form>
-
-                    <form onSubmit={handleDeckTop}>
-                        <button type='submit'>デッキ上1枚確認</button>
-                    </form>
-                    
-                    <form onSubmit={handleViewDeck}>
-                        <button type='submit'>デッキを確認</button>
-                    </form>
-                    
-                    <form onSubmit={handleReset}>
-                        <button type='submit'>リセット</button>
-                    </form>
-                </div>
-
             </div>
             
             {/* 山札上X枚確認 */}
