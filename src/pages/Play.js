@@ -1243,31 +1243,31 @@ function Play ({deck, setDeck}) {
                         </ul>
                     </div>
                 </div>
+                
+                {/* 山札上X枚確認 */}
+                {viewDeckTop && <div id="deckTop" class="boxLayout">
+                    <div class="boxTitle">
+                        山札上(<span id="deckTop.length">{boardState.deckTop.length}</span>)枚確認
+                        <a id="deckTopSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
+                        <a id="deckTopDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
+                    </div>
+                    <div class="buttonLayout">
+                        <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
+                        <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
+                        <a id="deckTopShuffle" class="button" onClick={shuffleDeckTop}>シャッフル</a>
+                    </div>
+                    <div class="boxLayout">
+                        <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+                            {boardState.deckTop?.map((card, index) => (
+                                <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
+                                    {handleCardImg(card)}
+                                    {handleCardOverlay(card["id"])}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>}
             </div>
-            
-            {/* 山札上X枚確認 */}
-            {viewDeckTop && <div id="area3" class="boxLayout">
-                <div class="boxTitle">
-                    山札上(<span id="deckTop.length">{boardState.deckTop.length}</span>)枚確認
-                    <a id="deckTopSelectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={selectAll}>全選択</a>
-                    <a id="deckTopDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
-                </div>
-                <div class="buttonLayout">
-                    <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
-                    <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
-                    <a id="deckTopShuffle" class="button" onClick={shuffleDeckTop}>シャッフル</a>
-                </div>
-                <div class="boxLayout">
-                    <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-                        {boardState.deckTop?.map((card, index) => (
-                            <li id={index} class={handleCardClass(card)} draggable="true" onMouseDown={handleMouseDown}>
-                                {handleCardImg(card)}
-                                {handleCardOverlay(card["id"])}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>}
             
             {/* デッキ確認 */}
             {viewDeck && <div id="area4" class="boxLayout">
