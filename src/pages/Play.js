@@ -1138,8 +1138,8 @@ function Play ({deck, setDeck}) {
                         <a id="handDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="handBottom" class="button" onClick={bottom}>山札の下に置く</a>
-                        <a id="handTop" class="button" onClick={top}>山札の上に置く</a>
+                        <a id="handBottom" class="button" onClick={bottom}>選択カードを山札の下に置く</a>
+                        <a id="handTop" class="button" onClick={top}>選択カードを山札の上に置く</a>
                     </div>
                     <div class="boxLayout">
                         <div id="handWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -1160,7 +1160,7 @@ function Play ({deck, setDeck}) {
                     </div>
                     
                     <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
-                        <button type='submit'>シャッフル, 5枚ドロー, 5枚シールド化</button>
+                        <button type='submit'>シャッフル, 5 枚ドロー, 5 枚シールド化</button>
                     </form>
 
                     <form onSubmit={shuffle}>
@@ -1168,7 +1168,7 @@ function Play ({deck, setDeck}) {
                     </form>
 
                     <form onSubmit={draw}>
-                        <button type='submit'>1枚ドロー</button>
+                        <button type='submit'>1 枚ドロー</button>
                     </form>
                     
                     <form onSubmit={turnDraw}>
@@ -1206,7 +1206,7 @@ function Play ({deck, setDeck}) {
                     <div class="buttonLayout">
                         <a id="manaTapAll" class="button" onClick={manaTapAll}>全てタップ</a>
                         <a id="manaUntapAll" class="button" onClick={manaUntapAll}>全てアンタップ</a>
-                        <a id="placeholder_mana_02" class="button" onClick={manaBoost}>1枚マナブースト</a>
+                        <a id="placeholder_mana_02" class="button" onClick={manaBoost}>1 枚マナブースト</a>
                     </div>
                     <div class="boxLayout">
                         <ul id="manaWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
