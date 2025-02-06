@@ -1176,11 +1176,11 @@ function Play ({deck, setDeck}) {
                     </form>
                     
                     <form onSubmit={setOneShield}>
-                        <button type='submit'>1枚シールド化</button>
+                        <button type='submit'>1 枚シールド化</button>
                     </form>
 
                     <form onSubmit={handleDeckTop}>
-                        <button type='submit'>デッキ上1枚確認</button>
+                        <button type='submit'>デッキ上 1 枚確認</button>
                     </form>
                     
                     <form onSubmit={handleViewDeck}>
@@ -1228,8 +1228,8 @@ function Play ({deck, setDeck}) {
                         <a id="trashDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="trashBottom" class="button" onClick={bottom}>山札の下に置く</a>
-                        <a id="trashTop" class="button" onClick={top}>山札の上に置く</a>
+                        <a id="trashBottom" class="button" onClick={bottom}>選択カードを山札の下に置く</a>
+                        <a id="trashTop" class="button" onClick={top}>選択カードを山札の上に置く</a>
                         <a id="trashShuffle" class="button" onClick={shuffleDeckTop}>シャッフル</a>
                     </div>
                     <div class="boxLayout">
@@ -1252,9 +1252,10 @@ function Play ({deck, setDeck}) {
                         <a id="deckTopDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                     </div>
                     <div class="buttonLayout">
-                        <a id="deckTopBottom" class="button" onClick={bottom}>山札の下に置く</a>
-                        <a id="deckTopTop" class="button" onClick={top}>山札の上に置く</a>
+                        <a id="deckTopBottom" class="button" onClick={bottom}>選択カードを山札の下に置く</a>
+                        <a id="deckTopTop" class="button" onClick={top}>選択カードを山札の上に置く</a>
                         <a id="deckTopShuffle" class="button" onClick={shuffleDeckTop}>シャッフル</a>
+                        <a id="deckTopOne" class="button" onClick={handleDeckTop}>デッキ上 1 枚確認</a>
                     </div>
                     <div class="boxLayout">
                         <ul id="deckTopWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
@@ -1277,8 +1278,7 @@ function Play ({deck, setDeck}) {
                     <a id="deckDeselectAll" class="button" style={{marginLeft: 10 + "px"}} onClick={deselectAll}>全解除</a>
                 </div>
                 <div class="buttonLayout">
-                    <a id="placeholder_deck_00" class="button">placeholder_deck_00</a>
-                    <a id="placeholder_deck_01" class="button">placeholder_deck_01</a>
+                    <a id="deckShuffle" class="button" onClick={shuffle}>シャッフル</a>
                 </div>
                 <div class="boxLayout">
                     <ul id="deckWrap" class="cardWrap" onDrop={drop} onDragOver={allowDrop}>
