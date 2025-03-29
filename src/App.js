@@ -12,6 +12,10 @@ function App() {
 
 	return (
 		<div>
+			<head>
+				<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6862698457969651"
+				crossorigin="anonymous"></script>
+			</head>
 			<Routes>
 				<Route path="/" element={<Deckbuild deck={deck} setDeck={setDeck} />} />
 				<Route path="/play" element={<Play deck={deck} setDeck={setDeck} />} />
