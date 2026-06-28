@@ -37,6 +37,10 @@ Run `npm run format` to auto-fix formatting. `npm run lint:strict` shows lint wa
   removed; do not add more of it.
 - When you extract pure game logic (move card between zones, draw, shuffle, tap, flip, overlap),
   put it in `src/game/` as pure functions and add unit tests — these are the cheapest safety net.
+  `src/game/` code must stay free of React and browser globals (`File`, `URL.createObjectURL`) so
+  it runs in plain Jest. Functions that use randomness take an injectable `rng = Math.random` for
+  deterministic tests. Tests fabricate cards with the `src/game/__fixtures__` `makeCard` factory
+  (`file: null` — pure logic only needs `id`/`source`/`flip`/`tap`, never the image).
 - Keep the Japanese UI copy intact unless a task is specifically about wording.
 - This is a playtester, not a rules engine: it does not enforce Duel Masters rules, it just moves
   cards where the user drags them. Keep it that way unless asked.
