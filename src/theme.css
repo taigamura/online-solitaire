@@ -1,0 +1,64 @@
+/* theme.css — dark-neon design tokens (PRD #36 / fix_plan #37 foundation).
+
+   Phase-1 prefactor: this file defines the token vocabulary. Existing Play /
+   Deckbuild CSS reads the structural/neutral tokens at the bottom, whose values
+   match the pre-redesign look, so nothing changes visually yet. The dark-neon
+   base palette + civilization accents are the foundation the later themed-chrome
+   / playmat passes (#39–#43) build on. */
+
+:root {
+  /* ---- Dark-neon base palette (foundation for later chrome; not yet applied) ---- */
+  --color-bg: #0a0a12;
+  --color-surface: #14141f;
+  --color-surface-raised: #1e1e2e;
+  --color-text: #e8e8f0;
+  --color-text-muted: #9a9ab0;
+  --color-neon-cyan: #22d3ee;
+  --color-neon-magenta: #e84393;
+  --color-neon-purple: #a855f7;
+
+  /* ---- Civilization accent colors (Duel Masters five civilizations) ---- */
+  --civ-light: #f4e04d; /* 光 */
+  --civ-water: #2f9be0; /* 水 */
+  --civ-darkness: #6b4b8a; /* 闇 */
+  --civ-fire: #e0492f; /* 火 */
+  --civ-nature: #3fae62; /* 自然 */
+
+  /* ---- Spacing scale ---- */
+  --space-1: 2px;
+  --space-2: 5px;
+  --space-3: 10px;
+  --space-4: 15px;
+  --space-5: 30px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 5px;
+  --radius-md: 10px;
+  --radius-pill: 34px;
+
+  /* ---- Shadows / glows (foundation for later) ---- */
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --glow-neon: 0 0 8px rgba(34, 211, 238, 0.6);
+
+  /* ---- Typography ---- */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  --font-size-sm: 12px;
+  --font-size-md: 16px;
+
+  /* ---- Card sizing (folded in from Play.css) ---- */
+  --card-height: calc(88px * 2);
+  --card-width: calc(63px * 2);
+
+  /* ---- Neutral / structural tokens (current pre-redesign values) ---- */
+  --color-border: #999999;
+  --color-ink: #222222;
+  --color-on-ink: #ffffff;
+  --color-title-muted: #777777;
+  --color-paper: #ffffff;
+  --color-scrim: rgba(0, 0, 0, 0.5);
+  --color-toggle-off: #ccc;
+  --color-toggle-on: #2196f3;
+}

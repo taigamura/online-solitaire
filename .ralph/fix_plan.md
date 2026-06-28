@@ -1,18 +1,96 @@
 # Ralph Fix Plan
 
-Scope: code-health + test-foundation only. No new features, no UX/visual work, no dependency
-swaps, no bug-audits (see `CLAUDE.md` and the "Out of scope" note below). Work the **single
-highest unchecked item** per loop, top to bottom.
+Scope: the **dark-neon redesign** authorized by the #36 PRD — a design-token foundation,
+ad-safe image-free content pages (landing / about / privacy), a routing restructure
+(Deckbuild → `/build`), dark-neon themed chrome, and a Play-board usability rework (playmat
+layout + contextual selection-toolbar + a pure action-availability helper). This PRD is the
+"later supervised pass" that `CLAUDE.md`/`PROMPT.md` deferred all UX/layout/CSS work to — it
+authorizes that work but **does not change the playtester's game behavior**. Work the **single
+highest unchecked item** per loop, top to bottom; the order is dependency-sorted so the top
+unchecked item is always unblocked.
 
 **Definition of done (every item):** `npm run verify` is green (format + tests + build); exactly
 **one** commit on the `dev` branch; if you can't make `verify` green, revert and report — do not
-leave it red. Prefer immutable updates; `src/game/` code stays free of React and browser globals
-(`File`, `URL.createObjectURL`); randomness takes an injectable `rng = Math.random`; tests build
-cards with the `src/game/__fixtures__` `makeCard` factory. GitHub issue refs are for humans — do
-not push or open PRs.
+leave it red. Preserve all existing playtester behavior and keyboard shortcuts (Space/Esc/M/O/R/T).
+Prefer immutable updates — **do not add new in-place mutation of `boardState` card objects**.
+`src/game/` code stays free of React and browser globals (`File`, `URL.createObjectURL`);
+randomness takes an injectable `rng = Math.random`; tests build cards with the
+`src/game/__fixtures__` `makeCard` factory (`file: null`). No new styling dependencies (plain CSS
++ CSS custom-property tokens only). No Duel Masters logos, official fonts, or official card art.
+GitHub issue refs are for humans — do not push or open PRs.
 
-## High Priority — test foundation (do first; each = extract + test)
+## High Priority — Phase 1: token foundation + ad-safe surface (ships the striking, monetizable-ready result first)
 
+- [ ] **Routing restructure + Landing stub + routing test (#38).** Move Deckbuild from `/` to
+      `/build`; keep Play at `/play`; add a minimal **Landing stub** at `/` (full content comes in
+      #40); add lightweight nav between landing/build/play. Keep the lifted `deck` state flowing from
+      App into Deckbuild and Play unchanged. Add the RTL + memory-router test (Seam 1) asserting `/`→
+      Landing, `/build`→Deckbuild, `/play`→Play.
+- [ ] **Striking dark-neon Landing page (#40).** Replace the Landing stub with the full responsive,
+      Japanese, **image-free** landing page (hero + "what is this / how it works" + CTA into
+      `/build`), built on the tokens. Add a reserved ad-slot placeholder for the later AdSense slice.
+      Add the ad-safety test (Seam 2) asserting the page renders **no card `<img>` elements**.
+- [ ] **About/how-to-use + Privacy-policy content pages (#41).** Two responsive, Japanese,
+      dark-neon, **image-free** content pages: an about/how-to-use guide (uploading cards, building a
+      deck, using the board) and a privacy policy covering cookies + third-party (AdSense) ad
+      serving. Each reserves an ad slot; both reachable from the site nav; both covered by the
+      ad-safety test (Seam 2 — no card `<img>`).
+
+## Medium Priority — Phase 2–3: themed chrome + board UX rework
+
+- [ ] **Dark-neon themed chrome on Deckbuild + Play (#39).** Apply the token theme to Deckbuild and
+      Play **chrome** — headers, buttons, zone frames, page backgrounds — while keeping the
+      **card-playing surface calm/neutral** so card art and tap/flip/selected states stay readable.
+      Restyle only: **no** layout reorganization and **no** behavior change.
+- [ ] **Playmat-style board layout + color-coded zones + desktop-first notice (#42).** Rework the
+      Play board from the vertical stack of identical boxes into a **playmat-style fixed layout** with
+      **color-coded zone framing** (civilization→zone mapping tuned from screenshots), aiming for a
+      single surface with minimal desktop scrolling. Add a friendly small-screen "best experienced on
+      desktop" notice (no touch-drag impl). Drag/drop routing, tap/flip/overlap/shuffle/draw, and all
+      keyboard shortcuts must work exactly as before.
+- [ ] **Declutter board: contextual selection-toolbar + structural icon buttons + action-availability
+      fn (#43).** Extract a **pure `src/game/` function** that, given the selection and the zones its
+      cards are in, returns the set of valid actions — with unit tests (Seam 3) via `makeCard` (empty
+      selection → no actions; a selection in a given zone → expected set). Render a **single
+      contextual selection-toolbar** that appears only when cards are selected and shows only valid
+      actions (tap/flip/reset/send-to-top/send-to-bottom), plus an RTL smoke test (hidden with no
+      selection, shown with one). Convert per-zone **structural** actions (shuffle, draw,
+      select-all/deselect-all, …) into compact **icon buttons with tooltips**. Relocate/consolidate
+      controls only — behavior and shortcuts unchanged.
+
+## Low Priority — Phase 4: ad enablement (in-app wiring only; live ads gated on external deploy/approval)
+
+- [ ] **AdSense snippet wiring on safe pages (#44).** Wire the Google AdSense snippet into the
+      reserved slots on the **image-free** pages only (landing/about/privacy); Play and Deckbuild stay
+      permanently ad-free. Read the publisher/client id from configuration so it ships dark and
+      no-ops cleanly when unset. The ad-safety tests (no card images on ad pages) must still pass.
+      Account creation, deployment, domain, and AdSense approval are external and **out of scope**.
+
+## Out of scope this session (do NOT do — defer to a supervised pass)
+
+Live AdSense account creation, site deployment, domain purchase, and AdSense approval (external,
+non-code). Any product feature beyond the redesign: deck save/load, multiple decks, undo, online
+play, an opponent, or rules enforcement — this stays a single-player playtester that moves cards
+where the user drags them. Touch/mobile drag-and-drop for the Play board (desktop-first + notice).
+A second language for the new pages (Japanese only). Any Duel Masters logos, official fonts, or
+official card art. The still-deferred code-health audits (`<Zone>`/`<Card>` component split,
+replacing `react-image-magnifiers`, the `useEffect`-deps rewrite, `handleReset`/`top`/`bottom`
+correctness audits) — except where the board rework naturally touches them, in which case behavior
+must be preserved, not changed.
+
+## Completed
+- [x] **Design-token foundation + remove CRA boilerplate (#37).** Added `src/theme.css` — one
+      `:root` token vocabulary: dark-neon base palette + the five civ accents (`--civ-light/water/
+      darkness/fire/nature`) + spacing/radius/shadow-glow/typography scales (foundation for #39–#43,
+      not yet applied to chrome), plus neutral/structural tokens holding the *current* greys/whites
+      so nothing changes visually. Folded `--card-height`/`--card-width` in (removed the `:root`
+      block from Play.css). Imported `theme.css` in `index.js` before `index.css`. Refactored
+      Play.css (all hex/rgba colors, radii, common spacings, font sizes → tokens) and index.css
+      (body/code font-family → `--font-sans`/`--font-mono`); Deckbuild.css had no colors/sizes to
+      tokenize. Deleted CRA boilerplate: `src/App.css` (unused `.App*`/logo-spin styles) + its import
+      in App.js, and the unreferenced `src/logo.svg`. No `#hex`/`rgba`/`white` left in Play.css.
+      verify green (45 tests). NOTE: structural tokens (`--color-ink`, `--color-paper`, etc.) are the
+      light-themed seam the #39 themed-chrome pass will re-point at the dark-neon palette.
 - [x] **Keystone (#27).** Created `src/game/shuffle.js` (pure Fisher–Yates, injectable `rng`),
       `src/game/__fixtures__/makeCard.js`, and `src/game/shuffle.test.js` (id-multiset preserved
       over 200 runs, no input mutation, stubbed `rng` → exact permutation). Rewired `Play.js`
@@ -50,9 +128,6 @@ not push or open PRs.
       the selection to the new objects. NOTE: left `handleReset`'s `copy.forEach` tap/flip/source
       mutation alone — it rewrites `source` on the master deck `copy` ref and is flagged for the
       supervised `handleReset` correctness pass (Out of scope). verify green.
-
-## Medium Priority — mechanical sweeps (build/format-verified; no new tests required)
-
 - [x] **Remove console.logs (#32).** Deleted the 7 remaining `console.log`s in `Play.js` (overlap
       illegal-card checks ×2, `drop` e.target/sourceId/targetSource ×3, `changedCardsInPlay`, and the
       `run overlap` keydown log — the other 2 of the original 9 were already removed in #29/#30). No
@@ -74,12 +149,7 @@ not push or open PRs.
       to `deckView.length`. `grep | uniq -d` now reports zero duplicate static ids. None of these ids
       are referenced in JS (`getElementById`/`e.target.id`) or `Play.css`, so drag/drop routing
       (which keys off the `*Wrap` ids) is unaffected. verify green.
-
-## Out of scope (do NOT do — defer to a supervised pass)
-
-`handleReset`/`top`/`bottom` correctness audits; `<Zone>`/`<Card>` component split; replacing
-`react-image-magnifiers`; the `useEffect`-deps rewrite; all UX/layout/CSS/button polish; any new
-product feature; enforcing Duel Masters rules.
-
-## Completed
 - [x] Project enabled for Ralph
+
+## Notes
+- One focused change per loop; one commit; never leave the verify gate red.
