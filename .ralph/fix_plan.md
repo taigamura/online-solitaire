@@ -53,7 +53,10 @@ not push or open PRs.
 
 ## Medium Priority — mechanical sweeps (build/format-verified; no new tests required)
 
-- [ ] **Remove console.logs (#32).** Delete the 9 leftover `console.log`s in `Play.js`.
+- [x] **Remove console.logs (#32).** Deleted the 7 remaining `console.log`s in `Play.js` (overlap
+      illegal-card checks ×2, `drop` e.target/sourceId/targetSource ×3, `changedCardsInPlay`, and the
+      `run overlap` keydown log — the other 2 of the original 9 were already removed in #29/#30). No
+      `console.log` left in `src/`. verify green; bundle shrank 81B.
 - [ ] **class → className (#33).** Convert ~104 raw `class=` attributes in `Play.js` and
       `Deckbuild.js` to `className=`; rendered output unchanged.
 - [ ] **Strict equality (#34).** Convert the ~25 loose `==`/`!=` to `===`/`!==`, reviewing each for

@@ -199,7 +199,6 @@ function Play({ deck, setDeck }) {
 
       // only overlap if cards are in battle zone
       if (!(card['source'] == 'battleWrap' || card['source'] == 'overlappedCardsWrap')) {
-        console.log('card["source"]', card['source']);
         illegalCards.push(card);
       }
     });
@@ -207,7 +206,6 @@ function Play({ deck, setDeck }) {
     // check if overlap is called on already overlapped cards in same group
     // diff groups cannot be selected to begin with in handleMouseDown
     if (illegalCards.length > 0) {
-      console.log(illegalCards);
       window.alert('同じグループで呼び出し禁止');
       setCardsInPlay([]);
     } else {
@@ -235,8 +233,6 @@ function Play({ deck, setDeck }) {
   }
 
   function drop(e) {
-    console.log('e.target:', e.target);
-
     const currBoardState = { ...boardState };
     const currCardsInPlay = [...cardsInPlay];
     let targetSource =
@@ -246,9 +242,6 @@ function Play({ deck, setDeck }) {
     let sourceId = currCardsInPlay[0]['source'];
 
     targetSource = targetSource.replace('Parent', '');
-
-    console.log('sourceId:', sourceId);
-    console.log('targetSource:', targetSource);
 
     let changedState = [];
     let source = sourceId.replace('Wrap', '');
@@ -347,7 +340,6 @@ function Play({ deck, setDeck }) {
           changedCardsInPlay.push(selectedCard);
           setCardsInPlay(changedCardsInPlay);
         }
-        console.log('changedCardsInPlay', changedCardsInPlay);
       }
     }
   }
@@ -534,7 +526,6 @@ function Play({ deck, setDeck }) {
     }
     // o
     if (e.keyCode === 79 && canOverlap) {
-      console.log('run overlap');
       overlap();
     }
     // t
