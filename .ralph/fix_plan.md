@@ -40,9 +40,16 @@ not push or open PRs.
       at the call site via `source.includes('overlap')` (≡ old `source === overlappedCards`); the
       `Array.isArray` source-rewrite block and a `console.log` are gone. Tests cover into bottom/top,
       multi-card top order, out-of-group, empty-group drop, descending order, no mutation. verify green.
-- [ ] **Immutability (#31).** Convert the ~10 in-place `card['tap'] = …` / `card['flip'] = …`
-      mutations of objects held in `boardState` to immutable updates returning new objects/arrays;
-      route tap/flip through pure `src/game/` helpers with tests where practical. Behaviour identical.
+- [x] **Immutability (#31).** Added pure `src/game/card.js` (`setTap`/`setFlip`/`toggleTap`/
+      `toggleFlip`/`setTapAll`/`setFlipAll`/`mapCardById`, all returning fresh objects) +
+      `card.test.js`. Rewired `flipCardInTarget`, `untapCardInTarget`, `overlap{Tap,Untap}All`,
+      `battle{Tap,Untap}All`, `mana{Tap,Untap}All`, `shieldFlipAll{True,False}` to immutable maps.
+      `tap()` was the keystone: it mutated `cardsInPlay` cards (same refs as `boardState`) and only
+      called `setCardsInPlay`, so the visual update rode on the shared-ref mutation — rewrote it to
+      toggle tap by id immutably across all flat zones + overlap groups, `setBoardState`, and refresh
+      the selection to the new objects. NOTE: left `handleReset`'s `copy.forEach` tap/flip/source
+      mutation alone — it rewrites `source` on the master deck `copy` ref and is flagged for the
+      supervised `handleReset` correctness pass (Out of scope). verify green.
 
 ## Medium Priority — mechanical sweeps (build/format-verified; no new tests required)
 

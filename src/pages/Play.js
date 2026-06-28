@@ -10,6 +10,7 @@ import {
   setOneShield as setOneShieldCard,
 } from '../game/deck';
 import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
+import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -153,17 +154,32 @@ function Play({ deck, setDeck }) {
 
   function tap(e) {
     e?.preventDefault();
-    const currCardsInPlay = [...cardsInPlay];
 
-    currCardsInPlay.forEach((card, i) => {
-      if (card['tap']) {
-        card['tap'] = false;
-      } else {
-        card['tap'] = true;
-      }
+    // The selected cards live inside boardState zones; toggle tap on each of them
+    // immutably (fresh objects) wherever they sit, then refresh the selection to
+    // point at the new objects so it stays in sync.
+    const selectedIds = new Set(cardsInPlay.map((card) => card['id']));
+    const toggleIfSelected = (card) => (selectedIds.has(card['id']) ? toggleTap(card) : card);
+
+    const flatZones = ['hand', 'trash', 'mana', 'shield', 'battle', 'deck', 'deckTop'];
+    const newBoardState = { ...boardState };
+    flatZones.forEach((zone) => {
+      newBoardState[zone] = boardState[zone].map(toggleIfSelected);
+    });
+    newBoardState.overlappedCards = boardState.overlappedCards.map((group) =>
+      group.map(toggleIfSelected)
+    );
+
+    const updatedById = new Map();
+    flatZones.forEach((zone) => {
+      newBoardState[zone].forEach((card) => updatedById.set(card['id'], card));
+    });
+    newBoardState.overlappedCards.forEach((group) => {
+      group.forEach((card) => updatedById.set(card['id'], card));
     });
 
-    setCardsInPlay(currCardsInPlay);
+    setBoardState(newBoardState);
+    setCardsInPlay(cardsInPlay.map((card) => updatedById.get(card['id']) || card));
   }
 
   // when a single card is dragged ontop group, add to group
@@ -418,13 +434,7 @@ function Play({ deck, setDeck }) {
   }
 
   function flipCardInTarget(id, target) {
-    const currTarget = [...target];
-    currTarget.forEach((element) => {
-      if (element['id'] == id) {
-        element['flip'] ? (element['flip'] = false) : (element['flip'] = true);
-      }
-    });
-    return currTarget;
+    return mapCardById(target, id, toggleFlip);
   }
 
   function flipCardWithId(id) {
@@ -454,13 +464,7 @@ function Play({ deck, setDeck }) {
   }
 
   function untapCardInTarget(id, target) {
-    const currTarget = [...target];
-    currTarget.forEach((card) => {
-      if (card['id'] == id) {
-        card['tap'] = false;
-      }
-    });
-    return currTarget;
+    return mapCardById(target, id, (card) => setTap(card, false));
   }
 
   function untapCardWithId(id) {
@@ -814,17 +818,12 @@ function Play({ deck, setDeck }) {
 
   function overlapUntapAll(e) {
     e?.preventDefault();
+    const sourceId = parseInt(e.target.id.replace('overlap', ''));
+
     const currBoardState = { ...boardState };
-
-    let sourceId = parseInt(e.target.id.replace('overlap', ''));
-
-    currBoardState.overlappedCards.forEach((group, i) => {
-      if (sourceId == i) {
-        group.forEach((card) => {
-          card['tap'] = false;
-        });
-      }
-    });
+    currBoardState.overlappedCards = boardState.overlappedCards.map((group, i) =>
+      i === sourceId ? setTapAll(group, false) : group
+    );
 
     setCardsInPlay([]);
     setBoardState(currBoardState);
@@ -832,17 +831,12 @@ function Play({ deck, setDeck }) {
 
   function overlapTapAll(e) {
     e?.preventDefault();
+    const sourceId = parseInt(e.target.id.replace('overlap', ''));
+
     const currBoardState = { ...boardState };
-
-    let sourceId = parseInt(e.target.id.replace('overlap', ''));
-
-    currBoardState.overlappedCards.forEach((group, i) => {
-      if (sourceId == i) {
-        group.forEach((card) => {
-          card['tap'] = true;
-        });
-      }
-    });
+    currBoardState.overlappedCards = boardState.overlappedCards.map((group, i) =>
+      i === sourceId ? setTapAll(group, true) : group
+    );
 
     setCardsInPlay([]);
     setBoardState(currBoardState);
@@ -852,15 +846,10 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.battle.forEach((card) => {
-      card['tap'] = false;
-    });
-
-    currBoardState.overlappedCards.forEach((group) => {
-      group.forEach((card) => {
-        card['tap'] = false;
-      });
-    });
+    currBoardState.battle = setTapAll(boardState.battle, false);
+    currBoardState.overlappedCards = boardState.overlappedCards.map((group) =>
+      setTapAll(group, false)
+    );
 
     setCardsInPlay([]);
     setBoardState(currBoardState);
@@ -870,15 +859,10 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.battle.forEach((card) => {
-      card['tap'] = true;
-    });
-
-    currBoardState.overlappedCards.forEach((group) => {
-      group.forEach((card) => {
-        card['tap'] = true;
-      });
-    });
+    currBoardState.battle = setTapAll(boardState.battle, true);
+    currBoardState.overlappedCards = boardState.overlappedCards.map((group) =>
+      setTapAll(group, true)
+    );
 
     setCardsInPlay([]);
     setBoardState(currBoardState);
@@ -888,9 +872,7 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.mana.forEach((card) => {
-      card['tap'] = true;
-    });
+    currBoardState.mana = setTapAll(boardState.mana, true);
     setCardsInPlay([]);
     setBoardState(currBoardState);
   }
@@ -899,9 +881,7 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.mana.forEach((card) => {
-      card['tap'] = false;
-    });
+    currBoardState.mana = setTapAll(boardState.mana, false);
     setCardsInPlay([]);
     setBoardState(currBoardState);
   }
@@ -922,9 +902,7 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.shield.forEach((card) => {
-      card['flip'] = false;
-    });
+    currBoardState.shield = setFlipAll(boardState.shield, false);
     setCardsInPlay([]);
     setBoardState(currBoardState);
   }
@@ -933,9 +911,7 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     const currBoardState = { ...boardState };
 
-    currBoardState.shield.forEach((card) => {
-      card['flip'] = true;
-    });
+    currBoardState.shield = setFlipAll(boardState.shield, true);
     setCardsInPlay([]);
     setBoardState(currBoardState);
   }
