@@ -43,7 +43,7 @@ function Deckbuild({ deck, setDeck }) {
 
   function handleConfirmDeck(e) {
     e.preventDefault();
-    navigate('play');
+    navigate('/play');
   }
 
   function handleNumberChange(e, targetCard) {

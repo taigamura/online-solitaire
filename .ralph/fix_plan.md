@@ -21,11 +21,6 @@ GitHub issue refs are for humans — do not push or open PRs.
 
 ## High Priority — Phase 1: token foundation + ad-safe surface (ships the striking, monetizable-ready result first)
 
-- [ ] **Routing restructure + Landing stub + routing test (#38).** Move Deckbuild from `/` to
-      `/build`; keep Play at `/play`; add a minimal **Landing stub** at `/` (full content comes in
-      #40); add lightweight nav between landing/build/play. Keep the lifted `deck` state flowing from
-      App into Deckbuild and Play unchanged. Add the RTL + memory-router test (Seam 1) asserting `/`→
-      Landing, `/build`→Deckbuild, `/play`→Play.
 - [ ] **Striking dark-neon Landing page (#40).** Replace the Landing stub with the full responsive,
       Japanese, **image-free** landing page (hero + "what is this / how it works" + CTA into
       `/build`), built on the tokens. Add a reserved ad-slot placeholder for the later AdSense slice.
@@ -79,6 +74,16 @@ correctness audits) — except where the board rework naturally touches them, in
 must be preserved, not changed.
 
 ## Completed
+- [x] **Routing restructure + Landing stub + routing test (#38).** Moved Deckbuild from `/` to
+      `/build` and kept Play at `/play` in App.js. Added `src/pages/Landing.js` — minimal Japanese
+      stub at `/` (`data-testid="landing"` + CTA `<Link to="/build">`; full content deferred to #40)
+      — and `src/components/Nav.js`, a lightweight `<Link>` nav (ホーム/デッキ構築/プレイ) rendered
+      globally in App above `<Routes>`. Deck state still lifted in App and passed unchanged to both
+      Deckbuild and Play. Fixed `handleConfirmDeck`'s relative `navigate('play')` → absolute
+      `navigate('/play')` (it used to resolve relative to `/`; Deckbuild now lives at `/build`).
+      Rewrote App.test.js into Seam-1 routing tests (`/`→Landing via testid, `/build`→Deckbuild,
+      `/play`→Play). verify green (46 tests). NOTE: Nav/Landing are intentionally unstyled — themed
+      chrome is #39; full landing is #40.
 - [x] **Design-token foundation + remove CRA boilerplate (#37).** Added `src/theme.css` — one
       `:root` token vocabulary: dark-neon base palette + the five civ accents (`--civ-light/water/
       darkness/fire/nature`) + spacing/radius/shadow-glow/typography scales (foundation for #39–#43,
