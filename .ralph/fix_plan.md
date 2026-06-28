@@ -1,0 +1,50 @@
+# Ralph Fix Plan
+
+Scope: code-health + test-foundation only. No new features, no UX/visual work, no dependency
+swaps, no bug-audits (see `CLAUDE.md` and the "Out of scope" note below). Work the **single
+highest unchecked item** per loop, top to bottom.
+
+**Definition of done (every item):** `npm run verify` is green (format + tests + build); exactly
+**one** commit on the `dev` branch; if you can't make `verify` green, revert and report — do not
+leave it red. Prefer immutable updates; `src/game/` code stays free of React and browser globals
+(`File`, `URL.createObjectURL`); randomness takes an injectable `rng = Math.random`; tests build
+cards with the `src/game/__fixtures__` `makeCard` factory. GitHub issue refs are for humans — do
+not push or open PRs.
+
+## High Priority — test foundation (do first; each = extract + test)
+
+- [ ] **Keystone (#27).** Create `src/game/` with a pure `shuffle(cards, rng = Math.random)`
+      (Fisher–Yates; in-tree logic is already correct — this is extraction + test, not a re-fix).
+      Add `src/game/__fixtures__/makeCard.js`. Rewire `Play.js` `shuffle`/`shuffleDeckTop` to call
+      it. Tests: id-multiset preserved across many shuffles, and a stubbed `rng` → exact permutation.
+- [ ] **Deck-draw helpers (#28).** Extract `draw`/`manaBoost`/`setOneShield` (all pop the last
+      element of `deck`) into `src/game/` as pure functions over board state; rewire `Play.js`.
+      Tests: card moves to the right zone, deck shrinks by one, `id` preserved, `source` rewritten.
+- [ ] **Flat-zone move (#29).** Extract `handleMovementOfCard` into `src/game/` as a pure function,
+      preserving the `source` `Wrap`-suffix handling exactly. Tests: hand↔battle↔mana moves update
+      both zones and rewrite `source`.
+- [ ] **Overlap-group move (#30).** Extract `handleMovementOfCardOverlap` (the `overlappedCards`
+      array-of-groups zone) into `src/game/`. Tests: move into a group, out of a group, top vs
+      bottom placement (`overlapTop`).
+- [ ] **Immutability (#31).** Convert the ~10 in-place `card['tap'] = …` / `card['flip'] = …`
+      mutations of objects held in `boardState` to immutable updates returning new objects/arrays;
+      route tap/flip through pure `src/game/` helpers with tests where practical. Behaviour identical.
+
+## Medium Priority — mechanical sweeps (build/format-verified; no new tests required)
+
+- [ ] **Remove console.logs (#32).** Delete the 9 leftover `console.log`s in `Play.js`.
+- [ ] **class → className (#33).** Convert ~104 raw `class=` attributes in `Play.js` and
+      `Deckbuild.js` to `className=`; rendered output unchanged.
+- [ ] **Strict equality (#34).** Convert the ~25 loose `==`/`!=` to `===`/`!==`, reviewing each for
+      intended coercion (preserve deliberate index-vs-id comparisons by converting types explicitly).
+- [ ] **De-duplicate DOM ids (#35).** Make `id="area0"` (×3), `id="placeholder_battle_01"` (×2), and
+      the trash-count `id="hand.length"` (×2) unique/correct; verify drag/drop still routes after.
+
+## Out of scope (do NOT do — defer to a supervised pass)
+
+`handleReset`/`top`/`bottom` correctness audits; `<Zone>`/`<Card>` component split; replacing
+`react-image-magnifiers`; the `useEffect`-deps rewrite; all UX/layout/CSS/button polish; any new
+product feature; enforcing Duel Masters rules.
+
+## Completed
+- [x] Project enabled for Ralph
