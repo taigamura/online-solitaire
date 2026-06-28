@@ -67,8 +67,13 @@ not push or open PRs.
       both numeric since `sourceId = parseInt(...)` and `i` is an array index, so strict is safe and
       now matches the existing `i === sourceId` sites. The `!= undefined` cases (196, 326) only ever
       hold `undefined` or a number (never `null`), so `!== undefined` preserves behavior. verify green.
-- [ ] **De-duplicate DOM ids (#35).** Make `id="area0"` (×3), `id="placeholder_battle_01"` (×2), and
-      the trash-count `id="hand.length"` (×2) unique/correct; verify drag/drop still routes after.
+- [x] **De-duplicate DOM ids (#35).** Renamed `id="area0"` (×3) → `areaInfo`/`areaData`/`areaBattle`,
+      the second `placeholder_battle_01` → `placeholder_battle_02` (untap-all button), and the
+      copy-pasted trash-count `id="hand.length"` → `trash.length`. Also caught a 4th duplicate the
+      plan missed — `id="deck.length"` (×2): left the deck-zone count, renamed the deck-view modal one
+      to `deckView.length`. `grep | uniq -d` now reports zero duplicate static ids. None of these ids
+      are referenced in JS (`getElementById`/`e.target.id`) or `Play.css`, so drag/drop routing
+      (which keys off the `*Wrap` ids) is unaffected. verify green.
 
 ## Out of scope (do NOT do — defer to a supervised pass)
 

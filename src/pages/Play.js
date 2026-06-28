@@ -951,7 +951,7 @@ function Play({ deck, setDeck }) {
   return (
     <div>
       {/* 説明 */}
-      <div id="area0" className="boxLayout">
+      <div id="areaInfo" className="boxLayout">
         <div className="boxTitle">説明</div>
         <div>
           <b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> = 選択カードリセット
@@ -961,7 +961,7 @@ function Play({ deck, setDeck }) {
       </div>
 
       {/* データ */}
-      <div id="area0" className="boxLayout">
+      <div id="areaData" className="boxLayout">
         <div>
           現在ターン：<span id="turnCounter">{turnCounter}</span>
         </div>
@@ -991,7 +991,7 @@ function Play({ deck, setDeck }) {
       </div>
 
       {/* バトルゾーン */}
-      <div id="area0" className="boxLayout">
+      <div id="areaBattle" className="boxLayout">
         <div className="boxTitle">
           バトルゾーン(<span id="battle.length">{boardState.battle.length}</span>)
           <a
@@ -1018,7 +1018,7 @@ function Play({ deck, setDeck }) {
           <a id="placeholder_battle_01" className="button" onClick={battleTapAll}>
             全てタップ
           </a>
-          <a id="placeholder_battle_01" className="button" onClick={battleUntapAll}>
+          <a id="placeholder_battle_02" className="button" onClick={battleUntapAll}>
             全てアンタップ
           </a>
         </div>
@@ -1285,7 +1285,7 @@ function Play({ deck, setDeck }) {
         {/* 墓地 */}
         <div id="trash" className="boxLayout">
           <div className="boxTitle">
-            墓地(<span id="hand.length">{boardState.trash.length}</span>)
+            墓地(<span id="trash.length">{boardState.trash.length}</span>)
             <a
               id="trashSelectAll"
               className="button"
@@ -1390,7 +1390,7 @@ function Play({ deck, setDeck }) {
       {viewDeck && (
         <div id="area4" className="boxLayout">
           <div className="boxTitle">
-            デッキ確認(<span id="deck.length">{boardState.deck.length}</span>)
+            デッキ確認(<span id="deckView.length">{boardState.deck.length}</span>)
             <a
               id="deckSelectAll"
               className="button"
