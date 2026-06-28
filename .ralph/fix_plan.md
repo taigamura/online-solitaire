@@ -23,9 +23,14 @@ not push or open PRs.
       `setOneShield` flips face-down; `draw`/`manaBoost` leave flip. `src/game/deck.test.js`:
       right zone, deck shrinks by one, `id` preserved, `source` rewritten, no input mutation,
       append to non-empty zone. Rewired `Play.js`; callers keep the empty-deck alert guard. verify green.
-- [ ] **Flat-zone move (#29).** Extract `handleMovementOfCard` into `src/game/` as a pure function,
-      preserving the `source` `Wrap`-suffix handling exactly. Tests: hand↔battle↔mana moves update
-      both zones and rewrite `source`.
+- [x] **Flat-zone move (#29).** Created `src/game/move.js` with pure immutable `moveCards(source,
+      target, cardsToMove, newSource)` — moves cards present in both `source` and `cardsToMove`
+      (matched by `id`, original order kept) and rewrites each moved card's `source` to `newSource`
+      (fresh objects; inputs never mutated). Folded the old in-place `card['source'] = targetSource`
+      rewrite (drop) into the helper; `drop` still passes the `Wrap`-suffixed label so suffix
+      handling is preserved. Rewired `drop` and `overlap` call sites; dropped the leftover
+      `console.log`. `src/game/move.test.js`: hand→battle / battle→mana moves + source rewrite,
+      both-zones membership, order, field preservation, no mutation, no-match no-op. verify green.
 - [ ] **Overlap-group move (#30).** Extract `handleMovementOfCardOverlap` (the `overlappedCards`
       array-of-groups zone) into `src/game/`. Tests: move into a group, out of a group, top vs
       bottom placement (`overlapTop`).

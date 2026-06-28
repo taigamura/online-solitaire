@@ -9,6 +9,7 @@ import {
   manaBoost as manaBoostCard,
   setOneShield as setOneShieldCard,
 } from '../game/deck';
+import { moveCards } from '../game/move';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -135,31 +136,6 @@ function Play({ deck, setDeck }) {
     }
 
     setCommandList(currCommandList);
-  }
-
-  function handleMovementOfCard(source, target) {
-    const currSource = [...source];
-    const currTarget = [...target];
-    const changedCardsInPlay = [...cardsInPlay];
-
-    let elementsToRemove = [];
-    // find indexes to remove from source
-    currSource.forEach((card, i) => {
-      changedCardsInPlay.forEach((currcardsInPlay, j) => {
-        if (card['id'] == currcardsInPlay['id']) {
-          elementsToRemove.push(card);
-        }
-      });
-    });
-
-    if (elementsToRemove.length > 0) {
-      for (var i = 0; i < elementsToRemove.length; i++) {
-        let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0];
-        currTarget.push(card);
-      }
-      console.log(currTarget);
-      return [currSource, currTarget];
-    }
   }
 
   function findOverlapGroupIdx(id) {
@@ -295,7 +271,12 @@ function Play({ deck, setDeck }) {
       // make selected first card the top
       group = group.reverse();
 
-      let changedState = handleMovementOfCard(boardState.battle, boardState.overlappedCards);
+      let changedState = moveCards(
+        boardState.battle,
+        boardState.overlappedCards,
+        currCardsInPlay,
+        'overlappedCardsWrap'
+      );
 
       currBoardState.battle = changedState[0];
       currBoardState.overlappedCards.push(group);
@@ -345,9 +326,13 @@ function Play({ deck, setDeck }) {
         setBoardState(currBoardState);
       }
     } else if (source != target) {
-      changedState = handleMovementOfCard(boardState[source], boardState[target]);
+      changedState = moveCards(
+        boardState[source],
+        boardState[target],
+        currCardsInPlay,
+        targetSource
+      );
       currBoardState[source] = changedState[0];
-      changedState[1].map((card) => (card['source'] = targetSource));
       currBoardState[target] = changedState[1];
       setBoardState(currBoardState);
     }
