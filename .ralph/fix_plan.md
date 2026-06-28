@@ -21,10 +21,6 @@ GitHub issue refs are for humans — do not push or open PRs.
 
 ## High Priority — Phase 1: token foundation + ad-safe surface (ships the striking, monetizable-ready result first)
 
-- [ ] **Striking dark-neon Landing page (#40).** Replace the Landing stub with the full responsive,
-      Japanese, **image-free** landing page (hero + "what is this / how it works" + CTA into
-      `/build`), built on the tokens. Add a reserved ad-slot placeholder for the later AdSense slice.
-      Add the ad-safety test (Seam 2) asserting the page renders **no card `<img>` elements**.
 - [ ] **About/how-to-use + Privacy-policy content pages (#41).** Two responsive, Japanese,
       dark-neon, **image-free** content pages: an about/how-to-use guide (uploading cards, building a
       deck, using the board) and a privacy policy covering cookies + third-party (AdSense) ad
@@ -74,6 +70,17 @@ correctness audits) — except where the board rework naturally touches them, in
 must be preserved, not changed.
 
 ## Completed
+- [x] **Striking dark-neon Landing page (#40).** Replaced the stub `src/pages/Landing.js` with the
+      full responsive, Japanese, image-free page: gradient/glow hero (title + tagline + primary
+      `デッキを作る`→`/build` & secondary `プレイ画面へ`→`/play` CTAs), a "これは何？" section, a
+      3-step "使い方" list with CSS-drawn neon number badges (no images), a reserved
+      `data-testid="ad-slot"` `<aside>` (wired to AdSense in #44; stays image-free), and a final CTA.
+      New `src/pages/Landing.css` is built entirely on the #37 dark-neon tokens (palette, neon
+      gradients/glow, spacing/radius/shadow, typography) with a `clamp()`-based fluid scale + a
+      480px mobile media query. Kept `data-testid="landing"` so the Seam-1 routing test still passes.
+      Added `src/pages/Landing.test.js` (Seam 2): asserts the page renders **zero `<img>`** (ad-safe)
+      and that the ad slot + `/build` CTA link exist. verify green (48 tests). NOTE: the global Nav
+      is still unstyled/light — themed chrome is #39.
 - [x] **Routing restructure + Landing stub + routing test (#38).** Moved Deckbuild from `/` to
       `/build` and kept Play at `/play` in App.js. Added `src/pages/Landing.js` — minimal Japanese
       stub at `/` (`data-testid="landing"` + CTA `<Link to="/build">`; full content deferred to #40)

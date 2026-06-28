@@ -1,0 +1,181 @@
+/* Landing page — dark-neon, responsive, image-free. Built on src/theme.css tokens. */
+
+.landing {
+  min-height: 100vh;
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+}
+
+.landing > * {
+  width: 100%;
+  max-width: 760px;
+}
+
+/* ---- Hero ---- */
+.landingHero {
+  text-align: center;
+  padding: var(--space-5) 0;
+}
+
+.landingTitle {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: var(--glow-neon);
+}
+
+.landingTagline {
+  margin: 0 auto;
+  max-width: 600px;
+  color: var(--color-text-muted);
+  font-size: clamp(15px, 2.2vw, 18px);
+}
+
+/* ---- CTAs ---- */
+.landingCtaRow {
+  margin-top: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.landingCta {
+  display: inline-block;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.landingCta:hover {
+  transform: translateY(-2px);
+}
+
+.landingCtaPrimary {
+  color: var(--color-bg);
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-purple));
+  box-shadow: var(--glow-neon);
+}
+
+.landingCtaSecondary {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-neon-cyan);
+}
+
+/* ---- Content sections ---- */
+.landingSection {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.landingHeading {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(20px, 3.5vw, 28px);
+  color: var(--color-neon-cyan);
+}
+
+.landingBody {
+  margin: 0;
+  color: var(--color-text);
+}
+
+/* ---- How-it-works steps ---- */
+.landingSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.landingStep {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.landingStepNum {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  color: var(--color-bg);
+  background: linear-gradient(135deg, var(--color-neon-magenta), var(--color-neon-purple));
+  box-shadow: var(--glow-neon);
+}
+
+.landingStepText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.landingStepTitle {
+  font-weight: 700;
+  font-size: var(--font-size-md);
+}
+
+.landingStepDesc {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---- Reserved ad slot ---- */
+.adSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  border: 1px dashed var(--color-text-muted);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.1em;
+}
+
+/* ---- Final CTA ---- */
+.landingFinalCta {
+  display: flex;
+  justify-content: center;
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .landingStep {
+    gap: var(--space-3);
+  }
+
+  .landingCta {
+    width: 100%;
+    text-align: center;
+  }
+}
