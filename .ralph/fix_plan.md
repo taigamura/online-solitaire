@@ -17,9 +17,12 @@ not push or open PRs.
       `src/game/__fixtures__/makeCard.js`, and `src/game/shuffle.test.js` (id-multiset preserved
       over 200 runs, no input mutation, stubbed `rng` → exact permutation). Rewired `Play.js`
       `shuffle`/`shuffleDeckTop` to use it; `shuffleDeckTop` is now immutable too. verify green.
-- [ ] **Deck-draw helpers (#28).** Extract `draw`/`manaBoost`/`setOneShield` (all pop the last
-      element of `deck`) into `src/game/` as pure functions over board state; rewire `Play.js`.
-      Tests: card moves to the right zone, deck shrinks by one, `id` preserved, `source` rewritten.
+- [x] **Deck-draw helpers (#28).** Created `src/game/deck.js` with pure `draw`/`manaBoost`/
+      `setOneShield` over board state (shared `moveTopOfDeck` helper; immutable — drawn card is a
+      fresh object so inputs are never mutated, fixing the old in-place `source`/`flip` writes).
+      `setOneShield` flips face-down; `draw`/`manaBoost` leave flip. `src/game/deck.test.js`:
+      right zone, deck shrinks by one, `id` preserved, `source` rewritten, no input mutation,
+      append to non-empty zone. Rewired `Play.js`; callers keep the empty-deck alert guard. verify green.
 - [ ] **Flat-zone move (#29).** Extract `handleMovementOfCard` into `src/game/` as a pure function,
       preserving the `source` `Wrap`-suffix handling exactly. Tests: hand↔battle↔mana moves update
       both zones and rewrite `source`.

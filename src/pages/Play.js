@@ -4,6 +4,11 @@ import './Play.css';
 import cardBack from '../images/cardBack.jpg';
 import { SideBySideMagnifier } from 'react-image-magnifiers';
 import { shuffle as shuffleCards } from '../game/shuffle';
+import {
+  draw as drawCard,
+  manaBoost as manaBoostCard,
+  setOneShield as setOneShieldCard,
+} from '../game/deck';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -427,12 +432,7 @@ function Play({ deck, setDeck }) {
   function manaBoost(e) {
     e?.preventDefault();
     if (boardState.deck.length > 0) {
-      const currBoardState = { ...boardState };
-      let drawnCard = currBoardState.deck.slice(-1)[0];
-      drawnCard['source'] = 'manaWrap';
-      currBoardState.deck = currBoardState.deck.slice(0, currBoardState.deck.length - 1);
-      currBoardState.mana = currBoardState.mana.concat(drawnCard);
-      setBoardState(currBoardState);
+      setBoardState(manaBoostCard(boardState));
     } else {
       window.alert('山札はありません');
     }
@@ -441,12 +441,7 @@ function Play({ deck, setDeck }) {
   function draw(e) {
     e?.preventDefault();
     if (boardState.deck.length > 0) {
-      const currBoardState = { ...boardState };
-      let drawnCard = currBoardState.deck.slice(-1)[0];
-      drawnCard['source'] = 'handWrap';
-      currBoardState.deck = currBoardState.deck.slice(0, currBoardState.deck.length - 1);
-      currBoardState.hand = currBoardState.hand.concat(drawnCard);
-      setBoardState(currBoardState);
+      setBoardState(drawCard(boardState));
     } else {
       window.alert('山札はありません');
     }
@@ -455,13 +450,7 @@ function Play({ deck, setDeck }) {
   function setOneShield(e) {
     e?.preventDefault();
     if (boardState.deck.length > 0) {
-      const currBoardState = { ...boardState };
-      let drawnCard = boardState.deck.slice(-1)[0];
-      drawnCard['source'] = 'shieldWrap';
-      drawnCard['flip'] = true;
-      currBoardState.deck = currBoardState.deck.slice(0, currBoardState.deck.length - 1);
-      currBoardState.shield = currBoardState.shield.concat(drawnCard);
-      setBoardState(currBoardState);
+      setBoardState(setOneShieldCard(boardState));
     } else {
       window.alert('デッキはありません');
     }
