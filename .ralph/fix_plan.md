@@ -57,8 +57,10 @@ not push or open PRs.
       illegal-card checks ×2, `drop` e.target/sourceId/targetSource ×3, `changedCardsInPlay`, and the
       `run overlap` keydown log — the other 2 of the original 9 were already removed in #29/#30). No
       `console.log` left in `src/`. verify green; bundle shrank 81B.
-- [ ] **class → className (#33).** Convert ~104 raw `class=` attributes in `Play.js` and
-      `Deckbuild.js` to `className=`; rendered output unchanged.
+- [x] **class → className (#33).** Converted all 104 raw `class=` attributes (94 in `Play.js`, 10 in
+      `Deckbuild.js`) to `className=` via two literal substitutions (` class="`→` className="`,
+      ` class={`→` className={`). All were space-preceded JSX attrs; no `class=` left in either file.
+      Clears the "Invalid DOM property `class`" warnings; rendered output unchanged. verify green.
 - [ ] **Strict equality (#34).** Convert the ~25 loose `==`/`!=` to `===`/`!==`, reviewing each for
       intended coercion (preserve deliberate index-vs-id comparisons by converting types explicitly).
 - [ ] **De-duplicate DOM ids (#35).** Make `id="area0"` (×3), `id="placeholder_battle_01"` (×2), and

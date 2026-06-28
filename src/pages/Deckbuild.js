@@ -105,30 +105,30 @@ function Deckbuild({ deck, setDeck }) {
     <div>
       <h1>デュエルマスターズ一人回し用ツール by taigamura</h1>
 
-      <div id="readme" class="boxLayout">
+      <div id="readme" className="boxLayout">
         <a>
           下からカード写真を追加してください。画像は高画質のものを使ってください（デュエルマスターズ公式カード検索から保存した写真推奨）。その後、デッキ確定をクリック。
         </a>
       </div>
 
       {/* デュエマは 63mm x 88mm */}
-      <div id="deckPreview" class="boxLayout">
-        <div class="boxTitle">
+      <div id="deckPreview" className="boxLayout">
+        <div className="boxTitle">
           デッキ(<span id="deck.length">{deck.length}</span>)枚
         </div>
-        <div class="buttonLayout">
-          <input class="button" type="file" multiple onChange={handleChange} accept="image/*" />
-          <a id="reset" class="button" onClick={handleReset}>
+        <div className="buttonLayout">
+          <input className="button" type="file" multiple onChange={handleChange} accept="image/*" />
+          <a id="reset" className="button" onClick={handleReset}>
             リセット
           </a>
-          <a id="confirmDeck" class="button" onClick={handleConfirmDeck}>
+          <a id="confirmDeck" className="button" onClick={handleConfirmDeck}>
             デッキ確定
           </a>
         </div>
-        <div class="boxLayout"></div>
-        <ul id="" class="deckPreviewWrap">
+        <div className="boxLayout"></div>
+        <ul id="" className="deckPreviewWrap">
           {deckGroupBy.map((group, i) => (
-            <li class="deckPreviewWrap">
+            <li className="deckPreviewWrap">
               {[...Array(group.value.length)].map(() => (
                 <img
                   src={URL.createObjectURL(group['key'])}
