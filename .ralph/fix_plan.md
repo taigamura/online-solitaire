@@ -13,10 +13,10 @@ not push or open PRs.
 
 ## High Priority — test foundation (do first; each = extract + test)
 
-- [ ] **Keystone (#27).** Create `src/game/` with a pure `shuffle(cards, rng = Math.random)`
-      (Fisher–Yates; in-tree logic is already correct — this is extraction + test, not a re-fix).
-      Add `src/game/__fixtures__/makeCard.js`. Rewire `Play.js` `shuffle`/`shuffleDeckTop` to call
-      it. Tests: id-multiset preserved across many shuffles, and a stubbed `rng` → exact permutation.
+- [x] **Keystone (#27).** Created `src/game/shuffle.js` (pure Fisher–Yates, injectable `rng`),
+      `src/game/__fixtures__/makeCard.js`, and `src/game/shuffle.test.js` (id-multiset preserved
+      over 200 runs, no input mutation, stubbed `rng` → exact permutation). Rewired `Play.js`
+      `shuffle`/`shuffleDeckTop` to use it; `shuffleDeckTop` is now immutable too. verify green.
 - [ ] **Deck-draw helpers (#28).** Extract `draw`/`manaBoost`/`setOneShield` (all pop the last
       element of `deck`) into `src/game/` as pure functions over board state; rewire `Play.js`.
       Tests: card moves to the right zone, deck shrinks by one, `id` preserved, `source` rewritten.

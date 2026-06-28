@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import './Play.css';
 import cardBack from '../images/cardBack.jpg';
 import { SideBySideMagnifier } from 'react-image-magnifiers';
+import { shuffle as shuffleCards } from '../game/shuffle';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -410,17 +411,7 @@ function Play({ deck, setDeck }) {
 
   function shuffle(e) {
     e?.preventDefault();
-    const currDeck = [...boardState.deck];
-    let currentIndex = currDeck.length;
-
-    while (currentIndex !== 0) {
-      let randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-      [currDeck[currentIndex], currDeck[randomIndex]] = [
-        currDeck[randomIndex],
-        currDeck[currentIndex],
-      ];
-    }
+    const currDeck = shuffleCards(boardState.deck);
     setBoardState((prevState) => {
       return { ...prevState, deck: currDeck };
     });
@@ -428,19 +419,9 @@ function Play({ deck, setDeck }) {
 
   function shuffleDeckTop(e) {
     e?.preventDefault();
-    const currBoardState = { ...boardState };
-    let currentIndex = currBoardState.deckTop.length;
-
-    while (currentIndex !== 0) {
-      let randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-      [currBoardState.deckTop[currentIndex], currBoardState.deckTop[randomIndex]] = [
-        currBoardState.deckTop[randomIndex],
-        currBoardState.deckTop[currentIndex],
-      ];
-    }
-
-    setBoardState(currBoardState);
+    setBoardState((prevState) => {
+      return { ...prevState, deckTop: shuffleCards(prevState.deckTop) };
+    });
   }
 
   function manaBoost(e) {
