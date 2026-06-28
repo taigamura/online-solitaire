@@ -7,17 +7,16 @@ import Deckbuild from './pages/Deckbuild';
 
 // function component
 function App() {
+  const [deck, setDeck] = useState([]);
 
-	const [deck, setDeck] = useState([]);
-
-	return (
-		<div>
-			<Routes>
-				<Route path="/" element={<Deckbuild deck={deck} setDeck={setDeck} />} />
-				<Route path="/play" element={<Play deck={deck} setDeck={setDeck} />} />
-			</Routes>
-		</div>
-	)
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Deckbuild deck={deck} setDeck={setDeck} />} />
+        <Route path="/play" element={<Play deck={deck} setDeck={setDeck} />} />
+      </Routes>
+    </div>
+  );
 }
 
 export default App;

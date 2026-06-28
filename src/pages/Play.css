@@ -1,225 +1,225 @@
 :root {
-    --card-height: calc(88px * 2);
-    --card-width: calc(63px * 2);
+  --card-height: calc(88px * 2);
+  --card-width: calc(63px * 2);
 }
 
 .columnLayoutBottom {
-    margin-top: 5px;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
+  margin-top: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
 }
 
 .boxTitle {
-    position: relative;
-    font-size: 16px;
-    font-weight: bold;
-    color: #777777;
-    z-index: 2;
+  position: relative;
+  font-size: 16px;
+  font-weight: bold;
+  color: #777777;
+  z-index: 2;
 }
 
 .boxLayout {
-    border: 2px solid #999999;
-    border-radius: 10px;
-    padding: 10px;
+  border: 2px solid #999999;
+  border-radius: 10px;
+  padding: 10px;
 }
 
 .buttonLayout {
-    position: relative;
-    z-index: 2;
-    margin-top: 5px;
+  position: relative;
+  z-index: 2;
+  margin-top: 5px;
 }
 
 .button {
-    display: inline-block;
-    border-radius: 5px;
-    border: 1px solid #222222;
-    padding: 2px 5px;
-    background-color: white;
-    font-size: 12px;
-    color: #222222;
-    cursor: pointer;
-  }
-  
+  display: inline-block;
+  border-radius: 5px;
+  border: 1px solid #222222;
+  padding: 2px 5px;
+  background-color: white;
+  font-size: 12px;
+  color: #222222;
+  cursor: pointer;
+}
+
 .button:hover {
-    border: 1px solid #222222;
-    background-color: #222222;
-    color: #ffffff;
+  border: 1px solid #222222;
+  background-color: #222222;
+  color: #ffffff;
 }
 
 .button.on {
-    border: 1px solid #222222;
-    background-color: #222222;
-    color: #ffffff;
+  border: 1px solid #222222;
+  background-color: #222222;
+  color: #ffffff;
 }
 
 .shade {
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    position: absolute;
-    top: 0;
-    left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .centered {
-    pointer-events: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ffffff;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
 }
 
 /* cardWrap */
 
 .cardWrap {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 5px;
-    min-height: 105px;
-    position: relative;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  min-height: 105px;
+  position: relative;
 }
 
 .cardWrap.overlapWrap {
-    border: 2px solid #999999;
-    border-radius: 10px;
-    padding: 10px;
+  border: 2px solid #999999;
+  border-radius: 10px;
+  padding: 10px;
 }
 
 /* child combinator */
-.cardWrap>.card {
-    position: relative;
-    z-index: 2;
-    display: block;
+.cardWrap > .card {
+  position: relative;
+  z-index: 2;
+  display: block;
 }
 
-.cardWrap>.tap {
-    transform: rotate(270deg);
+.cardWrap > .tap {
+  transform: rotate(270deg);
 }
 
-.cardWrap>.card.unmagnify:hover {
-    z-index: 10;
-    transform: scale(1.1);
+.cardWrap > .card.unmagnify:hover {
+  z-index: 10;
+  transform: scale(1.1);
 }
 
-.cardWrap>.card.magnify:hover {
-    z-index: 10;
+.cardWrap > .card.magnify:hover {
+  z-index: 10;
 }
 
-.cardWrap>.card {
-    cursor: pointer;
-    height: var(--card-height);
-    width: var(--card-width);
+.cardWrap > .card {
+  cursor: pointer;
+  height: var(--card-height);
+  width: var(--card-width);
 }
 
-.cardWrap>.card>img {
-    width: 100%;
-    height: 100%;
-    margin: auto;
+.cardWrap > .card > img {
+  width: 100%;
+  height: 100%;
+  margin: auto;
 }
 
-.cardWrap>.card.overlap:nth-of-type(n + 2) {
-    margin-left: -50px;
+.cardWrap > .card.overlap:nth-of-type(n + 2) {
+  margin-left: -50px;
 }
 
 .battleWrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin-top: 30px;
 }
-  
+
 .battleArea {
-    position: relative;
-    width: 400px;
-    min-height: 158px;
+  position: relative;
+  width: 400px;
+  min-height: 158px;
 }
 
-.bgLayout{
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+.bgLayout {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
-.battleArea .cardWrap>.card:nth-of-type(9n + 1) {
-    margin-left: 0;
+.battleArea .cardWrap > .card:nth-of-type(9n + 1) {
+  margin-left: 0;
 }
 
-.fieldArea:nth-of-type(2n+1) .spMenuArea{
-    margin-right: 30px;
+.fieldArea:nth-of-type(2n + 1) .spMenuArea {
+  margin-right: 30px;
 }
 
-.fieldArea:nth-of-type(2n) .spMenuArea{
-    margin-left: 30px;
+.fieldArea:nth-of-type(2n) .spMenuArea {
+  margin-left: 30px;
 }
 
 /* The switch - the box around the slider */
 .switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
 }
-  
+
 /* Hide default HTML checkbox */
 .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 /* The slider */
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+  background-color: #2196f3;
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #2196f3;
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-    }
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
 
 /* Rounded sliders */
 .slider.round {
-    border-radius: 34px;
+  border-radius: 34px;
 }
 
 .slider.round:before {
-    border-radius: 50%;
+  border-radius: 50%;
 }
