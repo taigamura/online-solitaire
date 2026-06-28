@@ -31,9 +31,15 @@ not push or open PRs.
       handling is preserved. Rewired `drop` and `overlap` call sites; dropped the leftover
       `console.log`. `src/game/move.test.js`: hand→battle / battle→mana moves + source rewrite,
       both-zones membership, order, field preservation, no mutation, no-match no-op. verify green.
-- [ ] **Overlap-group move (#30).** Extract `handleMovementOfCardOverlap` (the `overlappedCards`
-      array-of-groups zone) into `src/game/`. Tests: move into a group, out of a group, top vs
-      bottom placement (`overlapTop`).
+- [x] **Overlap-group move (#30).** Added pure immutable `moveCardsOutOfOverlap(groups, target,
+      cardsToMove, newSource)` and `moveCardsIntoOverlap(source, groups, cardsToMove, targetId,
+      overlapTop, newSource)` to `src/game/move.js` (plus private `findGroupIndex`). They rebuild
+      groups/cards instead of splicing the live group arrays (old in-place bug), drop emptied
+      groups, preserve the original orders (out: descending (group,card); into: push=source order,
+      unshift/`overlapTop`=reverse front), and fold in the drop source rewrite. Direction is chosen
+      at the call site via `source.includes('overlap')` (≡ old `source === overlappedCards`); the
+      `Array.isArray` source-rewrite block and a `console.log` are gone. Tests cover into bottom/top,
+      multi-card top order, out-of-group, empty-group drop, descending order, no mutation. verify green.
 - [ ] **Immutability (#31).** Convert the ~10 in-place `card['tap'] = …` / `card['flip'] = …`
       mutations of objects held in `boardState` to immutable updates returning new objects/arrays;
       route tap/flip through pure `src/game/` helpers with tests where practical. Behaviour identical.

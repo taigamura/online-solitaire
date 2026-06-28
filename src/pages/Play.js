@@ -9,7 +9,7 @@ import {
   manaBoost as manaBoostCard,
   setOneShield as setOneShieldCard,
 } from '../game/deck';
-import { moveCards } from '../game/move';
+import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -151,74 +151,6 @@ function Play({ deck, setDeck }) {
     return groupIdx;
   }
 
-  function handleMovementOfCardOverlap(source, target, targetId) {
-    let currSource = [...source];
-    const currTarget = [...target];
-    const changedCardsInPlay = [...cardsInPlay];
-
-    // overlappedCards --> target
-    if (source === boardState.overlappedCards) {
-      // [[group idx, card idx], ...]
-      let indexesToRemove = [];
-      // find indexes to remove from source
-      currSource.forEach((group, i) => {
-        group.forEach((card, j) => {
-          changedCardsInPlay.forEach((currcardsInPlay, k) => {
-            if (card['id'] == currcardsInPlay['id']) {
-              indexesToRemove.push([i, j]);
-            }
-          });
-        });
-      });
-
-      if (indexesToRemove.length > 0) {
-        for (var i = indexesToRemove.length - 1; i >= 0; i--) {
-          // splice overlappedCards[group idx].splice([card idx])
-          let card = currSource[indexesToRemove[i][0]].splice(indexesToRemove[i][1], 1)[0];
-          currTarget.push(card);
-        }
-      }
-
-      // filter empty groups
-      let changedCurrSource = [];
-      currSource.forEach((group, i) => {
-        if (group.length > 0) {
-          changedCurrSource.push(group);
-        }
-      });
-      currSource = changedCurrSource;
-    }
-    // source --> overlappedCards
-    else {
-      let elementsToRemove = [];
-      // find indexes to remove from source
-      currSource.forEach((card, i) => {
-        changedCardsInPlay.forEach((currcardsInPlay, j) => {
-          if (card['id'] == currcardsInPlay['id']) {
-            elementsToRemove.push(card);
-          }
-        });
-      });
-
-      // find which group to push into
-      let groupIdx = findOverlapGroupIdx(targetId);
-
-      if (elementsToRemove.length > 0) {
-        for (var i = 0; i < elementsToRemove.length; i++) {
-          let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0];
-
-          // if overlapTop = true, then dropped cards are on top
-          if (overlapTop) {
-            currTarget[groupIdx].unshift(card);
-          } else {
-            currTarget[groupIdx].push(card);
-          }
-        }
-      }
-    }
-    return [currSource, currTarget];
-  }
-
   function tap(e) {
     e?.preventDefault();
     const currCardsInPlay = [...cardsInPlay];
@@ -309,19 +241,24 @@ function Play({ deck, setDeck }) {
     if ((source.includes('overlap') || target.includes('overlap')) && source != target) {
       // if not dropped in empty space of overlappedCardsWrap
       if (!e.target.id.includes('overlappedCardsWrap')) {
-        changedState = handleMovementOfCardOverlap(
-          boardState[source],
-          boardState[target],
-          e.target.id
-        );
-        currBoardState[source] = changedState[0];
-        // if target is overlapped or not
-        if (Array.isArray(changedState[1][0])) {
-          changedState[1].map((group) => group.map((card) => (card['source'] = targetSource)));
+        if (source.includes('overlap')) {
+          changedState = moveCardsOutOfOverlap(
+            boardState[source],
+            boardState[target],
+            currCardsInPlay,
+            targetSource
+          );
         } else {
-          changedState[1].map((card) => (card['source'] = targetSource));
+          changedState = moveCardsIntoOverlap(
+            boardState[source],
+            boardState[target],
+            currCardsInPlay,
+            e.target.id,
+            overlapTop,
+            targetSource
+          );
         }
-        console.log(changedState[1]);
+        currBoardState[source] = changedState[0];
         currBoardState[target] = changedState[1];
         setBoardState(currBoardState);
       }
