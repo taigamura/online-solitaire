@@ -21,12 +21,6 @@ GitHub issue refs are for humans — do not push or open PRs.
 
 ## High Priority — Phase 1: token foundation + ad-safe surface (ships the striking, monetizable-ready result first)
 
-- [ ] **About/how-to-use + Privacy-policy content pages (#41).** Two responsive, Japanese,
-      dark-neon, **image-free** content pages: an about/how-to-use guide (uploading cards, building a
-      deck, using the board) and a privacy policy covering cookies + third-party (AdSense) ad
-      serving. Each reserves an ad slot; both reachable from the site nav; both covered by the
-      ad-safety test (Seam 2 — no card `<img>`).
-
 ## Medium Priority — Phase 2–3: themed chrome + board UX rework
 
 - [ ] **Dark-neon themed chrome on Deckbuild + Play (#39).** Apply the token theme to Deckbuild and
@@ -70,6 +64,18 @@ correctness audits) — except where the board rework naturally touches them, in
 must be preserved, not changed.
 
 ## Completed
+- [x] **About/how-to-use + Privacy-policy content pages (#41).** Added `src/pages/About.js`
+      (`/about`, `data-testid="about"`) — how-to guide: これは何？ + upload/build/board steps with the
+      six keyboard shortcuts (Space/Esc/M/O/R/T) as `.contentKbd` chips + caveats — and
+      `src/pages/Privacy.js` (`/privacy`, `data-testid="privacy"`) — cookies + Google AdSense
+      third-party serving + local-only card images + 免責事項. Both responsive, Japanese, image-free,
+      each with a reserved `data-testid="ad-slot"` `<aside>` and a CTA. New shared
+      `src/pages/content.css` (dark-neon, token-based, `clamp()` fluid headings) holds the content
+      classes; `.adSlot` is reused from the global Landing.css bundle (consistent with this app's
+      global-CSS architecture). Wired both routes into App.js and added 使い方/プライバシー links to the
+      global Nav. Added `src/pages/contentPages.test.js` (Seam 2, `describe.each`): each page renders
+      **zero `<img>`** and reserves an ad slot. verify green (52 tests). NOTE: Nav still unstyled —
+      themed chrome is #39 (next).
 - [x] **Striking dark-neon Landing page (#40).** Replaced the stub `src/pages/Landing.js` with the
       full responsive, Japanese, image-free page: gradient/glow hero (title + tagline + primary
       `デッキを作る`→`/build` & secondary `プレイ画面へ`→`/play` CTAs), a "これは何？" section, a

@@ -9,6 +9,8 @@ function Nav() {
       <Link to="/">ホーム</Link>
       <Link to="/build">デッキ構築</Link>
       <Link to="/play">プレイ</Link>
+      <Link to="/about">使い方</Link>
+      <Link to="/privacy">プライバシー</Link>
     </nav>
   );
 }
