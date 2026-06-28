@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import './Nav.css';
 
 // Lightweight site nav between landing / build / play. Themed chrome arrives in
 // fix_plan #39; for now this is a minimal, functional set of links.

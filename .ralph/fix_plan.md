@@ -23,10 +23,6 @@ GitHub issue refs are for humans — do not push or open PRs.
 
 ## Medium Priority — Phase 2–3: themed chrome + board UX rework
 
-- [ ] **Dark-neon themed chrome on Deckbuild + Play (#39).** Apply the token theme to Deckbuild and
-      Play **chrome** — headers, buttons, zone frames, page backgrounds — while keeping the
-      **card-playing surface calm/neutral** so card art and tap/flip/selected states stay readable.
-      Restyle only: **no** layout reorganization and **no** behavior change.
 - [ ] **Playmat-style board layout + color-coded zones + desktop-first notice (#42).** Rework the
       Play board from the vertical stack of identical boxes into a **playmat-style fixed layout** with
       **color-coded zone framing** (civilization→zone mapping tuned from screenshots), aiming for a
@@ -64,6 +60,19 @@ correctness audits) — except where the board rework naturally touches them, in
 must be preserved, not changed.
 
 ## Completed
+- [x] **Dark-neon themed chrome on Deckbuild + Play (#39).** CSS-only restyle — no markup/layout/
+      behavior change. `index.css` body now paints the dark-neon page background + light text (covers
+      Play/Deckbuild; Landing/About/Privacy already override with their own dark surface). In Play.css
+      (shared globally, so it themes Deckbuild too): zone titles `.boxTitle` → neon-cyan; zone frames
+      `.boxLayout`/`.cardWrap.overlapWrap` → `--color-surface` bg + subtle `--color-surface-raised`
+      1px border (the calm card-playing surface — cards/tap/flip/selection-`.shade` stay readable);
+      `.button` + `.button.on` and native `.boxLayout button`/`select` → surface-raised + neon-cyan
+      border with a neon-fill hover. New `src/components/Nav.css` (imported by Nav.js) makes the global
+      nav a dark surface bar with a neon-cyan bottom border + neon hover links. verify green (52
+      tests). NOTE: structural light tokens `--color-border`/`--color-ink`/`--color-title-muted` are
+      now unused (superseded by direct neon tokens) but left defined; `--color-paper`/`scrim`/
+      `on-ink`/`toggle-*` still drive the slider + selection overlay. Board layout is still the legacy
+      vertical stack — playmat rework is #42.
 - [x] **About/how-to-use + Privacy-policy content pages (#41).** Added `src/pages/About.js`
       (`/about`, `data-testid="about"`) — how-to guide: これは何？ + upload/build/board steps with the
       six keyboard shortcuts (Space/Esc/M/O/R/T) as `.contentKbd` chips + caveats — and
