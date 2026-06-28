@@ -107,31 +107,31 @@ function Play({ deck, setDeck }) {
     if (currCommandList['shuffle'] > 0) {
       shuffle();
       currCommandList['shuffle']--;
-      if (currCommandList['shuffle'] == 0) {
+      if (currCommandList['shuffle'] === 0) {
         delete currCommandList['shuffle'];
       }
     } else if (currCommandList['draw'] > 0) {
       draw();
       currCommandList['draw']--;
-      if (currCommandList['draw'] == 0) {
+      if (currCommandList['draw'] === 0) {
         delete currCommandList['draw'];
       }
     } else if (currCommandList['shield'] > 0) {
       setOneShield();
       currCommandList['shield']--;
-      if (currCommandList['shield'] == 0) {
+      if (currCommandList['shield'] === 0) {
         delete currCommandList['shield'];
       }
     } else if (currCommandList['manaUntapAll'] > 0) {
       manaUntapAll();
       currCommandList['manaUntapAll']--;
-      if (currCommandList['manaUntapAll'] == 0) {
+      if (currCommandList['manaUntapAll'] === 0) {
         delete currCommandList['manaUntapAll'];
       }
     } else if (currCommandList['battleUntapAll'] > 0) {
       battleUntapAll();
       currCommandList['battleUntapAll']--;
-      if (currCommandList['battleUntapAll'] == 0) {
+      if (currCommandList['battleUntapAll'] === 0) {
         delete currCommandList['battleUntapAll'];
       }
     }
@@ -193,12 +193,12 @@ function Play({ deck, setDeck }) {
       let groupIdx = findOverlapGroupIdx(card['id']);
 
       // if already in group, illegal
-      if (groupIdx != undefined) {
+      if (groupIdx !== undefined) {
         illegalCards.push(card);
       }
 
       // only overlap if cards are in battle zone
-      if (!(card['source'] == 'battleWrap' || card['source'] == 'overlappedCardsWrap')) {
+      if (!(card['source'] === 'battleWrap' || card['source'] === 'overlappedCardsWrap')) {
         illegalCards.push(card);
       }
     });
@@ -236,7 +236,7 @@ function Play({ deck, setDeck }) {
     const currBoardState = { ...boardState };
     const currCardsInPlay = [...cardsInPlay];
     let targetSource =
-      e.target.tagName != 'IMG'
+      e.target.tagName !== 'IMG'
         ? e.target.id
         : document.getElementById(e.target.id).parentElement.parentElement.id;
     let sourceId = currCardsInPlay[0]['source'];
@@ -247,7 +247,7 @@ function Play({ deck, setDeck }) {
     let source = sourceId.replace('Wrap', '');
     let target = targetSource.replace('Wrap', '');
 
-    if ((source.includes('overlap') || target.includes('overlap')) && source != target) {
+    if ((source.includes('overlap') || target.includes('overlap')) && source !== target) {
       // if not dropped in empty space of overlappedCardsWrap
       if (!e.target.id.includes('overlappedCardsWrap')) {
         if (source.includes('overlap')) {
@@ -271,7 +271,7 @@ function Play({ deck, setDeck }) {
         currBoardState[target] = changedState[1];
         setBoardState(currBoardState);
       }
-    } else if (source != target) {
+    } else if (source !== target) {
       changedState = moveCards(
         boardState[source],
         boardState[target],
@@ -323,14 +323,14 @@ function Play({ deck, setDeck }) {
       // selected must be a card in playable area (not divs and other stuff) or grouped
       if (
         allPlayableAreaIds.includes(selectedCard['source']) ||
-        findOverlapGroupIdx(selectedCard['id']) != undefined
+        findOverlapGroupIdx(selectedCard['id']) !== undefined
       ) {
         // must be unique
         if (!changedCardsInPlay.find((element) => element.id === selectedCard.id)) {
           if (changedCardsInPlay.length > 0) {
             // selected must be a part of same area else, clear card in play, if different groups, also clear
             if (
-              selectedCard['source'] != changedCardsInPlay[0]['source'] ||
+              selectedCard['source'] !== changedCardsInPlay[0]['source'] ||
               findOverlapGroupIdx(selectedCard['id']) !=
                 findOverlapGroupIdx(changedCardsInPlay[0]['id'])
             ) {
@@ -418,7 +418,7 @@ function Play({ deck, setDeck }) {
     const currTarget = [...target];
     let isFound = false;
     currTarget.forEach((element) => {
-      if (element['id'] == id) {
+      if (element['id'] === id) {
         isFound = true;
       }
     });
@@ -617,7 +617,7 @@ function Play({ deck, setDeck }) {
       let elementsToRemove = [];
       changedCardsInPlay.forEach((card, i) => {
         currSource.forEach((element, j) => {
-          if (element['id'] == card['id']) {
+          if (element['id'] === card['id']) {
             elementsToRemove.push(card);
           }
         });
@@ -672,7 +672,7 @@ function Play({ deck, setDeck }) {
       let elementsToRemove = [];
       changedCardsInPlay.forEach((card, i) => {
         currSource.forEach((element, j) => {
-          if (element['id'] == card['id']) {
+          if (element['id'] === card['id']) {
             elementsToRemove.push(card);
           }
         });
@@ -763,7 +763,7 @@ function Play({ deck, setDeck }) {
   }
 
   function listenDeckTopChange() {
-    if (boardState.deckTop.length == 0) {
+    if (boardState.deckTop.length === 0) {
       setViewDeckTop(false);
     }
   }
@@ -796,7 +796,7 @@ function Play({ deck, setDeck }) {
     } else {
       let sourceId = parseInt(source.replace('overlap', ''));
       boardState.overlappedCards.forEach((group, i) => {
-        if (sourceId == i) {
+        if (sourceId === i) {
           group.forEach((card, j) => {
             currCardsInPlay.push(card);
           });
@@ -913,7 +913,7 @@ function Play({ deck, setDeck }) {
 
     const currBoardState = { ...boardState };
     currBoardState.overlappedCards.forEach((group, i) => {
-      if (i == sourceId) {
+      if (i === sourceId) {
         while (group.length > 0) {
           let currCard = group.pop();
           currCard['source'] = 'battleWrap';

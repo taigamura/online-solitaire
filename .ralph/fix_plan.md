@@ -61,8 +61,12 @@ not push or open PRs.
       `Deckbuild.js`) to `className=` via two literal substitutions (` class="`→` className="`,
       ` class={`→` className={`). All were space-preceded JSX attrs; no `class=` left in either file.
       Clears the "Invalid DOM property `class`" warnings; rendered output unchanged. verify green.
-- [ ] **Strict equality (#34).** Convert the ~25 loose `==`/`!=` to `===`/`!==`, reviewing each for
-      intended coercion (preserve deliberate index-vs-id comparisons by converting types explicitly).
+- [x] **Strict equality (#34).** Converted all 18 loose `==`/`!=` in `Play.js` to `===`/`!==`
+      (Deckbuild.js had none). Reviewed each: count/length `=== 0`, uuid-string id/source/tagName
+      comparisons (already same-type), and the two `sourceId == i` overlap-index pairs (799, 916) —
+      both numeric since `sourceId = parseInt(...)` and `i` is an array index, so strict is safe and
+      now matches the existing `i === sourceId` sites. The `!= undefined` cases (196, 326) only ever
+      hold `undefined` or a number (never `null`), so `!== undefined` preserves behavior. verify green.
 - [ ] **De-duplicate DOM ids (#35).** Make `id="area0"` (×3), `id="placeholder_battle_01"` (×2), and
       the trash-count `id="hand.length"` (×2) unique/correct; verify drag/drop still routes after.
 
