@@ -1,5 +1,23 @@
 /* Card sizing + all colors come from the shared token file (src/theme.css). */
 
+/* Play board layout — stacks the zone frames with consistent vertical spacing. */
+.playBoard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Desktop-recommended notice — this tool assumes mouse drag-and-drop, so it
+   warns touch users up front rather than letting them hit dead interactions. */
+.desktopNotice {
+  border: 1px solid var(--color-neon-magenta);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .columnLayoutBottom {
   margin-top: var(--space-2);
   display: flex;
@@ -22,6 +40,42 @@
   border-radius: var(--radius-md);
   padding: var(--space-3);
   background: var(--color-surface);
+}
+
+/* Civilization-accented zones — each zone surfaces its Duel Masters civilization
+   color as a top accent border so the board reads as a playmat, while the dark
+   surface underneath keeps card art and tap/flip/selected states readable. */
+.boxLayout.zone--fire {
+  --zone-accent: var(--civ-fire);
+}
+.boxLayout.zone--water {
+  --zone-accent: var(--civ-water);
+}
+.boxLayout.zone--light {
+  --zone-accent: var(--civ-light);
+}
+.boxLayout.zone--nature {
+  --zone-accent: var(--civ-nature);
+}
+.boxLayout.zone--darkness {
+  --zone-accent: var(--civ-darkness);
+}
+.boxLayout.zone--neutral {
+  --zone-accent: var(--color-neon-cyan);
+}
+
+.boxLayout.zone--fire,
+.boxLayout.zone--water,
+.boxLayout.zone--light,
+.boxLayout.zone--nature,
+.boxLayout.zone--darkness,
+.boxLayout.zone--neutral {
+  border-top: 3px solid var(--zone-accent);
+}
+
+/* デッキ確認 overlay — distinct neon-purple frame so it reads as a modal-ish view. */
+.zoneDeckView {
+  border-top: 3px solid var(--color-neon-purple);
 }
 
 .buttonLayout {
