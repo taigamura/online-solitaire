@@ -26,7 +26,7 @@
     "eject": "react-scripts eject",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
-    "verify": "npm run format:check && CI=true npm test -- --watchAll=false && npm run build",
+    "verify": "npm run format:check && CI=true npm test -- --watchAll=false && npm run lint:strict",
     "lint:strict": "CI=true npm run build"
   },
   "eslintConfig": {

@@ -25,10 +25,12 @@ Every change must keep `npm run verify` green. It runs:
 
 1. `npm run format:check` — Prettier (config in `.prettierrc`).
 2. `CI=true npm test -- --watchAll=false` — Jest + React Testing Library smoke tests.
-3. `npm run build` — must compile (real errors fail; lint *warnings* are allowed for now).
+3. `npm run lint:strict` (`CI=true npm run build`) — strict build: must compile **and** be lint-clean
+   (real errors *and* lint warnings both fail).
 
-Run `npm run format` to auto-fix formatting. `npm run lint:strict` shows lint warnings as errors
-(the backlog burns these down; eventually `verify` will switch to the strict build).
+Run `npm run format` to auto-fix formatting. The lint backlog is fully burned down, so `verify` now
+runs the strict build — keep it warning-free. If you ever need a non-failing build, use
+`npm run build` directly.
 
 ## Conventions
 
