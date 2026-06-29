@@ -31,8 +31,8 @@ function Play({ deck, setDeck }) {
   const [viewDeck, setViewDeck] = useState(false);
   const [viewDeckTop, setViewDeckTop] = useState(false);
   const [canMagnify, setCanMagnify] = useState(false);
-  const [canOverlap, setCanOverlap] = useState(true);
-  const [canSortable, setCanSortable] = useState(false);
+  const [canOverlap] = useState(true);
+  const [canSortable] = useState(false);
   const [mouseRight, setMouseRight] = useState(false);
   const [overlapTop, setOverlapTop] = useState(false);
 
