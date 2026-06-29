@@ -1,21 +1,89 @@
 /* Card sizing + all colors come from the shared token file (src/theme.css). */
 
-/* Play board layout — stacks the zone frames with consistent vertical spacing. */
+/* Playmat-style board layout (#42).
+   Named grid areas map to DM zones:
+     notice  — small-screen banner (full-width strip)
+     shield  — シールドゾーン (top-left)
+     info    — 説明 + データ panel (top-center)
+     deck    — デッキ + controls (top-right)
+     battle  — バトルゾーン (dominant, center full-width)
+     hand    — 手札 (bottom-left)
+     mana    — マナゾーン (bottom-center)
+     trash   — 墓地 (bottom-right)
+   DeckTop and DeckView modals float over the grid via position:fixed. */
 .playBoard {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--space-2);
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    'notice  notice  notice'
+    'shield  info    deck'
+    'battle  battle  battle'
+    'hand    mana    trash';
+  min-height: 100vh;
+  align-items: start;
 }
 
 /* Desktop-recommended notice — this tool assumes mouse drag-and-drop, so it
    warns touch users up front rather than letting them hit dead interactions. */
 .desktopNotice {
+  grid-area: notice;
   border: 1px solid var(--color-neon-magenta);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   background: var(--color-surface-raised);
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
+}
+
+/* Grid area assignments for each named zone */
+.zoneInfoPanel {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.zoneBattle {
+  grid-area: battle;
+}
+.zoneShield {
+  grid-area: shield;
+}
+.zoneHand {
+  grid-area: hand;
+}
+.zoneDeck {
+  grid-area: deck;
+}
+.zoneMana {
+  grid-area: mana;
+}
+.zoneTrash {
+  grid-area: trash;
+}
+
+/* DeckTop and DeckView modals float as fixed overlays so they don't
+   collapse the grid when they appear. */
+.zoneDeckTop {
+  position: fixed;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 100;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.zoneDeckView {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  max-width: min(90vw, 900px);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .columnLayoutBottom {

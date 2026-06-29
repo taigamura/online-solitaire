@@ -9,12 +9,7 @@ import {
   manaBoost as manaBoostCard,
   setOneShield as setOneShieldCard,
 } from '../game/deck';
-import {
-  moveCards,
-  moveCardsIntoOverlap,
-  moveCardsOutOfOverlap,
-  moveCardsToDeck,
-} from '../game/move';
+import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
 import { resetBoard } from '../game/board';
 import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
 
@@ -971,45 +966,49 @@ function Play({ deck, setDeck }) {
         このツールはマウス操作（ドラッグ＆ドロップ）を前提としているため、デスクトップでのご利用を推奨します。スマートフォンやタブレットでは一部の操作が動作しないことがあります。
       </div>
 
-      {/* 説明 */}
-      <div id="areaInfo" className="boxLayout zoneInfo zone--neutral">
-        <div className="boxTitle">説明</div>
-        <div>
-          <b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> = 選択カードリセット
-          | <b>M</b> = カード拡大モード | <b>O</b> = カード選択した状態でカードを重ねる | <b>R</b> =
-          全カードアンタップ | <b>T</b> = カード選択した状態でカードをタップ
+      {/* 説明 + データ */}
+      <div className="zoneInfoPanel">
+        <div id="areaInfo" className="boxLayout zoneInfo zone--neutral">
+          <div className="boxTitle">説明</div>
+          <div>
+            <b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> =
+            選択カードリセット | <b>M</b> = カード拡大モード | <b>O</b> =
+            カード選択した状態でカードを重ねる | <b>R</b> = 全カードアンタップ | <b>T</b> =
+            カード選択した状態でカードをタップ
+          </div>
+        </div>
+
+        {/* データ */}
+        <div id="areaData" className="boxLayout zoneData zone--neutral">
+          <div>
+            現在ターン：<span id="turnCounter">{turnCounter}</span>
+          </div>
+          <div>
+            Sortable：<span id="canSortable">{canSortable.toString()}</span>
+          </div>
+
+          <form onSubmit={handleOverlapTop}>
+            <button type="submit">{getOverlapTopMessage()}</button>
+          </form>
+
+          <form onSubmit={toggleMagnify}>
+            <button type="submit">{getMagnifyMessage()}</button>
+          </form>
+
+          <form onSubmit={tap}>
+            <button type="submit">選択カードタップ</button>
+          </form>
+
+          <form onSubmit={flip}>
+            <button type="submit">選択カード裏返し</button>
+          </form>
+
+          <form onSubmit={resetSelected}>
+            <button type="submit">選択カードリセット</button>
+          </form>
         </div>
       </div>
-
-      {/* データ */}
-      <div id="areaData" className="boxLayout zoneData zone--neutral">
-        <div>
-          現在ターン：<span id="turnCounter">{turnCounter}</span>
-        </div>
-        <div>
-          Sortable：<span id="canSortable">{canSortable.toString()}</span>
-        </div>
-
-        <form onSubmit={handleOverlapTop}>
-          <button type="submit">{getOverlapTopMessage()}</button>
-        </form>
-
-        <form onSubmit={toggleMagnify}>
-          <button type="submit">{getMagnifyMessage()}</button>
-        </form>
-
-        <form onSubmit={tap}>
-          <button type="submit">選択カードタップ</button>
-        </form>
-
-        <form onSubmit={flip}>
-          <button type="submit">選択カード裏返し</button>
-        </form>
-
-        <form onSubmit={resetSelected}>
-          <button type="submit">選択カードリセット</button>
-        </form>
-      </div>
+      {/* /zoneInfoPanel */}
 
       {/* バトルゾーン */}
       <div id="areaBattle" className="boxLayout zoneBattle zone--fire">
