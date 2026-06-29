@@ -616,6 +616,7 @@ function Play({ deck, setDeck }) {
         source = boardState.trash;
         setSource = 'trash';
         break;
+      // no default
     }
 
     const changedCardsInPlay = [...cardsInPlay];
@@ -671,6 +672,7 @@ function Play({ deck, setDeck }) {
         source = boardState.trash;
         setSource = 'trash';
         break;
+      // no default
     }
 
     const changedCardsInPlay = [...cardsInPlay];
