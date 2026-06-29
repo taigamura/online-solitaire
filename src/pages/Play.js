@@ -87,7 +87,15 @@ function Play({ deck, setDeck }) {
       document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleMouseDown, handleKeyUp, handleKeyDown]); // <-- here put the parameter to listen, react will re-render component when your state will be changed
+    // Intentional dependency set. handleMouseDown/handleKeyUp/handleKeyDown are
+    // redefined every render, so this effect already re-runs on each render — by
+    // design: it re-registers the state-dependent key/mouse listeners and drives
+    // the sequential command-list runner (runCommandList) and Sortable setup.
+    // Listing the full reactive set the linter wants would not change this; a
+    // real fix means memoising every handler (useCallback) and splitting this
+    // effect, a larger refactor tracked separately.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleMouseDown, handleKeyUp, handleKeyDown]);
 
   // check which side mouse is on
   function handleMouseMove(e) {
