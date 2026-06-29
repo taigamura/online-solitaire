@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './content.css';
+import AdSlot from '../components/AdSlot';
 
 // Privacy policy at "/privacy". Responsive, Japanese, image-free (ad-safe — see
 // contentPages.test.js, Seam 2). Covers cookies + third-party (AdSense) ads.
@@ -45,7 +46,7 @@ function Privacy() {
 
       {/* Reserved ad slot — wired to AdSense later (fix_plan #44); stays image-free. */}
       <aside className="adSlot" data-testid="ad-slot" aria-label="広告スペース">
-        広告スペース
+        <AdSlot />
       </aside>
 
       <div className="contentCtaRow">

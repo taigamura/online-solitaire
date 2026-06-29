@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Landing.css';
+import AdSlot from '../components/AdSlot';
 
 // Landing page at "/". Responsive, Japanese, and intentionally image-free so it
 // stays ad-safe (no uploaded/copyrighted card art) — see the Seam-2 test in
@@ -64,7 +65,7 @@ function Landing() {
       {/* Reserved ad slot — wired to AdSense on safe pages later (fix_plan #44).
           Kept image-free; ships dark until configured. */}
       <aside className="adSlot" data-testid="ad-slot" aria-label="広告スペース">
-        広告スペース
+        <AdSlot />
       </aside>
 
       <section className="landingSection landingFinalCta">

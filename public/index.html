@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6862698457969651"
-    crossorigin="anonymous"></script>
+    <!-- Google AdSense — loads only when REACT_APP_ADSENSE_CLIENT is set at build time.
+         When the env var is absent the ?client= param is empty and AdSense ignores the load. -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=%REACT_APP_ADSENSE_CLIENT%"
+      crossorigin="anonymous"
+    ></script>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
