@@ -106,9 +106,9 @@ function Deckbuild({ deck, setDeck }) {
       <h1>デュエルマスターズ一人回し用ツール by taigamura</h1>
 
       <div id="readme" className="boxLayout">
-        <a>
+        <p>
           下からカード写真を追加してください。画像は高画質のものを使ってください（デュエルマスターズ公式カード検索から保存した写真推奨）。その後、デッキ確定をクリック。
-        </a>
+        </p>
       </div>
 
       {/* デュエマは 63mm x 88mm */}
@@ -118,12 +118,12 @@ function Deckbuild({ deck, setDeck }) {
         </div>
         <div className="buttonLayout">
           <input className="button" type="file" multiple onChange={handleChange} accept="image/*" />
-          <a id="reset" className="button" onClick={handleReset}>
+          <button type="button" id="reset" className="button" onClick={handleReset}>
             リセット
-          </a>
-          <a id="confirmDeck" className="button" onClick={handleConfirmDeck}>
+          </button>
+          <button type="button" id="confirmDeck" className="button" onClick={handleConfirmDeck}>
             デッキ確定
-          </a>
+          </button>
         </div>
         <div className="boxLayout"></div>
         <ul id="" className="deckPreviewWrap">
