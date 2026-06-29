@@ -12,6 +12,7 @@ import {
 import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
 import { resetBoard } from '../game/board';
 import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
+import { getAvailableActions } from '../game/actions';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -703,6 +704,32 @@ function Play({ deck, setDeck }) {
     }
   }
 
+  // Toolbar action: send selected cards to deck top, deriving zone from selection.
+  function sendTopFromSelection(e) {
+    e?.preventDefault();
+    if (cardsInPlay.length === 0) return;
+    const sourceWrap = cardsInPlay[0]['source'];
+    const zoneMap = { handWrap: 'handTop', trashWrap: 'trashTop', deckTopWrap: 'deckTopTop' };
+    const fakeId = zoneMap[sourceWrap];
+    if (!fakeId) return;
+    top({ target: { id: fakeId } });
+  }
+
+  // Toolbar action: send selected cards to deck bottom, deriving zone from selection.
+  function sendBottomFromSelection(e) {
+    e?.preventDefault();
+    if (cardsInPlay.length === 0) return;
+    const sourceWrap = cardsInPlay[0]['source'];
+    const zoneMap = {
+      handWrap: 'handBottom',
+      trashWrap: 'trashBottom',
+      deckTopWrap: 'deckTopBottom',
+    };
+    const fakeId = zoneMap[sourceWrap];
+    if (!fakeId) return;
+    bottom({ target: { id: fakeId } });
+  }
+
   function handleCardOverlay(id) {
     const changedCardsInPlay = [...cardsInPlay];
     let card = changedCardsInPlay.find((element) => element.id === id);
@@ -983,9 +1010,6 @@ function Play({ deck, setDeck }) {
           <div>
             現在ターン：<span id="turnCounter">{turnCounter}</span>
           </div>
-          <div>
-            Sortable：<span id="canSortable">{canSortable.toString()}</span>
-          </div>
 
           <form onSubmit={handleOverlapTop}>
             <button type="submit">{getOverlapTopMessage()}</button>
@@ -994,21 +1018,83 @@ function Play({ deck, setDeck }) {
           <form onSubmit={toggleMagnify}>
             <button type="submit">{getMagnifyMessage()}</button>
           </form>
-
-          <form onSubmit={tap}>
-            <button type="submit">選択カードタップ</button>
-          </form>
-
-          <form onSubmit={flip}>
-            <button type="submit">選択カード裏返し</button>
-          </form>
-
-          <form onSubmit={resetSelected}>
-            <button type="submit">選択カードリセット</button>
-          </form>
         </div>
       </div>
       {/* /zoneInfoPanel */}
+
+      {/* 選択ツールバー — appears only when cards are selected */}
+      {cardsInPlay.length > 0 && (
+        <div className="selectionToolbar" data-testid="selection-toolbar">
+          <span className="selectionToolbar__label">{cardsInPlay.length}枚選択中</span>
+          {(() => {
+            const actions = getAvailableActions(cardsInPlay);
+            return (
+              <>
+                {actions.has('tap') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択カードをタップ/アンタップ (T)"
+                    onClick={tap}
+                  >
+                    T
+                  </button>
+                )}
+                {actions.has('flip') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択カードを裏返す (Space)"
+                    onClick={flip}
+                  >
+                    裏返
+                  </button>
+                )}
+                {actions.has('overlap') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択カードを重ねる (O)"
+                    onClick={overlap}
+                  >
+                    重
+                  </button>
+                )}
+                {actions.has('sendTop') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択カードを山札の上に置く"
+                    onClick={sendTopFromSelection}
+                  >
+                    山上
+                  </button>
+                )}
+                {actions.has('sendBottom') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択カードを山札の下に置く"
+                    onClick={sendBottomFromSelection}
+                  >
+                    山下
+                  </button>
+                )}
+                {actions.has('reset') && (
+                  <button
+                    type="button"
+                    className="button"
+                    title="選択解除 (Esc)"
+                    onClick={resetSelected}
+                  >
+                    ✕
+                  </button>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {/* バトルゾーン */}
       <div id="areaBattle" className="boxLayout zoneBattle zone--fire">
@@ -1017,41 +1103,40 @@ function Play({ deck, setDeck }) {
           <button
             type="button"
             id="battleSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全選択"
             onClick={selectAll}
           >
-            全選択
+            ☑
           </button>
           <button
             type="button"
             id="battleDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全解除"
             onClick={deselectAll}
           >
-            全解除
+            ☐
           </button>
         </div>
         <div className="buttonLayout">
-          <button type="button" id="placeholder_battle_00" className="button" onClick={overlap}>
-            選択カードを重ねる
-          </button>
           <button
             type="button"
             id="placeholder_battle_01"
-            className="button"
+            className="button iconBtn"
+            title="バトルゾーン全てタップ"
             onClick={battleTapAll}
           >
-            全てタップ
+            ↻
           </button>
           <button
             type="button"
             id="placeholder_battle_02"
-            className="button"
+            className="button iconBtn"
+            title="バトルゾーン全てアンタップ"
             onClick={battleUntapAll}
           >
-            全てアンタップ
+            ↺
           </button>
         </div>
         <div className="boxLayout">
@@ -1079,46 +1164,47 @@ function Play({ deck, setDeck }) {
                 <button
                   type="button"
                   id={'overlap' + i + 'SelectAll'}
-                  className="button"
+                  className="button iconBtn"
+                  title="グループ全選択"
                   onClick={selectAll}
                 >
-                  全選択
+                  ☑
                 </button>
                 <button
                   type="button"
                   id={'overlap' + i + 'DeselectAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
+                  className="button iconBtn"
+                  title="グループ全解除"
                   onClick={deselectAll}
                 >
-                  全解除
+                  ☐
                 </button>
                 <button
                   type="button"
                   id={'overlap' + i}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
+                  className="button iconBtn"
+                  title="重ね解除"
                   onClick={undoOverlap}
                 >
-                  重ね解除
+                  ⊟
                 </button>
                 <button
                   type="button"
                   id={'overlap' + i + 'TapAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
+                  className="button iconBtn"
+                  title="グループ全てタップ"
                   onClick={overlapTapAll}
                 >
-                  全てタップ
+                  ↻
                 </button>
                 <button
                   type="button"
                   id={'overlap' + i + 'UntapAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
+                  className="button iconBtn"
+                  title="グループ全てアンタップ"
                   onClick={overlapUntapAll}
                 >
-                  全てアンタップ
+                  ↺
                 </button>
                 <ul id="overlappedCardsWrap" className="cardWrap overlapWrap">
                   {group.map((card, j) => (
@@ -1146,38 +1232,40 @@ function Play({ deck, setDeck }) {
           <button
             type="button"
             id="shieldSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全選択"
             onClick={selectAll}
           >
-            全選択
+            ☑
           </button>
           <button
             type="button"
             id="shieldDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全解除"
             onClick={deselectAll}
           >
-            全解除
+            ☐
           </button>
         </div>
         <div className="buttonLayout">
           <button
             type="button"
             id="placeholder_shield_00"
-            className="button"
+            className="button iconBtn"
+            title="シールド全て表向き"
             onClick={shieldFlipAllFalse}
           >
-            シールド全て表
+            ↑
           </button>
           <button
             type="button"
             id="placeholder_shield_01"
-            className="button"
+            className="button iconBtn"
+            title="シールド全て裏向き"
             onClick={shieldFlipAllTrue}
           >
-            シールド全て裏
+            ↓
           </button>
         </div>
         <div className="boxLayout">
@@ -1204,28 +1292,20 @@ function Play({ deck, setDeck }) {
           <button
             type="button"
             id="handSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全選択"
             onClick={selectAll}
           >
-            全選択
+            ☑
           </button>
           <button
             type="button"
             id="handDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全解除"
             onClick={deselectAll}
           >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button type="button" id="handBottom" className="button" onClick={bottom}>
-            選択カードを山札の下に置く
-          </button>
-          <button type="button" id="handTop" className="button" onClick={top}>
-            選択カードを山札の上に置く
+            ☐
           </button>
         </div>
         <div className="boxLayout">
@@ -1250,38 +1330,62 @@ function Play({ deck, setDeck }) {
         <div className="boxTitle">
           デッキ(<span id="deck.length">{boardState.deck.length}</span>)
         </div>
-
-        <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
-          <button type="submit">シャッフル, 5 枚ドロー, 5 枚シールド化</button>
-        </form>
-
-        <form onSubmit={shuffle}>
-          <button type="submit">シャッフル</button>
-        </form>
-
-        <form onSubmit={draw}>
-          <button type="submit">1 枚ドロー</button>
-        </form>
-
-        <form onSubmit={turnDraw}>
-          <button type="submit">ターンドロー</button>
-        </form>
-
-        <form onSubmit={setOneShield}>
-          <button type="submit">1 枚シールド化</button>
-        </form>
-
-        <form onSubmit={handleDeckTop}>
-          <button type="submit">デッキ上 1 枚確認</button>
-        </form>
-
-        <form onSubmit={handleViewDeck}>
-          <button type="submit">デッキを確認</button>
-        </form>
-
-        <form onSubmit={handleReset}>
-          <button type="submit">リセット</button>
-        </form>
+        <div className="buttonLayout">
+          <button
+            type="button"
+            className="button iconBtn"
+            title="シャッフル→5ドロー→5シールド化"
+            onClick={shuffleOnceDrawFiveSetFiveShield}
+          >
+            ▶5
+          </button>
+          <button type="button" className="button iconBtn" title="シャッフル" onClick={shuffle}>
+            ⟳
+          </button>
+          <button type="button" className="button iconBtn" title="1枚ドロー" onClick={draw}>
+            ↑
+          </button>
+          <button
+            type="button"
+            className="button iconBtn"
+            title="ターンドロー（バトル+マナアンタップ→1ドロー）"
+            onClick={turnDraw}
+          >
+            ▶T
+          </button>
+          <button
+            type="button"
+            className="button iconBtn"
+            title="1枚シールド化"
+            onClick={setOneShield}
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            className="button iconBtn"
+            title="デッキ上1枚確認"
+            onClick={handleDeckTop}
+          >
+            👁
+          </button>
+          <button
+            type="button"
+            className="button iconBtn"
+            title="デッキ全体を確認"
+            onClick={handleViewDeck}
+          >
+            📋
+          </button>
+          <button
+            type="button"
+            className="button iconBtn"
+            title="ボードをリセット"
+            onClick={handleReset}
+          >
+            ⏮
+          </button>
+        </div>
       </div>
 
       {/* マナゾーン */}
@@ -1291,31 +1395,49 @@ function Play({ deck, setDeck }) {
           <button
             type="button"
             id="manaSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全選択"
             onClick={selectAll}
           >
-            全選択
+            ☑
           </button>
           <button
             type="button"
             id="manaDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全解除"
             onClick={deselectAll}
           >
-            全解除
+            ☐
           </button>
         </div>
         <div className="buttonLayout">
-          <button type="button" id="manaTapAll" className="button" onClick={manaTapAll}>
-            全てタップ
+          <button
+            type="button"
+            id="manaTapAll"
+            className="button iconBtn"
+            title="マナ全てタップ"
+            onClick={manaTapAll}
+          >
+            ↻
           </button>
-          <button type="button" id="manaUntapAll" className="button" onClick={manaUntapAll}>
-            全てアンタップ
+          <button
+            type="button"
+            id="manaUntapAll"
+            className="button iconBtn"
+            title="マナ全てアンタップ"
+            onClick={manaUntapAll}
+          >
+            ↺
           </button>
-          <button type="button" id="placeholder_mana_02" className="button" onClick={manaBoost}>
-            1 枚マナブースト
+          <button
+            type="button"
+            id="placeholder_mana_02"
+            className="button iconBtn"
+            title="1枚マナブースト"
+            onClick={manaBoost}
+          >
+            +
           </button>
         </div>
         <div className="boxLayout">
@@ -1342,31 +1464,31 @@ function Play({ deck, setDeck }) {
           <button
             type="button"
             id="trashSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全選択"
             onClick={selectAll}
           >
-            全選択
+            ☑
           </button>
           <button
             type="button"
             id="trashDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
+            className="button iconBtn"
+            title="全解除"
             onClick={deselectAll}
           >
-            全解除
+            ☐
           </button>
         </div>
         <div className="buttonLayout">
-          <button type="button" id="trashBottom" className="button" onClick={bottom}>
-            選択カードを山札の下に置く
-          </button>
-          <button type="button" id="trashTop" className="button" onClick={top}>
-            選択カードを山札の上に置く
-          </button>
-          <button type="button" id="trashShuffle" className="button" onClick={shuffleDeckTop}>
-            シャッフル
+          <button
+            type="button"
+            id="trashShuffle"
+            className="button iconBtn"
+            title="墓地をシャッフル"
+            onClick={shuffleDeckTop}
+          >
+            ⟳
           </button>
         </div>
         <div className="boxLayout">
@@ -1394,34 +1516,40 @@ function Play({ deck, setDeck }) {
             <button
               type="button"
               id="deckTopSelectAll"
-              className="button"
-              style={{ marginLeft: 10 + 'px' }}
+              className="button iconBtn"
+              title="全選択"
               onClick={selectAll}
             >
-              全選択
+              ☑
             </button>
             <button
               type="button"
               id="deckTopDeselectAll"
-              className="button"
-              style={{ marginLeft: 10 + 'px' }}
+              className="button iconBtn"
+              title="全解除"
               onClick={deselectAll}
             >
-              全解除
+              ☐
             </button>
           </div>
           <div className="buttonLayout">
-            <button type="button" id="deckTopBottom" className="button" onClick={bottom}>
-              選択カードを山札の下に置く
+            <button
+              type="button"
+              id="deckTopShuffle"
+              className="button iconBtn"
+              title="シャッフル"
+              onClick={shuffleDeckTop}
+            >
+              ⟳
             </button>
-            <button type="button" id="deckTopTop" className="button" onClick={top}>
-              選択カードを山札の上に置く
-            </button>
-            <button type="button" id="deckTopShuffle" className="button" onClick={shuffleDeckTop}>
-              シャッフル
-            </button>
-            <button type="button" id="deckTopOne" className="button" onClick={handleDeckTop}>
-              デッキ上 1 枚確認
+            <button
+              type="button"
+              id="deckTopOne"
+              className="button iconBtn"
+              title="デッキ上1枚追加確認"
+              onClick={handleDeckTop}
+            >
+              +1
             </button>
           </div>
           <div className="boxLayout">
@@ -1450,25 +1578,31 @@ function Play({ deck, setDeck }) {
             <button
               type="button"
               id="deckSelectAll"
-              className="button"
-              style={{ marginLeft: 10 + 'px' }}
+              className="button iconBtn"
+              title="全選択"
               onClick={selectAll}
             >
-              全選択
+              ☑
             </button>
             <button
               type="button"
               id="deckDeselectAll"
-              className="button"
-              style={{ marginLeft: 10 + 'px' }}
+              className="button iconBtn"
+              title="全解除"
               onClick={deselectAll}
             >
-              全解除
+              ☐
             </button>
           </div>
           <div className="buttonLayout">
-            <button type="button" id="deckShuffle" className="button" onClick={shuffle}>
-              シャッフル
+            <button
+              type="button"
+              id="deckShuffle"
+              className="button iconBtn"
+              title="シャッフル"
+              onClick={shuffle}
+            >
+              ⟳
             </button>
           </div>
           <div className="boxLayout">
