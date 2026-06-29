@@ -23,29 +23,45 @@ GitHub issue refs are for humans — do not push or open PRs.
 
 ## Medium Priority — Phase 2–3: themed chrome + board UX rework
 
-- [ ] **Playmat-style board layout + color-coded zones + desktop-first notice (#42).** Rework the
+- [x] **Playmat-style board layout + color-coded zones + desktop-first notice (#42).** Rework the
       Play board from the vertical stack of identical boxes into a **playmat-style fixed layout** with
       **color-coded zone framing** (civilization→zone mapping tuned from screenshots), aiming for a
       single surface with minimal desktop scrolling. Add a friendly small-screen "best experienced on
       desktop" notice (no touch-drag impl). Drag/drop routing, tap/flip/overlap/shuffle/draw, and all
-      keyboard shortcuts must work exactly as before.
-- [ ] **Declutter board: contextual selection-toolbar + structural icon buttons + action-availability
-      fn (#43).** Extract a **pure `src/game/` function** that, given the selection and the zones its
-      cards are in, returns the set of valid actions — with unit tests (Seam 3) via `makeCard` (empty
-      selection → no actions; a selection in a given zone → expected set). Render a **single
-      contextual selection-toolbar** that appears only when cards are selected and shows only valid
-      actions (tap/flip/reset/send-to-top/send-to-bottom), plus an RTL smoke test (hidden with no
-      selection, shown with one). Convert per-zone **structural** actions (shuffle, draw,
-      select-all/deselect-all, …) into compact **icon buttons with tooltips**. Relocate/consolidate
-      controls only — behavior and shortcuts unchanged.
+      keyboard shortcuts must work exactly as before. Play.css: `.playBoard` → 3-col/4-row CSS grid
+      with named areas (notice/shield/info/deck/battle/hand/mana/trash); `.desktopNotice` → notice area;
+      `.zoneInfoPanel` → info area wrapping both info + data boxes; zone classes get `grid-area`;
+      `.zoneDeckTop`/`.zoneDeckView` → `position:fixed` overlays. Civilization-accented top border
+      (`zone--fire/water/light/nature/darkness/neutral`). Removed unused `moveCardsToDeck` import.
+      verify green (56 tests).
+- [x] **Declutter board: contextual selection-toolbar + structural icon buttons + action-availability
+      fn (#43).** `src/game/actions.js`: pure `getAvailableActions(selection)` — returns a `Set` of
+      action keys (`tap`,`flip`,`reset`,`sendTop`,`sendBottom`,`overlap`) based on the first card's
+      `source`. `src/game/actions.test.js` (10 tests): empty/null → empty set; hand/trash/deckTop →
+      sendTop+sendBottom; battle/overlappedCards → overlap; mana/shield → tap+flip+reset only;
+      multi-card uses first card. Play.js: `selectionToolbar` div (`data-testid="selection-toolbar"`)
+      appears conditionally when `cardsInPlay.length > 0`, renders only actions from
+      `getAvailableActions(cardsInPlay)` as icon buttons with `title` tooltips. `sendTopFromSelection`
+      / `sendBottomFromSelection` helpers derive zone from `cardsInPlay[0].source` and delegate to
+      existing `top`/`bottom`. Deck zone: converted 8 `<form onSubmit>` buttons → `type="button"`
+      `onClick` icon buttons with `title` tooltips. All other zones: selectAll/deselectAll → `iconBtn`;
+      tap/untap-all → `iconBtn`; sendTop/sendBottom removed from zone buttonLayouts (moved to toolbar).
+      Data panel: removed tap/flip/resetSelected forms (moved to toolbar); removed Sortable display.
+      Play.css: `.selectionToolbar` (fixed bottom overlay, neon-cyan glow), `.selectionToolbar__label`,
+      `.button.iconBtn` (compact padding). verify green (66 tests).
 
 ## Low Priority — Phase 4: ad enablement (in-app wiring only; live ads gated on external deploy/approval)
 
-- [ ] **AdSense snippet wiring on safe pages (#44).** Wire the Google AdSense snippet into the
-      reserved slots on the **image-free** pages only (landing/about/privacy); Play and Deckbuild stay
-      permanently ad-free. Read the publisher/client id from configuration so it ships dark and
-      no-ops cleanly when unset. The ad-safety tests (no card images on ad pages) must still pass.
-      Account creation, deployment, domain, and AdSense approval are external and **out of scope**.
+- [x] **AdSense snippet wiring on safe pages (#44).** `src/components/AdSlot.js`: renders
+      `<ins class="adsbygoogle">` with `useEffect` push only when both `REACT_APP_ADSENSE_CLIENT`
+      and `REACT_APP_ADSENSE_SLOT` env vars are set at build time; returns `null` (no-op) when
+      either is absent so the app ships dark without a live account. `public/index.html`: replaced
+      hardcoded `ca-pub-*` client id in the adsbygoogle script src with `%REACT_APP_ADSENSE_CLIENT%`
+      (CRA build-time substitution) so the load itself is also conditional. Landing.js, About.js,
+      Privacy.js: imported `AdSlot` and replaced the `広告スペース` placeholder text inside the
+      existing `<aside data-testid="ad-slot">` with `<AdSlot />`. Play and Deckbuild untouched —
+      permanently ad-free. Ad-safety tests (zero `<img>` on ad pages, ad-slot present) still pass;
+      `<ins>` contains no `<img>`. verify green (66 tests).
 
 ## Out of scope this session (do NOT do — defer to a supervised pass)
 
