@@ -331,7 +331,7 @@ function Play({ deck, setDeck }) {
             // selected must be a part of same area else, clear card in play, if different groups, also clear
             if (
               selectedCard['source'] !== changedCardsInPlay[0]['source'] ||
-              findOverlapGroupIdx(selectedCard['id']) !=
+              findOverlapGroupIdx(selectedCard['id']) !==
                 findOverlapGroupIdx(changedCardsInPlay[0]['id'])
             ) {
               changedCardsInPlay = [];
