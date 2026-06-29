@@ -9,7 +9,12 @@ import {
   manaBoost as manaBoostCard,
   setOneShield as setOneShieldCard,
 } from '../game/deck';
-import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
+import {
+  moveCards,
+  moveCardsIntoOverlap,
+  moveCardsOutOfOverlap,
+  moveCardsToDeck,
+} from '../game/move';
 import { resetBoard } from '../game/board';
 import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
 

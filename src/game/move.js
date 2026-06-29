@@ -72,6 +72,27 @@ export function moveCardsOutOfOverlap(groups, target, cardsToMove, newSource) {
   return [newGroups, target.concat(moved)];
 }
 
+// Move the selected cards out of a flat zone onto the deck — behaviour-preserving
+// extraction of the in-tree `top`/`bottom` handlers. `position` is 'top' (cards
+// land at the END of the deck array, where `draw` takes from) or 'bottom' (the
+// FRONT). Only cards present in BOTH `source` and `cardsToMove` (matched by id)
+// move; they are appended in REVERSED selection order, matching the original
+// reverse-`push` / forward-`unshift` loops. The whole resulting deck is rebuilt
+// with `source: 'deckWrap'` (as the old code did). Immutable: inputs and their
+// cards are never mutated. Returns `[newSource, newDeck]`.
+export function moveCardsToDeck(deck, source, cardsToMove, position) {
+  const moveIds = new Set(cardsToMove.map((card) => card.id));
+  const inSource = new Set(source.map((card) => card.id));
+
+  const remaining = source.filter((card) => !moveIds.has(card.id));
+  const moved = cardsToMove.filter((card) => inSource.has(card.id)).reverse();
+
+  const combined = position === 'top' ? deck.concat(moved) : moved.concat(deck);
+  const newDeck = combined.map((card) => ({ ...card, source: 'deckWrap' }));
+
+  return [remaining, newDeck];
+}
+
 // Overlap-group move, INTO an overlap zone — behaviour-preserving extraction of
 // the `else` branch of `handleMovementOfCardOverlap`. Cards in `cardsToMove` are
 // pulled out of the flat `source` zone and inserted into the group that holds the
