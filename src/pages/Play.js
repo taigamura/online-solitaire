@@ -10,6 +10,7 @@ import {
   setOneShield as setOneShieldCard,
 } from '../game/deck';
 import { moveCards, moveCardsIntoOverlap, moveCardsOutOfOverlap } from '../game/move';
+import { resetBoard } from '../game/board';
 import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
 
 function Play({ deck, setDeck }) {
@@ -38,8 +39,6 @@ function Play({ deck, setDeck }) {
 
   const allCards = Object.values(boardState);
   const allPlayableAreaIds = Object.keys(boardState).map((x) => x + 'Wrap');
-
-  const copy = [...deck];
 
   useEffect(() => {
     if (canSortable) {
@@ -587,22 +586,7 @@ function Play({ deck, setDeck }) {
   function handleReset(e) {
     e.preventDefault();
 
-    copy.forEach((card) => {
-      card['tap'] = false;
-      card['flip'] = false;
-      card['source'] = 'deckWrap';
-    });
-
-    setBoardState({
-      hand: [],
-      trash: [],
-      mana: [],
-      shield: [],
-      battle: [],
-      overlappedCards: [],
-      deckTop: [],
-      deck: copy,
-    });
+    setBoardState(resetBoard(deck));
     setCardsInPlay([]);
     setTurnCounter(1);
   }
