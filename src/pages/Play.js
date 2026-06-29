@@ -414,6 +414,15 @@ function Play({ deck, setDeck }) {
     return cardImg;
   }
 
+  // Accessible label for a card image: face-down cards read as such, otherwise
+  // fall back to the uploaded file name so screen readers can tell cards apart.
+  function handleCardImgAlt(card) {
+    if (card['flip']) {
+      return '裏向きのカード';
+    }
+    return card['file']?.name ?? 'カード';
+  }
+
   function isCardInTarget(id, target) {
     const currTarget = [...target];
     let isFound = false;
@@ -745,6 +754,7 @@ function Play({ deck, setDeck }) {
             switchSides="true"
             id={card['id']}
             imageSrc={handleCardImgSrc(card)}
+            alt={handleCardImgAlt(card)}
             className={handleCardClass(card)}
           />
         );
@@ -753,12 +763,20 @@ function Play({ deck, setDeck }) {
           <SideBySideMagnifier
             id={card['id']}
             imageSrc={handleCardImgSrc(card)}
+            alt={handleCardImgAlt(card)}
             className={handleCardClass(card)}
           />
         );
       }
     } else {
-      return <img id={card['id']} src={handleCardImgSrc(card)} className={handleCardClass(card)} />;
+      return (
+        <img
+          id={card['id']}
+          src={handleCardImgSrc(card)}
+          alt={handleCardImgAlt(card)}
+          className={handleCardClass(card)}
+        />
+      );
     }
   }
 
