@@ -23,3 +23,20 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ralph runtime state (keep control files: PROMPT.md, fix_plan.md, AGENT.md, specs/)
+.ralph/.call_count
+.ralph/.last_reset
+.ralph/.exit_signals
+.ralph/status.json
+.ralph/.ralph_session
+.ralph/.ralph_session_history
+.ralph/.claude_session_id
+.ralph/.response_analysis
+.ralph/.circuit_breaker_state
+.ralph/.circuit_breaker_history
+.ralph/.github_lifecycle_state
+.ralph/live.log
+.ralph/logs/
+.ralph/docs/generated/
+.ralph_backup_*

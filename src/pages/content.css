@@ -1,0 +1,100 @@
+/* Shared dark-neon styling for the image-free content pages (about, privacy).
+   Built on src/theme.css tokens. The `.adSlot` rule lives in Landing.css and is
+   global to the CRA bundle, so it is reused here. */
+
+.contentPage {
+  min-height: 100vh;
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.8;
+}
+
+.contentPage > * {
+  width: 100%;
+  max-width: 760px;
+}
+
+.contentTitle {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(26px, 5vw, 40px);
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: var(--glow-neon);
+}
+
+.contentSection {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.contentHeading {
+  margin: 0 0 var(--space-4);
+  font-size: clamp(18px, 3vw, 24px);
+  color: var(--color-neon-cyan);
+}
+
+.contentBody {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.contentList {
+  margin: 0;
+  padding-left: var(--space-5);
+  color: var(--color-text);
+}
+
+.contentList li {
+  margin-bottom: var(--space-3);
+}
+
+.contentList li:last-child {
+  margin-bottom: 0;
+}
+
+.contentKbd {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-neon-cyan);
+  color: var(--color-neon-cyan);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.contentCta {
+  display: inline-block;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--color-bg);
+  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-purple));
+  box-shadow: var(--glow-neon);
+  transition: transform 0.15s ease;
+}
+
+.contentCta:hover {
+  transform: translateY(-2px);
+}
+
+.contentCtaRow {
+  display: flex;
+  justify-content: center;
+}

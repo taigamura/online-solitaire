@@ -1,225 +1,398 @@
-:root {
-    --card-height: calc(88px * 2);
-    --card-width: calc(63px * 2);
+/* Card sizing + all colors come from the shared token file (src/theme.css). */
+
+/* Playmat-style board layout (#42).
+   Named grid areas map to DM zones:
+     notice  — small-screen banner (full-width strip)
+     shield  — シールドゾーン (top-left)
+     info    — 説明 + データ panel (top-center)
+     deck    — デッキ + controls (top-right)
+     battle  — バトルゾーン (dominant, center full-width)
+     hand    — 手札 (bottom-left)
+     mana    — マナゾーン (bottom-center)
+     trash   — 墓地 (bottom-right)
+   DeckTop and DeckView modals float over the grid via position:fixed. */
+.playBoard {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    'notice  notice  notice'
+    'shield  info    deck'
+    'battle  battle  battle'
+    'hand    mana    trash';
+  min-height: 100vh;
+  align-items: start;
+}
+
+/* Desktop-recommended notice — this tool assumes mouse drag-and-drop, so it
+   warns touch users up front rather than letting them hit dead interactions. */
+.desktopNotice {
+  grid-area: notice;
+  border: 1px solid var(--color-neon-magenta);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Grid area assignments for each named zone */
+.zoneInfoPanel {
+  grid-area: info;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.zoneBattle {
+  grid-area: battle;
+}
+.zoneShield {
+  grid-area: shield;
+}
+.zoneHand {
+  grid-area: hand;
+}
+.zoneDeck {
+  grid-area: deck;
+}
+.zoneMana {
+  grid-area: mana;
+}
+.zoneTrash {
+  grid-area: trash;
+}
+
+/* DeckTop and DeckView modals float as fixed overlays so they don't
+   collapse the grid when they appear. */
+.zoneDeckTop {
+  position: fixed;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 100;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.zoneDeckView {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  max-width: min(90vw, 900px);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .columnLayoutBottom {
-    margin-top: 5px;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
+  margin-top: var(--space-2);
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
 }
 
 .boxTitle {
-    position: relative;
-    font-size: 16px;
-    font-weight: bold;
-    color: #777777;
-    z-index: 2;
+  position: relative;
+  font-size: var(--font-size-md);
+  font-weight: bold;
+  color: var(--color-neon-cyan);
+  z-index: 2;
 }
 
+/* Zone frame — themed chrome. The dark surface keeps the card-playing area calm
+   so card art and tap/flip/selected states stay readable. */
 .boxLayout {
-    border: 2px solid #999999;
-    border-radius: 10px;
-    padding: 10px;
+  border: 1px solid var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-surface);
+}
+
+/* Civilization-accented zones — each zone surfaces its Duel Masters civilization
+   color as a top accent border so the board reads as a playmat, while the dark
+   surface underneath keeps card art and tap/flip/selected states readable. */
+.boxLayout.zone--fire {
+  --zone-accent: var(--civ-fire);
+}
+.boxLayout.zone--water {
+  --zone-accent: var(--civ-water);
+}
+.boxLayout.zone--light {
+  --zone-accent: var(--civ-light);
+}
+.boxLayout.zone--nature {
+  --zone-accent: var(--civ-nature);
+}
+.boxLayout.zone--darkness {
+  --zone-accent: var(--civ-darkness);
+}
+.boxLayout.zone--neutral {
+  --zone-accent: var(--color-neon-cyan);
+}
+
+.boxLayout.zone--fire,
+.boxLayout.zone--water,
+.boxLayout.zone--light,
+.boxLayout.zone--nature,
+.boxLayout.zone--darkness,
+.boxLayout.zone--neutral {
+  border-top: 3px solid var(--zone-accent);
+}
+
+/* デッキ確認 overlay — distinct neon-purple frame so it reads as a modal-ish view. */
+.zoneDeckView {
+  border-top: 3px solid var(--color-neon-purple);
+}
+
+/* Contextual selection toolbar — floats at bottom of viewport when cards are
+   selected; hidden otherwise (controlled by conditional rendering in Play.js). */
+.selectionToolbar {
+  position: fixed;
+  bottom: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-neon-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glow-neon);
+}
+
+.selectionToolbar__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-neon-cyan);
+  white-space: nowrap;
+  margin-right: var(--space-1);
+}
+
+/* Compact icon buttons — used for structural zone actions (selectAll, tap/untap all,
+   shuffle, etc.) to declutter zone titles and buttonLayouts. */
+.button.iconBtn {
+  padding: var(--space-1);
+  min-width: 24px;
+  text-align: center;
+  margin-left: var(--space-1);
 }
 
 .buttonLayout {
-    position: relative;
-    z-index: 2;
-    margin-top: 5px;
+  position: relative;
+  z-index: 2;
+  margin-top: var(--space-2);
 }
 
 .button {
-    display: inline-block;
-    border-radius: 5px;
-    border: 1px solid #222222;
-    padding: 2px 5px;
-    background-color: white;
-    font-size: 12px;
-    color: #222222;
-    cursor: pointer;
-  }
-  
+  display: inline-block;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-neon-cyan);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-surface-raised);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
 .button:hover {
-    border: 1px solid #222222;
-    background-color: #222222;
-    color: #ffffff;
+  border-color: var(--color-neon-cyan);
+  background-color: var(--color-neon-cyan);
+  color: var(--color-bg);
 }
 
 .button.on {
-    border: 1px solid #222222;
-    background-color: #222222;
-    color: #ffffff;
+  border-color: var(--color-neon-cyan);
+  background-color: var(--color-neon-cyan);
+  color: var(--color-bg);
+}
+
+/* Native form controls inside zone frames (submit buttons, deck-count select). */
+.boxLayout button,
+.boxLayout select {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-neon-cyan);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-surface-raised);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.boxLayout button:hover {
+  background-color: var(--color-neon-cyan);
+  color: var(--color-bg);
 }
 
 .shade {
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    position: absolute;
-    top: 0;
-    left: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  background: var(--color-scrim);
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .centered {
-    pointer-events: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #ffffff;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-on-ink);
 }
 
 /* cardWrap */
 
 .cardWrap {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 5px;
-    min-height: 105px;
-    position: relative;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+  min-height: 105px;
+  position: relative;
 }
 
 .cardWrap.overlapWrap {
-    border: 2px solid #999999;
-    border-radius: 10px;
-    padding: 10px;
+  border: 1px solid var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
 }
 
 /* child combinator */
-.cardWrap>.card {
-    position: relative;
-    z-index: 2;
-    display: block;
+.cardWrap > .card {
+  position: relative;
+  z-index: 2;
+  display: block;
 }
 
-.cardWrap>.tap {
-    transform: rotate(270deg);
+.cardWrap > .tap {
+  transform: rotate(270deg);
 }
 
-.cardWrap>.card.unmagnify:hover {
-    z-index: 10;
-    transform: scale(1.1);
+.cardWrap > .card.unmagnify:hover {
+  z-index: 10;
+  transform: scale(1.1);
 }
 
-.cardWrap>.card.magnify:hover {
-    z-index: 10;
+.cardWrap > .card.magnify:hover {
+  z-index: 10;
 }
 
-.cardWrap>.card {
-    cursor: pointer;
-    height: var(--card-height);
-    width: var(--card-width);
+.cardWrap > .card {
+  cursor: pointer;
+  height: var(--card-height);
+  width: var(--card-width);
 }
 
-.cardWrap>.card>img {
-    width: 100%;
-    height: 100%;
-    margin: auto;
+.cardWrap > .card > img {
+  width: 100%;
+  height: 100%;
+  margin: auto;
 }
 
-.cardWrap>.card.overlap:nth-of-type(n + 2) {
-    margin-left: -50px;
+.cardWrap > .card.overlap:nth-of-type(n + 2) {
+  margin-left: -50px;
 }
 
 .battleWrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin-top: var(--space-5);
 }
-  
+
 .battleArea {
-    position: relative;
-    width: 400px;
-    min-height: 158px;
+  position: relative;
+  width: 400px;
+  min-height: 158px;
 }
 
-.bgLayout{
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+.bgLayout {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
-.battleArea .cardWrap>.card:nth-of-type(9n + 1) {
-    margin-left: 0;
+.battleArea .cardWrap > .card:nth-of-type(9n + 1) {
+  margin-left: 0;
 }
 
-.fieldArea:nth-of-type(2n+1) .spMenuArea{
-    margin-right: 30px;
+.fieldArea:nth-of-type(2n + 1) .spMenuArea {
+  margin-right: var(--space-5);
 }
 
-.fieldArea:nth-of-type(2n) .spMenuArea{
-    margin-left: 30px;
+.fieldArea:nth-of-type(2n) .spMenuArea {
+  margin-left: var(--space-5);
 }
 
 /* The switch - the box around the slider */
 .switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
 }
-  
+
 /* Hide default HTML checkbox */
 .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 /* The slider */
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-toggle-off);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--color-paper);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+  background-color: var(--color-toggle-on);
 }
 
 input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px var(--color-toggle-on);
 }
 
 input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-    }
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
 
 /* Rounded sliders */
 .slider.round {
-    border-radius: 34px;
+  border-radius: var(--radius-pill);
 }
 
 .slider.round:before {
-    border-radius: 50%;
+  border-radius: 50%;
 }
