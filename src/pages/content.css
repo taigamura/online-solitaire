@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-5);
-  background: var(--color-bg);
+  background: transparent; /* let the body's felt table show through */
   color: var(--color-text);
   font-family: var(--font-sans);
   line-height: 1.8;
@@ -25,26 +25,27 @@
 .contentTitle {
   margin: 0;
   text-align: center;
-  font-size: clamp(26px, 5vw, 40px);
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 5vw, 42px);
   font-weight: 800;
-  background: linear-gradient(90deg, var(--color-neon-cyan), var(--color-neon-magenta));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: var(--glow-neon);
+  color: var(--color-gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .contentSection {
   background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-gold-deep);
   border-radius: var(--radius-md);
   padding: var(--space-5);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-inset), var(--shadow-card);
 }
 
 .contentHeading {
   margin: 0 0 var(--space-4);
+  font-family: var(--font-serif);
   font-size: clamp(18px, 3vw, 24px);
-  color: var(--color-neon-cyan);
+  color: var(--color-gold);
 }
 
 .contentBody {
