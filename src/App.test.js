@@ -19,7 +19,7 @@ test('renders the Landing stub at /', () => {
 
 test('renders the deckbuilder at /build', () => {
   renderAt('/build');
-  expect(screen.getByText(/デュエルマスターズ一人回し用ツール/)).toBeInTheDocument();
+  expect(screen.getByText(/下からカード写真を追加してください/)).toBeInTheDocument();
 });
 
 test('renders the play board at /play without crashing', () => {

@@ -103,8 +103,6 @@ function Deckbuild({ deck, setDeck }) {
 
   return (
     <div>
-      <h1>デュエルマスターズ一人回し用ツール by taigamura</h1>
-
       <div id="readme" className="boxLayout">
         <p>
           下からカード写真を追加してください。画像は高画質のものを使ってください（デュエルマスターズ公式カード検索から保存した写真推奨）。その後、デッキ確定をクリック。

@@ -11,13 +11,6 @@ function About() {
       <h1 className="contentTitle">使い方・このツールについて</h1>
 
       <section className="contentSection">
-        <h2 className="contentHeading">これは何？</h2>
-        <p className="contentBody">
-          デュエルマスターズの「一人回し（ソリティア）」専用のプレイテスターです。相手もネットワークもありません。アップロードしたカード画像でデッキを組み、一人でデッキの回り方を試せます。ルールの自動判定は行わず、あなたがドラッグした通りにカードを動かすだけのシンプルなツールです。
-        </p>
-      </section>
-
-      <section className="contentSection">
         <h2 className="contentHeading">1. カード画像をアップロード</h2>
         <p className="contentBody">
           デッキ構築画面でファイルを選び、使いたいカードの画像を読み込みます。高画質の写真（デュエルマスターズ公式カード検索から保存した画像を推奨）を使うと、ボード上でも見やすくなります。画像はあなたの端末のブラウザ内だけで扱われ、サーバーには送信されません。
