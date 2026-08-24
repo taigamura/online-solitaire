@@ -201,19 +201,22 @@
   margin-right: var(--space-1);
 }
 
-/* Compact icon buttons — used for structural zone actions (selectAll, tap/untap all,
-   shuffle, etc.) to declutter zone titles and buttonLayouts. */
+/* Text buttons for structural zone actions (selectAll, tap/untap all, shuffle, etc.)
+   in zone titles and buttonLayouts. */
 .button.iconBtn {
-  padding: var(--space-1);
-  min-width: 24px;
+  padding: var(--space-1) var(--space-2);
   text-align: center;
   margin-left: var(--space-1);
+  white-space: nowrap;
 }
 
 .buttonLayout {
   position: relative;
   z-index: 2;
   margin-top: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
 }
 
 .button {
