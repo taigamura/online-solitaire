@@ -1,8 +1,15 @@
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--color-bg);
   color: var(--color-text);
+  /* Green felt table: a fine speckle over the felt color, with a soft vignette
+     so the surface reads as a lit tabletop rather than a flat fill. */
+  background-color: var(--color-bg);
+  background-image: var(--felt-speckle), var(--felt-vignette);
+  background-size:
+    3px 3px,
+    auto;
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
