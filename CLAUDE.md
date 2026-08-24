@@ -1,12 +1,18 @@
 # CLAUDE.md — Project context
 
+> **Read [CONTEXT.md](CONTEXT.md) first.** It's the standing architecture map —
+> data model, Play.js mechanisms, and known landmines — so you don't re-run a full
+> code review every session. This file covers the rules of engagement (gate, scope,
+> style); CONTEXT.md covers how the code actually works.
+
 ## What this is
 
 A **single-player Duel Masters (デュエルマスターズ) playtester / "solitaire" tool**. The user
 uploads card images, builds a deck, then plays alone on a board to test deck flow. There is no
 opponent and no networking. Everything runs client-side in the browser.
 
-- `src/pages/Deckbuild.js` — landing route `/`. Upload card images → build a deck (1–4 copies each).
+- `src/pages/Deckbuild.js` — route `/build`. Upload card images → build a deck (1–4 copies each).
+  (`/` is `Landing`, a marketing/how-to page.)
 - `src/pages/Play.js` — route `/play`. The full board: hand, mana, shield, battle, trash, deck,
   deck-top, and overlapped-card groups. Drag/drop between zones, tap/untap, flip, shuffle,
   keyboard shortcuts (Space=flip, Esc=deselect, M=magnify, O=overlap, R=untap all, T=tap).

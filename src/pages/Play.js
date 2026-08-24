@@ -17,6 +17,7 @@ import {
 } from '../game/move';
 import { resetBoard } from '../game/board';
 import { setFlipAll, setTapAll, toggleFlip, toggleTap, setTap, mapCardById } from '../game/card';
+import { objectUrlFor } from '../objectUrlCache';
 
 function Play({ deck, setDeck }) {
   const [cardsInPlay, setCardsInPlay] = useState([]);
@@ -197,7 +198,6 @@ function Play({ deck, setDeck }) {
   // when a single card is dragged ontop group, add to group
   // when a card is selected already in group, switch
   function overlap() {
-    const currBoardState = { ...boardState };
     const currCardsInPlay = [...cardsInPlay];
 
     let illegalCards = [];
@@ -221,25 +221,24 @@ function Play({ deck, setDeck }) {
       window.alert('同じグループで呼び出し禁止');
       setCardsInPlay([]);
     } else {
-      let group = [];
-      currCardsInPlay.map((element) => (element['source'] = 'overlappedCardsWrap'));
-      currCardsInPlay.forEach((card, i) => {
-        group.push(card);
-      });
-      // make selected first card the top
-      group = group.reverse();
+      // Fresh group of the selected cards, re-sourced and reversed so the first
+      // selected card ends up on top — immutable, no mutation of the live cards.
+      const group = currCardsInPlay
+        .map((card) => ({ ...card, source: 'overlappedCardsWrap' }))
+        .reverse();
 
-      let changedState = moveCards(
+      const [remainingBattle] = moveCards(
         boardState.battle,
-        boardState.overlappedCards,
+        [],
         currCardsInPlay,
         'overlappedCardsWrap'
       );
 
-      currBoardState.battle = changedState[0];
-      currBoardState.overlappedCards.push(group);
-
-      setBoardState(currBoardState);
+      setBoardState((prevState) => ({
+        ...prevState,
+        battle: remainingBattle,
+        overlappedCards: [...prevState.overlappedCards, group],
+      }));
       setCardsInPlay([]);
     }
   }
@@ -421,7 +420,7 @@ function Play({ deck, setDeck }) {
     if (card['flip']) {
       cardImg = cardBack;
     } else {
-      cardImg = URL.createObjectURL(card['file']);
+      cardImg = objectUrlFor(card['file']);
     }
     return cardImg;
   }
@@ -616,39 +615,24 @@ function Play({ deck, setDeck }) {
       // no default
     }
 
-    const changedCardsInPlay = [...cardsInPlay];
-    const currSource = [...source];
-    const currDeck = [...boardState.deck];
-
-    if (currSource.length > 0) {
-      let elementsToRemove = [];
-      changedCardsInPlay.forEach((card, i) => {
-        currSource.forEach((element, j) => {
-          if (element['id'] === card['id']) {
-            elementsToRemove.push(card);
-          }
-        });
-      });
-
-      if (elementsToRemove.length > 0) {
-        for (var i = elementsToRemove.length - 1; i >= 0; i--) {
-          let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0];
-          currDeck.push(card);
-        }
-
-        currDeck.forEach((card, i) => {
-          card['source'] = 'deckWrap';
-        });
-        setBoardState((prevState) => {
-          return { ...prevState, [setSource]: currSource };
-        });
-        setBoardState((prevState) => {
-          return { ...prevState, deck: currDeck };
-        });
-        setCardsInPlay([]);
-      }
-    } else {
+    if (source.length === 0) {
       window.alert('手札はありません');
+      return;
+    }
+
+    const selectedInSource = cardsInPlay.filter((card) =>
+      source.some((element) => element['id'] === card['id'])
+    );
+
+    if (selectedInSource.length > 0) {
+      const [remaining, newDeck] = moveCardsToDeck(
+        boardState.deck,
+        source,
+        selectedInSource,
+        'top'
+      );
+      setBoardState((prevState) => ({ ...prevState, [setSource]: remaining, deck: newDeck }));
+      setCardsInPlay([]);
     }
   }
 
@@ -672,39 +656,24 @@ function Play({ deck, setDeck }) {
       // no default
     }
 
-    const changedCardsInPlay = [...cardsInPlay];
-    const currSource = [...source];
-    const currDeck = [...boardState.deck];
-
-    if (currSource.length > 0) {
-      let elementsToRemove = [];
-      changedCardsInPlay.forEach((card, i) => {
-        currSource.forEach((element, j) => {
-          if (element['id'] === card['id']) {
-            elementsToRemove.push(card);
-          }
-        });
-      });
-
-      if (elementsToRemove.length > 0) {
-        for (var i = 0; i < elementsToRemove.length; i++) {
-          let card = currSource.splice(currSource.indexOf(elementsToRemove[i]), 1)[0];
-          currDeck.unshift(card);
-        }
-
-        currDeck.forEach((card, i) => {
-          card['source'] = 'deckWrap';
-        });
-        setBoardState((prevState) => {
-          return { ...prevState, [setSource]: currSource };
-        });
-        setBoardState((prevState) => {
-          return { ...prevState, deck: currDeck };
-        });
-        setCardsInPlay([]);
-      }
-    } else {
+    if (source.length === 0) {
       window.alert('手札はありません');
+      return;
+    }
+
+    const selectedInSource = cardsInPlay.filter((card) =>
+      source.some((element) => element['id'] === card['id'])
+    );
+
+    if (selectedInSource.length > 0) {
+      const [remaining, newDeck] = moveCardsToDeck(
+        boardState.deck,
+        source,
+        selectedInSource,
+        'bottom'
+      );
+      setBoardState((prevState) => ({ ...prevState, [setSource]: remaining, deck: newDeck }));
+      setCardsInPlay([]);
     }
   }
 
@@ -727,17 +696,15 @@ function Play({ deck, setDeck }) {
     if (boardState.deck.length > 0) {
       setViewDeckTop(true);
 
-      const changedDeck = [...boardState.deck];
-      let drawnCard = changedDeck.pop();
       setBoardState((prevState) => {
-        return { ...prevState, deck: changedDeck };
-      });
-
-      const changedDeckTop = [...boardState.deckTop];
-      drawnCard['source'] = 'deckTopWrap';
-      changedDeckTop.push(drawnCard);
-      setBoardState((prevState) => {
-        return { ...prevState, deckTop: changedDeckTop };
+        const changedDeck = [...prevState.deck];
+        const top = changedDeck.pop();
+        const drawnCard = { ...top, source: 'deckTopWrap' };
+        return {
+          ...prevState,
+          deck: changedDeck,
+          deckTop: prevState.deckTop.concat(drawnCard),
+        };
       });
     } else {
       window.alert('山札はありません');
@@ -928,22 +895,20 @@ function Play({ deck, setDeck }) {
     e?.preventDefault();
     let sourceId = parseInt(e.target.id.replace('overlap', ''));
 
-    const currBoardState = { ...boardState };
-    currBoardState.overlappedCards.forEach((group, i) => {
-      if (i === sourceId) {
-        while (group.length > 0) {
-          let currCard = group.pop();
-          currCard['source'] = 'battleWrap';
-          currBoardState.battle.push(currCard);
-        }
-      }
+    setBoardState((prevState) => {
+      const group = prevState.overlappedCards[sourceId] ?? [];
+      // Return the whole group to the battle zone; moveCardsOutOfOverlap rebuilds
+      // both zones immutably and drops the now-empty group.
+      const [newGroups, newBattle] = moveCardsOutOfOverlap(
+        prevState.overlappedCards,
+        prevState.battle,
+        group,
+        'battleWrap'
+      );
+      return { ...prevState, battle: newBattle, overlappedCards: newGroups };
     });
 
-    // filter empty array from array
-    currBoardState.overlappedCards = currBoardState.overlappedCards.filter((x) => x.length);
-
     setCardsInPlay([]);
-    setBoardState(currBoardState);
   }
 
   function getOverlapTopMessage() {
@@ -1230,7 +1195,7 @@ function Play({ deck, setDeck }) {
           </button>
         </div>
         <div className="boxLayout">
-          <div id="handWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+          <ul id="handWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
             {boardState.hand?.map((card, index) => (
               <li
                 id={index}
@@ -1242,7 +1207,7 @@ function Play({ deck, setDeck }) {
                 {handleCardOverlay(card['id'])}
               </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
 
@@ -1474,7 +1439,7 @@ function Play({ deck, setDeck }) {
           </div>
           <div className="boxLayout">
             <ul id="deckWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-              {boardState.deck?.toReversed().map((card, index) => (
+              {[...(boardState.deck ?? [])].reverse().map((card, index) => (
                 <li
                   id={index}
                   className={handleCardClass(card)}

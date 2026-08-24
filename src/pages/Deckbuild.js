@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import './Deckbuild.css';
+import { objectUrlFor } from '../objectUrlCache';
+
+// Group cards by their File into [{ key: file, value: [...card] }, ...].
+// Replaces Map.groupBy (ES2024), which isn't available on older browsers.
+function groupByFile(cards) {
+  const groups = new Map();
+  cards.forEach((card) => {
+    const existing = groups.get(card.file);
+    if (existing) {
+      existing.push(card);
+    } else {
+      groups.set(card.file, [card]);
+    }
+  });
+  return Array.from(groups, ([key, value]) => ({ key, value }));
+}
 
 // function component
 function Deckbuild({ deck, setDeck }) {
@@ -24,14 +40,7 @@ function Deckbuild({ deck, setDeck }) {
       currDeck.push(card);
     });
     setDeck(currDeck);
-    setDeckGroupBy(
-      Array.from(
-        Map.groupBy(currDeck, (card) => {
-          return card.file;
-        }),
-        ([key, value]) => ({ key, value })
-      )
-    );
+    setDeckGroupBy(groupByFile(currDeck));
   }
 
   function handleReset(e) {
@@ -91,14 +100,7 @@ function Deckbuild({ deck, setDeck }) {
     }
 
     setDeck(currDeck);
-    setDeckGroupBy(
-      Array.from(
-        Map.groupBy(currDeck, (card) => {
-          return card.file;
-        }),
-        ([key, value]) => ({ key, value })
-      )
-    );
+    setDeckGroupBy(groupByFile(currDeck));
   }
 
   return (
@@ -130,12 +132,7 @@ function Deckbuild({ deck, setDeck }) {
           {deckGroupBy.map((group, i) => (
             <li className="deckPreviewWrap">
               {[...Array(group.value.length)].map(() => (
-                <img
-                  src={URL.createObjectURL(group['key'])}
-                  width="78.75"
-                  height="110"
-                  alt="error"
-                />
+                <img src={objectUrlFor(group['key'])} width="78.75" height="110" alt="error" />
               ))}
 
               <select
