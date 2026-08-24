@@ -1037,7 +1037,7 @@ function Play({ deck, setDeck }) {
                     title="選択カードをタップ/アンタップ (T)"
                     onClick={tap}
                   >
-                    T
+                    タップ/アンタップ
                   </button>
                 )}
                 {actions.has('flip') && (
@@ -1047,7 +1047,7 @@ function Play({ deck, setDeck }) {
                     title="選択カードを裏返す (Space)"
                     onClick={flip}
                   >
-                    裏返
+                    裏返す
                   </button>
                 )}
                 {actions.has('overlap') && (
@@ -1057,7 +1057,7 @@ function Play({ deck, setDeck }) {
                     title="選択カードを重ねる (O)"
                     onClick={overlap}
                   >
-                    重
+                    重ねる
                   </button>
                 )}
                 {actions.has('sendTop') && (
@@ -1067,7 +1067,7 @@ function Play({ deck, setDeck }) {
                     title="選択カードを山札の上に置く"
                     onClick={sendTopFromSelection}
                   >
-                    山上
+                    山札の上へ
                   </button>
                 )}
                 {actions.has('sendBottom') && (
@@ -1077,7 +1077,7 @@ function Play({ deck, setDeck }) {
                     title="選択カードを山札の下に置く"
                     onClick={sendBottomFromSelection}
                   >
-                    山下
+                    山札の下へ
                   </button>
                 )}
                 {actions.has('reset') && (
@@ -1087,7 +1087,7 @@ function Play({ deck, setDeck }) {
                     title="選択解除 (Esc)"
                     onClick={resetSelected}
                   >
-                    ✕
+                    選択解除
                   </button>
                 )}
               </>
@@ -1107,7 +1107,7 @@ function Play({ deck, setDeck }) {
             title="全選択"
             onClick={selectAll}
           >
-            ☑
+            全選択
           </button>
           <button
             type="button"
@@ -1116,7 +1116,7 @@ function Play({ deck, setDeck }) {
             title="全解除"
             onClick={deselectAll}
           >
-            ☐
+            全解除
           </button>
         </div>
         <div className="buttonLayout">
@@ -1127,7 +1127,7 @@ function Play({ deck, setDeck }) {
             title="バトルゾーン全てタップ"
             onClick={battleTapAll}
           >
-            ↻
+            全タップ
           </button>
           <button
             type="button"
@@ -1136,7 +1136,7 @@ function Play({ deck, setDeck }) {
             title="バトルゾーン全てアンタップ"
             onClick={battleUntapAll}
           >
-            ↺
+            全アンタップ
           </button>
         </div>
         <div className="boxLayout">
@@ -1168,7 +1168,7 @@ function Play({ deck, setDeck }) {
                   title="グループ全選択"
                   onClick={selectAll}
                 >
-                  ☑
+                  全選択
                 </button>
                 <button
                   type="button"
@@ -1177,7 +1177,7 @@ function Play({ deck, setDeck }) {
                   title="グループ全解除"
                   onClick={deselectAll}
                 >
-                  ☐
+                  全解除
                 </button>
                 <button
                   type="button"
@@ -1186,7 +1186,7 @@ function Play({ deck, setDeck }) {
                   title="重ね解除"
                   onClick={undoOverlap}
                 >
-                  ⊟
+                  重ね解除
                 </button>
                 <button
                   type="button"
@@ -1195,7 +1195,7 @@ function Play({ deck, setDeck }) {
                   title="グループ全てタップ"
                   onClick={overlapTapAll}
                 >
-                  ↻
+                  全タップ
                 </button>
                 <button
                   type="button"
@@ -1204,7 +1204,7 @@ function Play({ deck, setDeck }) {
                   title="グループ全てアンタップ"
                   onClick={overlapUntapAll}
                 >
-                  ↺
+                  全アンタップ
                 </button>
                 <ul id="overlappedCardsWrap" className="cardWrap overlapWrap">
                   {group.map((card, j) => (
@@ -1236,7 +1236,7 @@ function Play({ deck, setDeck }) {
             title="全選択"
             onClick={selectAll}
           >
-            ☑
+            全選択
           </button>
           <button
             type="button"
@@ -1245,7 +1245,7 @@ function Play({ deck, setDeck }) {
             title="全解除"
             onClick={deselectAll}
           >
-            ☐
+            全解除
           </button>
         </div>
         <div className="buttonLayout">
@@ -1256,7 +1256,7 @@ function Play({ deck, setDeck }) {
             title="シールド全て表向き"
             onClick={shieldFlipAllFalse}
           >
-            ↑
+            全て表向き
           </button>
           <button
             type="button"
@@ -1265,7 +1265,7 @@ function Play({ deck, setDeck }) {
             title="シールド全て裏向き"
             onClick={shieldFlipAllTrue}
           >
-            ↓
+            全て裏向き
           </button>
         </div>
         <div className="boxLayout">
@@ -1296,7 +1296,7 @@ function Play({ deck, setDeck }) {
             title="全選択"
             onClick={selectAll}
           >
-            ☑
+            全選択
           </button>
           <button
             type="button"
@@ -1305,7 +1305,7 @@ function Play({ deck, setDeck }) {
             title="全解除"
             onClick={deselectAll}
           >
-            ☐
+            全解除
           </button>
         </div>
         <div className="boxLayout">
@@ -1337,13 +1337,13 @@ function Play({ deck, setDeck }) {
             title="シャッフル→5ドロー→5シールド化"
             onClick={shuffleOnceDrawFiveSetFiveShield}
           >
-            ▶5
+            シャッフル→5ドロー→5シールド
           </button>
           <button type="button" className="button iconBtn" title="シャッフル" onClick={shuffle}>
-            ⟳
+            シャッフル
           </button>
           <button type="button" className="button iconBtn" title="1枚ドロー" onClick={draw}>
-            ↑
+            1枚ドロー
           </button>
           <button
             type="button"
@@ -1351,7 +1351,7 @@ function Play({ deck, setDeck }) {
             title="ターンドロー（バトル+マナアンタップ→1ドロー）"
             onClick={turnDraw}
           >
-            ▶T
+            ターンドロー
           </button>
           <button
             type="button"
@@ -1359,7 +1359,7 @@ function Play({ deck, setDeck }) {
             title="1枚シールド化"
             onClick={setOneShield}
           >
-            ▲
+            1枚シールド化
           </button>
           <button
             type="button"
@@ -1367,7 +1367,7 @@ function Play({ deck, setDeck }) {
             title="デッキ上1枚確認"
             onClick={handleDeckTop}
           >
-            👁
+            デッキ上1枚確認
           </button>
           <button
             type="button"
@@ -1375,7 +1375,7 @@ function Play({ deck, setDeck }) {
             title="デッキ全体を確認"
             onClick={handleViewDeck}
           >
-            📋
+            デッキ全体を確認
           </button>
           <button
             type="button"
@@ -1383,7 +1383,7 @@ function Play({ deck, setDeck }) {
             title="ボードをリセット"
             onClick={handleReset}
           >
-            ⏮
+            ボードをリセット
           </button>
         </div>
       </div>
@@ -1399,7 +1399,7 @@ function Play({ deck, setDeck }) {
             title="全選択"
             onClick={selectAll}
           >
-            ☑
+            全選択
           </button>
           <button
             type="button"
@@ -1408,7 +1408,7 @@ function Play({ deck, setDeck }) {
             title="全解除"
             onClick={deselectAll}
           >
-            ☐
+            全解除
           </button>
         </div>
         <div className="buttonLayout">
@@ -1419,7 +1419,7 @@ function Play({ deck, setDeck }) {
             title="マナ全てタップ"
             onClick={manaTapAll}
           >
-            ↻
+            全タップ
           </button>
           <button
             type="button"
@@ -1428,7 +1428,7 @@ function Play({ deck, setDeck }) {
             title="マナ全てアンタップ"
             onClick={manaUntapAll}
           >
-            ↺
+            全アンタップ
           </button>
           <button
             type="button"
@@ -1437,7 +1437,7 @@ function Play({ deck, setDeck }) {
             title="1枚マナブースト"
             onClick={manaBoost}
           >
-            +
+            1枚マナブースト
           </button>
         </div>
         <div className="boxLayout">
@@ -1468,7 +1468,7 @@ function Play({ deck, setDeck }) {
             title="全選択"
             onClick={selectAll}
           >
-            ☑
+            全選択
           </button>
           <button
             type="button"
@@ -1477,7 +1477,7 @@ function Play({ deck, setDeck }) {
             title="全解除"
             onClick={deselectAll}
           >
-            ☐
+            全解除
           </button>
         </div>
         <div className="buttonLayout">
@@ -1488,7 +1488,7 @@ function Play({ deck, setDeck }) {
             title="墓地をシャッフル"
             onClick={shuffleDeckTop}
           >
-            ⟳
+            シャッフル
           </button>
         </div>
         <div className="boxLayout">
@@ -1520,7 +1520,7 @@ function Play({ deck, setDeck }) {
               title="全選択"
               onClick={selectAll}
             >
-              ☑
+              全選択
             </button>
             <button
               type="button"
@@ -1529,7 +1529,7 @@ function Play({ deck, setDeck }) {
               title="全解除"
               onClick={deselectAll}
             >
-              ☐
+              全解除
             </button>
           </div>
           <div className="buttonLayout">
@@ -1540,7 +1540,7 @@ function Play({ deck, setDeck }) {
               title="シャッフル"
               onClick={shuffleDeckTop}
             >
-              ⟳
+              シャッフル
             </button>
             <button
               type="button"
@@ -1549,7 +1549,7 @@ function Play({ deck, setDeck }) {
               title="デッキ上1枚追加確認"
               onClick={handleDeckTop}
             >
-              +1
+              デッキ上1枚追加確認
             </button>
           </div>
           <div className="boxLayout">
@@ -1582,7 +1582,7 @@ function Play({ deck, setDeck }) {
               title="全選択"
               onClick={selectAll}
             >
-              ☑
+              全選択
             </button>
             <button
               type="button"
@@ -1591,7 +1591,7 @@ function Play({ deck, setDeck }) {
               title="全解除"
               onClick={deselectAll}
             >
-              ☐
+              全解除
             </button>
           </div>
           <div className="buttonLayout">
@@ -1602,7 +1602,7 @@ function Play({ deck, setDeck }) {
               title="シャッフル"
               onClick={shuffle}
             >
-              ⟳
+              シャッフル
             </button>
           </div>
           <div className="boxLayout">
