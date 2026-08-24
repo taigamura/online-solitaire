@@ -30,6 +30,40 @@
   font-size: var(--font-size-sm);
 }
 
+/* Board rows — the board is arranged as horizontal rows instead of one tall
+   column: row 1 = battle (full width), row 2 = shield / deck / trash, row 3 =
+   hand / mana. Shield is widened so it defaults to ~5 cards per row. On-demand
+   overlays (deck-top / deck-view) span full width below. */
+.playRow {
+  display: grid;
+  gap: var(--space-2);
+  align-items: start;
+}
+.playRow--info {
+  grid-template-columns: 1fr 2fr;
+}
+.playRow--battle {
+  grid-template-columns: 1fr;
+}
+.playRow--sdt {
+  /* Shield widened so it defaults to ~5 cards (5 × 126px) per row; deck is a
+     button stack and trash needs less room. */
+  grid-template-columns: 2.6fr 0.9fr 1.1fr;
+}
+.playRow--hm {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Narrow viewports: collapse the multi-column rows back to a single column so
+   zones stay usable (the tool already warns that desktop is recommended). */
+@media (max-width: 900px) {
+  .playRow--info,
+  .playRow--sdt,
+  .playRow--hm {
+    grid-template-columns: 1fr;
+  }
+}
+
 .columnLayoutBottom {
   margin-top: var(--space-2);
   display: flex;
@@ -60,17 +94,55 @@
     0 2px 5px rgba(0, 0, 0, 0.28);
 }
 
-/* Tabletop zones — uniform felt panels finished with a thin gold trim at the
-   top edge, like the piping on a playmat. The zone--* civilization classes are
-   kept in the markup but no longer color-coded; the Japanese zone labels carry
-   the identification. */
-.boxLayout.zone--fire,
-.boxLayout.zone--water,
-.boxLayout.zone--light,
-.boxLayout.zone--nature,
-.boxLayout.zone--darkness,
+/* Tabletop zones — felt panels color-coded by Duel Masters civilization so each
+   zone is identifiable at a glance: a full colored border, a matching 2px top
+   rail, and a faint civ-colored tint layered over the felt surface. Deck stays
+   neutral gold. Card art/tap/flip states still read against the darkened felt. */
 .boxLayout.zone--neutral {
   border-top: 2px solid var(--color-gold-deep);
+}
+
+.boxLayout.zone--fire {
+  border-color: var(--civ-fire);
+  border-top: 2px solid var(--civ-fire);
+  background-image: linear-gradient(rgba(224, 73, 47, 0.1), rgba(224, 73, 47, 0.1));
+}
+.boxLayout.zone--light {
+  border-color: var(--civ-light);
+  border-top: 2px solid var(--civ-light);
+  background-image: linear-gradient(rgba(244, 224, 77, 0.1), rgba(244, 224, 77, 0.1));
+}
+.boxLayout.zone--water {
+  border-color: var(--civ-water);
+  border-top: 2px solid var(--civ-water);
+  background-image: linear-gradient(rgba(47, 155, 224, 0.1), rgba(47, 155, 224, 0.1));
+}
+.boxLayout.zone--nature {
+  border-color: var(--civ-nature);
+  border-top: 2px solid var(--civ-nature);
+  background-image: linear-gradient(rgba(63, 174, 98, 0.1), rgba(63, 174, 98, 0.1));
+}
+.boxLayout.zone--darkness {
+  border-color: var(--civ-darkness);
+  border-top: 2px solid var(--civ-darkness);
+  background-image: linear-gradient(rgba(107, 75, 138, 0.16), rgba(107, 75, 138, 0.16));
+}
+
+/* Zone titles pick up the civilization color so the label reinforces the border. */
+.zone--fire .boxTitle {
+  color: var(--civ-fire);
+}
+.zone--light .boxTitle {
+  color: var(--civ-light);
+}
+.zone--water .boxTitle {
+  color: var(--civ-water);
+}
+.zone--nature .boxTitle {
+  color: var(--civ-nature);
+}
+.zone--darkness .boxTitle {
+  color: #b79bd4; /* lightened 闇 purple for contrast on dark felt */
 }
 
 /* デッキ確認 overlay — brighter gold trim so it reads as a modal-ish view. */

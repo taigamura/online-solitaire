@@ -936,99 +936,226 @@ function Play({ deck, setDeck }) {
         このツールはマウス操作（ドラッグ＆ドロップ）を前提としているため、デスクトップでのご利用を推奨します。スマートフォンやタブレットでは一部の操作が動作しないことがあります。
       </div>
 
-      {/* 説明 */}
-      <div id="areaInfo" className="boxLayout zoneInfo zone--neutral">
-        <div className="boxTitle">説明</div>
-        <div>
-          <b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> = 選択カードリセット
-          | <b>M</b> = カード拡大モード | <b>O</b> = カード選択した状態でカードを重ねる | <b>R</b> =
-          全カードアンタップ | <b>T</b> = カード選択した状態でカードをタップ
+      <div className="playRow playRow--info">
+        {/* 説明 */}
+        <div id="areaInfo" className="boxLayout zoneInfo zone--neutral">
+          <div className="boxTitle">説明</div>
+          <div>
+            <b>Spacebar</b> = カード選択した状態でカードを裏向き表示 | <b>Esc</b> =
+            選択カードリセット | <b>M</b> = カード拡大モード | <b>O</b> =
+            カード選択した状態でカードを重ねる | <b>R</b> = 全カードアンタップ | <b>T</b> =
+            カード選択した状態でカードをタップ
+          </div>
+        </div>
+
+        {/* データ */}
+        <div id="areaData" className="boxLayout zoneData zone--neutral">
+          <div>
+            現在ターン：<span id="turnCounter">{turnCounter}</span>
+          </div>
+          <div>
+            Sortable：<span id="canSortable">{canSortable.toString()}</span>
+          </div>
+
+          <form onSubmit={handleOverlapTop}>
+            <button type="submit">{getOverlapTopMessage()}</button>
+          </form>
+
+          <form onSubmit={toggleMagnify}>
+            <button type="submit">{getMagnifyMessage()}</button>
+          </form>
+
+          <form onSubmit={tap}>
+            <button type="submit">選択カードタップ</button>
+          </form>
+
+          <form onSubmit={flip}>
+            <button type="submit">選択カード裏返し</button>
+          </form>
+
+          <form onSubmit={resetSelected}>
+            <button type="submit">選択カードリセット</button>
+          </form>
         </div>
       </div>
 
-      {/* データ */}
-      <div id="areaData" className="boxLayout zoneData zone--neutral">
-        <div>
-          現在ターン：<span id="turnCounter">{turnCounter}</span>
+      {/* バトルゾーン (Row 1) */}
+      <div className="playRow playRow--battle">
+        <div id="areaBattle" className="boxLayout zoneBattle zone--fire">
+          <div className="boxTitle">
+            バトルゾーン(<span id="battle.length">{boardState.battle.length}</span>)
+            <button
+              type="button"
+              id="battleSelectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={selectAll}
+            >
+              全選択
+            </button>
+            <button
+              type="button"
+              id="battleDeselectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={deselectAll}
+            >
+              全解除
+            </button>
+          </div>
+          <div className="buttonLayout">
+            <button type="button" id="placeholder_battle_00" className="button" onClick={overlap}>
+              選択カードを重ねる
+            </button>
+            <button
+              type="button"
+              id="placeholder_battle_01"
+              className="button"
+              onClick={battleTapAll}
+            >
+              全てタップ
+            </button>
+            <button
+              type="button"
+              id="placeholder_battle_02"
+              className="button"
+              onClick={battleUntapAll}
+            >
+              全てアンタップ
+            </button>
+          </div>
+          <div className="boxLayout">
+            <div
+              id="battleWrapParent"
+              className="columnLayoutBottom"
+              onDrop={drop}
+              onDragOver={allowDrop}
+            >
+              <ul id="battleWrap" className="cardWrap">
+                {boardState.battle?.map((card, index) => (
+                  <li
+                    id={index}
+                    className={handleCardClass(card)}
+                    draggable="true"
+                    onMouseDown={handleMouseDown}
+                  >
+                    {handleCardImg(card)}
+                    {handleCardOverlay(card['id'])}
+                  </li>
+                ))}
+              </ul>
+              {boardState.overlappedCards?.map((group, i) => (
+                <div>
+                  <button
+                    type="button"
+                    id={'overlap' + i + 'SelectAll'}
+                    className="button"
+                    onClick={selectAll}
+                  >
+                    全選択
+                  </button>
+                  <button
+                    type="button"
+                    id={'overlap' + i + 'DeselectAll'}
+                    className="button"
+                    style={{ marginLeft: 10 + 'px' }}
+                    onClick={deselectAll}
+                  >
+                    全解除
+                  </button>
+                  <button
+                    type="button"
+                    id={'overlap' + i}
+                    className="button"
+                    style={{ marginLeft: 10 + 'px' }}
+                    onClick={undoOverlap}
+                  >
+                    重ね解除
+                  </button>
+                  <button
+                    type="button"
+                    id={'overlap' + i + 'TapAll'}
+                    className="button"
+                    style={{ marginLeft: 10 + 'px' }}
+                    onClick={overlapTapAll}
+                  >
+                    全てタップ
+                  </button>
+                  <button
+                    type="button"
+                    id={'overlap' + i + 'UntapAll'}
+                    className="button"
+                    style={{ marginLeft: 10 + 'px' }}
+                    onClick={overlapUntapAll}
+                  >
+                    全てアンタップ
+                  </button>
+                  <ul id="overlappedCardsWrap" className="cardWrap overlapWrap">
+                    {group.map((card, j) => (
+                      <li
+                        id={j}
+                        className={handleCardClass(card) + ' overlap'}
+                        draggable="true"
+                        onMouseDown={handleMouseDown}
+                      >
+                        {handleCardImg(card)}
+                        {handleCardOverlay(card['id'])}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div>
-          Sortable：<span id="canSortable">{canSortable.toString()}</span>
-        </div>
-
-        <form onSubmit={handleOverlapTop}>
-          <button type="submit">{getOverlapTopMessage()}</button>
-        </form>
-
-        <form onSubmit={toggleMagnify}>
-          <button type="submit">{getMagnifyMessage()}</button>
-        </form>
-
-        <form onSubmit={tap}>
-          <button type="submit">選択カードタップ</button>
-        </form>
-
-        <form onSubmit={flip}>
-          <button type="submit">選択カード裏返し</button>
-        </form>
-
-        <form onSubmit={resetSelected}>
-          <button type="submit">選択カードリセット</button>
-        </form>
       </div>
 
-      {/* バトルゾーン */}
-      <div id="areaBattle" className="boxLayout zoneBattle zone--fire">
-        <div className="boxTitle">
-          バトルゾーン(<span id="battle.length">{boardState.battle.length}</span>)
-          <button
-            type="button"
-            id="battleSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={selectAll}
-          >
-            全選択
-          </button>
-          <button
-            type="button"
-            id="battleDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={deselectAll}
-          >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button type="button" id="placeholder_battle_00" className="button" onClick={overlap}>
-            選択カードを重ねる
-          </button>
-          <button
-            type="button"
-            id="placeholder_battle_01"
-            className="button"
-            onClick={battleTapAll}
-          >
-            全てタップ
-          </button>
-          <button
-            type="button"
-            id="placeholder_battle_02"
-            className="button"
-            onClick={battleUntapAll}
-          >
-            全てアンタップ
-          </button>
-        </div>
-        <div className="boxLayout">
-          <div
-            id="battleWrapParent"
-            className="columnLayoutBottom"
-            onDrop={drop}
-            onDragOver={allowDrop}
-          >
-            <ul id="battleWrap" className="cardWrap">
-              {boardState.battle?.map((card, index) => (
+      {/* シールド / デッキ / 墓地 (Row 2) */}
+      <div className="playRow playRow--sdt">
+        {/* シールドゾーン */}
+        <div id="shield" className="boxLayout zoneShield zone--light">
+          <div className="boxTitle">
+            シールドゾーン(<span id="shield.length">{boardState.shield.length}</span>)
+            <button
+              type="button"
+              id="shieldSelectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={selectAll}
+            >
+              全選択
+            </button>
+            <button
+              type="button"
+              id="shieldDeselectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={deselectAll}
+            >
+              全解除
+            </button>
+          </div>
+          <div className="buttonLayout">
+            <button
+              type="button"
+              id="placeholder_shield_00"
+              className="button"
+              onClick={shieldFlipAllFalse}
+            >
+              シールド全て表
+            </button>
+            <button
+              type="button"
+              id="placeholder_shield_01"
+              className="button"
+              onClick={shieldFlipAllTrue}
+            >
+              シールド全て裏
+            </button>
+          </div>
+          <div className="boxLayout">
+            <ul id="shieldWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+              {boardState.shield?.map((card, index) => (
                 <li
                   id={index}
                   className={handleCardClass(card)}
@@ -1040,315 +1167,199 @@ function Play({ deck, setDeck }) {
                 </li>
               ))}
             </ul>
-            {boardState.overlappedCards?.map((group, i) => (
-              <div>
-                <button
-                  type="button"
-                  id={'overlap' + i + 'SelectAll'}
-                  className="button"
-                  onClick={selectAll}
+          </div>
+        </div>
+
+        {/* デッキ */}
+        <div id="deck" className="boxLayout zoneDeck zone--neutral">
+          <div className="boxTitle">
+            デッキ(<span id="deck.length">{boardState.deck.length}</span>)
+          </div>
+
+          <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
+            <button type="submit">シャッフル, 5 枚ドロー, 5 枚シールド化</button>
+          </form>
+
+          <form onSubmit={shuffle}>
+            <button type="submit">シャッフル</button>
+          </form>
+
+          <form onSubmit={draw}>
+            <button type="submit">1 枚ドロー</button>
+          </form>
+
+          <form onSubmit={turnDraw}>
+            <button type="submit">ターンドロー</button>
+          </form>
+
+          <form onSubmit={setOneShield}>
+            <button type="submit">1 枚シールド化</button>
+          </form>
+
+          <form onSubmit={handleDeckTop}>
+            <button type="submit">デッキ上 1 枚確認</button>
+          </form>
+
+          <form onSubmit={handleViewDeck}>
+            <button type="submit">デッキを確認</button>
+          </form>
+
+          <form onSubmit={handleReset}>
+            <button type="submit">リセット</button>
+          </form>
+        </div>
+
+        {/* 墓地 */}
+        <div id="trash" className="boxLayout zoneTrash zone--darkness">
+          <div className="boxTitle">
+            墓地(<span id="trash.length">{boardState.trash.length}</span>)
+            <button
+              type="button"
+              id="trashSelectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={selectAll}
+            >
+              全選択
+            </button>
+            <button
+              type="button"
+              id="trashDeselectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={deselectAll}
+            >
+              全解除
+            </button>
+          </div>
+          <div className="buttonLayout">
+            <button type="button" id="trashBottom" className="button" onClick={bottom}>
+              選択カードを山札の下に置く
+            </button>
+            <button type="button" id="trashTop" className="button" onClick={top}>
+              選択カードを山札の上に置く
+            </button>
+            <button type="button" id="trashShuffle" className="button" onClick={shuffleDeckTop}>
+              シャッフル
+            </button>
+          </div>
+          <div className="boxLayout">
+            <ul id="trashWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+              {boardState.trash?.map((card, index) => (
+                <li
+                  id={index}
+                  className={handleCardClass(card)}
+                  draggable="true"
+                  onMouseDown={handleMouseDown}
                 >
-                  全選択
-                </button>
-                <button
-                  type="button"
-                  id={'overlap' + i + 'DeselectAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
-                  onClick={deselectAll}
-                >
-                  全解除
-                </button>
-                <button
-                  type="button"
-                  id={'overlap' + i}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
-                  onClick={undoOverlap}
-                >
-                  重ね解除
-                </button>
-                <button
-                  type="button"
-                  id={'overlap' + i + 'TapAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
-                  onClick={overlapTapAll}
-                >
-                  全てタップ
-                </button>
-                <button
-                  type="button"
-                  id={'overlap' + i + 'UntapAll'}
-                  className="button"
-                  style={{ marginLeft: 10 + 'px' }}
-                  onClick={overlapUntapAll}
-                >
-                  全てアンタップ
-                </button>
-                <ul id="overlappedCardsWrap" className="cardWrap overlapWrap">
-                  {group.map((card, j) => (
-                    <li
-                      id={j}
-                      className={handleCardClass(card) + ' overlap'}
-                      draggable="true"
-                      onMouseDown={handleMouseDown}
-                    >
-                      {handleCardImg(card)}
-                      {handleCardOverlay(card['id'])}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                  {handleCardImg(card)}
+                  {handleCardOverlay(card['id'])}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
 
-      {/* シールドゾーン */}
-      <div id="shield" className="boxLayout zoneShield zone--light">
-        <div className="boxTitle">
-          シールドゾーン(<span id="shield.length">{boardState.shield.length}</span>)
-          <button
-            type="button"
-            id="shieldSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={selectAll}
-          >
-            全選択
-          </button>
-          <button
-            type="button"
-            id="shieldDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={deselectAll}
-          >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button
-            type="button"
-            id="placeholder_shield_00"
-            className="button"
-            onClick={shieldFlipAllFalse}
-          >
-            シールド全て表
-          </button>
-          <button
-            type="button"
-            id="placeholder_shield_01"
-            className="button"
-            onClick={shieldFlipAllTrue}
-          >
-            シールド全て裏
-          </button>
-        </div>
-        <div className="boxLayout">
-          <ul id="shieldWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-            {boardState.shield?.map((card, index) => (
-              <li
-                id={index}
-                className={handleCardClass(card)}
-                draggable="true"
-                onMouseDown={handleMouseDown}
-              >
-                {handleCardImg(card)}
-                {handleCardOverlay(card['id'])}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* 手札 */}
-      <div id="hand" className="boxLayout zoneHand zone--water">
-        <div className="boxTitle">
-          手札(<span id="hand.length">{boardState.hand.length}</span>)
-          <button
-            type="button"
-            id="handSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={selectAll}
-          >
-            全選択
-          </button>
-          <button
-            type="button"
-            id="handDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={deselectAll}
-          >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button type="button" id="handBottom" className="button" onClick={bottom}>
-            選択カードを山札の下に置く
-          </button>
-          <button type="button" id="handTop" className="button" onClick={top}>
-            選択カードを山札の上に置く
-          </button>
-        </div>
-        <div className="boxLayout">
-          <ul id="handWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-            {boardState.hand?.map((card, index) => (
-              <li
-                id={index}
-                className={handleCardClass(card)}
-                draggable="true"
-                onMouseDown={handleMouseDown}
-              >
-                {handleCardImg(card)}
-                {handleCardOverlay(card['id'])}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* デッキ */}
-      <div id="deck" className="boxLayout zoneDeck zone--neutral">
-        <div className="boxTitle">
-          デッキ(<span id="deck.length">{boardState.deck.length}</span>)
+      {/* 手札 / マナ (Row 3) */}
+      <div className="playRow playRow--hm">
+        {/* 手札 */}
+        <div id="hand" className="boxLayout zoneHand zone--water">
+          <div className="boxTitle">
+            手札(<span id="hand.length">{boardState.hand.length}</span>)
+            <button
+              type="button"
+              id="handSelectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={selectAll}
+            >
+              全選択
+            </button>
+            <button
+              type="button"
+              id="handDeselectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={deselectAll}
+            >
+              全解除
+            </button>
+          </div>
+          <div className="buttonLayout">
+            <button type="button" id="handBottom" className="button" onClick={bottom}>
+              選択カードを山札の下に置く
+            </button>
+            <button type="button" id="handTop" className="button" onClick={top}>
+              選択カードを山札の上に置く
+            </button>
+          </div>
+          <div className="boxLayout">
+            <ul id="handWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+              {boardState.hand?.map((card, index) => (
+                <li
+                  id={index}
+                  className={handleCardClass(card)}
+                  draggable="true"
+                  onMouseDown={handleMouseDown}
+                >
+                  {handleCardImg(card)}
+                  {handleCardOverlay(card['id'])}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <form onSubmit={shuffleOnceDrawFiveSetFiveShield}>
-          <button type="submit">シャッフル, 5 枚ドロー, 5 枚シールド化</button>
-        </form>
-
-        <form onSubmit={shuffle}>
-          <button type="submit">シャッフル</button>
-        </form>
-
-        <form onSubmit={draw}>
-          <button type="submit">1 枚ドロー</button>
-        </form>
-
-        <form onSubmit={turnDraw}>
-          <button type="submit">ターンドロー</button>
-        </form>
-
-        <form onSubmit={setOneShield}>
-          <button type="submit">1 枚シールド化</button>
-        </form>
-
-        <form onSubmit={handleDeckTop}>
-          <button type="submit">デッキ上 1 枚確認</button>
-        </form>
-
-        <form onSubmit={handleViewDeck}>
-          <button type="submit">デッキを確認</button>
-        </form>
-
-        <form onSubmit={handleReset}>
-          <button type="submit">リセット</button>
-        </form>
-      </div>
-
-      {/* マナゾーン */}
-      <div id="mana" className="boxLayout zoneMana zone--nature">
-        <div className="boxTitle">
-          マナゾーン(<span id="mana.length">{boardState.mana.length}</span>)
-          <button
-            type="button"
-            id="manaSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={selectAll}
-          >
-            全選択
-          </button>
-          <button
-            type="button"
-            id="manaDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={deselectAll}
-          >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button type="button" id="manaTapAll" className="button" onClick={manaTapAll}>
-            全てタップ
-          </button>
-          <button type="button" id="manaUntapAll" className="button" onClick={manaUntapAll}>
-            全てアンタップ
-          </button>
-          <button type="button" id="placeholder_mana_02" className="button" onClick={manaBoost}>
-            1 枚マナブースト
-          </button>
-        </div>
-        <div className="boxLayout">
-          <ul id="manaWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-            {boardState.mana?.map((card, index) => (
-              <li
-                id={index}
-                className={handleCardClass(card)}
-                draggable="true"
-                onMouseDown={handleMouseDown}
-              >
-                {handleCardImg(card)}
-                {handleCardOverlay(card['id'])}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* 墓地 */}
-      <div id="trash" className="boxLayout zoneTrash zone--darkness">
-        <div className="boxTitle">
-          墓地(<span id="trash.length">{boardState.trash.length}</span>)
-          <button
-            type="button"
-            id="trashSelectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={selectAll}
-          >
-            全選択
-          </button>
-          <button
-            type="button"
-            id="trashDeselectAll"
-            className="button"
-            style={{ marginLeft: 10 + 'px' }}
-            onClick={deselectAll}
-          >
-            全解除
-          </button>
-        </div>
-        <div className="buttonLayout">
-          <button type="button" id="trashBottom" className="button" onClick={bottom}>
-            選択カードを山札の下に置く
-          </button>
-          <button type="button" id="trashTop" className="button" onClick={top}>
-            選択カードを山札の上に置く
-          </button>
-          <button type="button" id="trashShuffle" className="button" onClick={shuffleDeckTop}>
-            シャッフル
-          </button>
-        </div>
-        <div className="boxLayout">
-          <ul id="trashWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
-            {boardState.trash?.map((card, index) => (
-              <li
-                id={index}
-                className={handleCardClass(card)}
-                draggable="true"
-                onMouseDown={handleMouseDown}
-              >
-                {handleCardImg(card)}
-                {handleCardOverlay(card['id'])}
-              </li>
-            ))}
-          </ul>
+        {/* マナゾーン */}
+        <div id="mana" className="boxLayout zoneMana zone--nature">
+          <div className="boxTitle">
+            マナゾーン(<span id="mana.length">{boardState.mana.length}</span>)
+            <button
+              type="button"
+              id="manaSelectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={selectAll}
+            >
+              全選択
+            </button>
+            <button
+              type="button"
+              id="manaDeselectAll"
+              className="button"
+              style={{ marginLeft: 10 + 'px' }}
+              onClick={deselectAll}
+            >
+              全解除
+            </button>
+          </div>
+          <div className="buttonLayout">
+            <button type="button" id="manaTapAll" className="button" onClick={manaTapAll}>
+              全てタップ
+            </button>
+            <button type="button" id="manaUntapAll" className="button" onClick={manaUntapAll}>
+              全てアンタップ
+            </button>
+            <button type="button" id="placeholder_mana_02" className="button" onClick={manaBoost}>
+              1 枚マナブースト
+            </button>
+          </div>
+          <div className="boxLayout">
+            <ul id="manaWrap" className="cardWrap" onDrop={drop} onDragOver={allowDrop}>
+              {boardState.mana?.map((card, index) => (
+                <li
+                  id={index}
+                  className={handleCardClass(card)}
+                  draggable="true"
+                  onMouseDown={handleMouseDown}
+                >
+                  {handleCardImg(card)}
+                  {handleCardOverlay(card['id'])}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
