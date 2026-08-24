@@ -1,28 +1,42 @@
 /* Card sizing + all colors come from the shared token file (src/theme.css). */
 
-/* Playmat-style board layout (#42).
-   Named grid areas map to DM zones:
+/* Playmat-style board layout (#42), arranged as stacked rows.
+   Named grid areas map to DM zones, over a 4-column track so シールド can span
+   half the width (defaults to ~5 cards per row):
      notice  — small-screen banner (full-width strip)
-     shield  — シールドゾーン (top-left)
-     info    — 説明 + データ panel (top-center)
-     deck    — デッキ + controls (top-right)
-     battle  — バトルゾーン (dominant, center full-width)
-     hand    — 手札 (bottom-left)
-     mana    — マナゾーン (bottom-center)
-     trash   — 墓地 (bottom-right)
+     info    — 説明 + データ panel (full-width strip)
+     battle  — バトルゾーン (Row 1, dominant, full-width)
+     shield / deck / trash — Row 2 (shield spans 2 columns, deck + trash one each)
+     hand / mana           — Row 3 (each spans 2 columns)
    DeckTop and DeckView modals float over the grid via position:fixed. */
 .playBoard {
   display: grid;
   gap: var(--space-2);
-  grid-template-columns: 1fr 2fr 1fr;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-areas:
-    'notice  notice  notice'
-    'shield  info    deck'
-    'battle  battle  battle'
-    'hand    mana    trash';
-  min-height: 100vh;
+    'notice  notice  notice  notice'
+    'info    info    info    info'
+    'battle  battle  battle  battle'
+    'shield  shield  deck    trash'
+    'hand    hand    mana    mana';
   align-items: start;
+}
+
+/* Narrow viewports: stack every zone in a single column so nothing is crushed
+   (the tool already warns that desktop is recommended). */
+@media (max-width: 900px) {
+  .playBoard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'notice'
+      'info'
+      'battle'
+      'shield'
+      'deck'
+      'trash'
+      'hand'
+      'mana';
+  }
 }
 
 /* Desktop-recommended notice — this tool assumes mouse drag-and-drop, so it
