@@ -1,23 +1,37 @@
-/* theme.css — dark-neon design tokens (PRD #36 / fix_plan #37 foundation).
+/* theme.css — Tabletop (フェルト) design tokens.
 
-   Phase-1 prefactor: this file defines the token vocabulary. Existing Play /
-   Deckbuild CSS reads the structural/neutral tokens at the bottom, whose values
-   match the pre-redesign look, so nothing changes visually yet. The dark-neon
-   base palette + civilization accents are the foundation the later themed-chrome
-   / playmat passes (#39–#43) build on. */
+   Redesign direction "#10 Tabletop": a physical card-table look — green felt
+   surface, wood frame, warm cream cards, and gold accents. The whole app reads
+   these tokens, so the palette lives here and the page CSS stays unchanged in
+   structure. The legacy "neon" token NAMES are kept and re-pointed at the
+   tabletop accents so existing selectors recolor coherently without a rename
+   sweep. */
 
 :root {
-  /* ---- Dark-neon base palette (foundation for later chrome; not yet applied) ---- */
-  --color-bg: #0a0a12;
-  --color-surface: #14141f;
-  --color-surface-raised: #1e1e2e;
-  --color-text: #e8e8f0;
-  --color-text-muted: #9a9ab0;
-  --color-neon-cyan: #22d3ee;
-  --color-neon-magenta: #e84393;
-  --color-neon-purple: #a855f7;
+  /* ---- Tabletop base palette ---- */
+  --color-bg: #1c4a34; /* felt green table */
+  --color-felt-dark: #163c2a; /* deeper felt, for shadows / panels */
+  --color-surface: #17402d; /* zone panel — darkened felt */
+  --color-surface-raised: #245b40; /* raised felt — buttons, chips */
+  --color-text: #f4ecd8; /* warm cream */
+  --color-text-muted: #a9c2b0; /* sage */
 
-  /* ---- Civilization accent colors (Duel Masters five civilizations) ---- */
+  /* ---- Accents ---- */
+  --color-gold: #e7c766;
+  --color-gold-deep: #cda63f;
+  --color-copper: #cf7a43;
+  --color-wood: #6b4a2b;
+  --color-wood-dark: #4e3520;
+
+  /* Legacy accent names, re-pointed to the tabletop accents. Existing page CSS
+     references these; keeping the names avoids a repo-wide rename. */
+  --color-neon-cyan: var(--color-gold);
+  --color-neon-magenta: var(--color-copper);
+  --color-neon-purple: var(--color-gold-deep);
+
+  /* ---- Civilization accent colors (Duel Masters five civilizations) ----
+     Retained for reference; the tabletop board renders uniform felt zones and
+     no longer surfaces these as zone borders. */
   --civ-light: #f4e04d; /* 光 */
   --civ-water: #2f9be0; /* 水 */
   --civ-darkness: #6b4b8a; /* 闇 */
@@ -32,18 +46,27 @@
   --space-5: 30px;
 
   /* ---- Radius ---- */
-  --radius-sm: 5px;
-  --radius-md: 10px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
   --radius-pill: 34px;
 
-  /* ---- Shadows / glows (foundation for later) ---- */
-  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
-  --glow-neon: 0 0 8px rgba(34, 211, 238, 0.6);
+  /* ---- Shadows / depth (warm, physical) ---- */
+  --shadow-card: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-piece: 0 3px 6px rgba(0, 0, 0, 0.45); /* a card resting on felt */
+  /* Kept for compatibility with prior "glow" call sites; now a soft warm drop,
+     not a neon glow. */
+  --glow-neon: 0 2px 4px rgba(0, 0, 0, 0.45);
+
+  /* ---- Textures ---- */
+  --felt-speckle: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  --felt-vignette: radial-gradient(120% 100% at 50% -10%, rgba(0, 0, 0, 0.35), transparent 60%);
 
   /* ---- Typography ---- */
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
-    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    'Zen Kaku Gothic New', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Noto Sans JP',
+    'Helvetica Neue', sans-serif;
+  --font-serif: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
   --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
   --font-size-sm: 12px;
   --font-size-md: 16px;
@@ -52,13 +75,13 @@
   --card-height: calc(88px * 2);
   --card-width: calc(63px * 2);
 
-  /* ---- Neutral / structural tokens (current pre-redesign values) ---- */
-  --color-border: #999999;
-  --color-ink: #222222;
-  --color-on-ink: #ffffff;
-  --color-title-muted: #777777;
-  --color-paper: #ffffff;
+  /* ---- Neutral / structural tokens ---- */
+  --color-border: #143c28; /* felt seam line */
+  --color-ink: #163c2a;
+  --color-on-ink: #f4ecd8;
+  --color-title-muted: #a9c2b0;
+  --color-paper: #f4ecd8; /* cream (toggle knob) */
   --color-scrim: rgba(0, 0, 0, 0.5);
-  --color-toggle-off: #ccc;
-  --color-toggle-on: #2196f3;
+  --color-toggle-off: #143c28;
+  --color-toggle-on: var(--color-gold);
 }

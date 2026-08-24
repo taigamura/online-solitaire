@@ -1,10 +1,22 @@
 /* Card sizing + all colors come from the shared token file (src/theme.css). */
 
-/* Play board layout — stacks the zone frames with consistent vertical spacing. */
+/* Play board layout — stacks the zone frames with consistent vertical spacing.
+   The board sits inside a wooden table frame: a wood border with a bevelled edge
+   and a felt inner surface, so the whole play area reads as a physical tabletop. */
 .playBoard {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  margin: var(--space-4);
+  padding: var(--space-4);
+  border: 12px solid var(--color-wood);
+  border-radius: 16px;
+  background-color: var(--color-bg);
+  background-image: var(--felt-vignette);
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 2px var(--color-wood-dark),
+    inset 0 0 26px rgba(0, 0, 0, 0.35);
 }
 
 /* Desktop-recommended notice — this tool assumes mouse drag-and-drop, so it
@@ -27,55 +39,43 @@
 
 .boxTitle {
   position: relative;
+  font-family: var(--font-serif);
   font-size: var(--font-size-md);
-  font-weight: bold;
-  color: var(--color-neon-cyan);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-gold);
   z-index: 2;
 }
 
-/* Zone frame — themed chrome. The dark surface keeps the card-playing area calm
-   so card art and tap/flip/selected states stay readable. */
+/* Zone frame — a felt panel recessed into the table. The darkened felt surface
+   keeps the card-playing area calm so card art and tap/flip/selected states stay
+   readable; the inset highlight/shadow give it physical depth. */
 .boxLayout {
-  border: 1px solid var(--color-surface-raised);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   background: var(--color-surface);
+  box-shadow:
+    var(--shadow-inset),
+    0 2px 5px rgba(0, 0, 0, 0.28);
 }
 
-/* Civilization-accented zones — each zone surfaces its Duel Masters civilization
-   color as a top accent border so the board reads as a playmat, while the dark
-   surface underneath keeps card art and tap/flip/selected states readable. */
-.boxLayout.zone--fire {
-  --zone-accent: var(--civ-fire);
-}
-.boxLayout.zone--water {
-  --zone-accent: var(--civ-water);
-}
-.boxLayout.zone--light {
-  --zone-accent: var(--civ-light);
-}
-.boxLayout.zone--nature {
-  --zone-accent: var(--civ-nature);
-}
-.boxLayout.zone--darkness {
-  --zone-accent: var(--civ-darkness);
-}
-.boxLayout.zone--neutral {
-  --zone-accent: var(--color-neon-cyan);
-}
-
+/* Tabletop zones — uniform felt panels finished with a thin gold trim at the
+   top edge, like the piping on a playmat. The zone--* civilization classes are
+   kept in the markup but no longer color-coded; the Japanese zone labels carry
+   the identification. */
 .boxLayout.zone--fire,
 .boxLayout.zone--water,
 .boxLayout.zone--light,
 .boxLayout.zone--nature,
 .boxLayout.zone--darkness,
 .boxLayout.zone--neutral {
-  border-top: 3px solid var(--zone-accent);
+  border-top: 2px solid var(--color-gold-deep);
 }
 
-/* デッキ確認 overlay — distinct neon-purple frame so it reads as a modal-ish view. */
+/* デッキ確認 overlay — brighter gold trim so it reads as a modal-ish view. */
 .zoneDeckView {
-  border-top: 3px solid var(--color-neon-purple);
+  border-top: 2px solid var(--color-gold);
 }
 
 .buttonLayout {
@@ -184,12 +184,15 @@
   cursor: pointer;
   height: var(--card-height);
   width: var(--card-width);
+  border-radius: 6px;
+  box-shadow: var(--shadow-piece);
 }
 
 .cardWrap > .card > img {
   width: 100%;
   height: 100%;
   margin: auto;
+  border-radius: 6px;
 }
 
 .cardWrap > .card.overlap:nth-of-type(n + 2) {
